@@ -6,6 +6,7 @@ from scipy import integrate
 import numpy as np
 import matplotlib.pyplot as pl
 import time
+import itertools
 
 def kf(ne, L, ns):
 
@@ -215,7 +216,7 @@ def energy(beta, mu, spval):
 
     for temp in range(0,len(beta)):
         for speig in range(0,len(spval)):
-            tenergy = tenergy + spval[speig][0]*spval[speig][1]/(np.exp(-beta[temp]*(mu[temp]-spval[speig][1]))+1)
+            tenergy = tenergy + (spval[speig][0]*spval[speig][1])/(np.exp(-beta[temp]*(mu[temp]-spval[speig][1]))+1)
 
         tot_energy.append(tenergy)
         tenergy = 0
@@ -251,6 +252,28 @@ def partition_function(beta, mu, spval):
 
     return Z
 
+def canonical_partition_function(beta, spval, nel, kval, K):
+
+    label = np.arange(0,len(spval))
+    combs = list(itertools.combinations(label, nel))
+    count = 0
+    tenergy = np.zeros(len(beta))
+    part = np.zeros(len(beta))
+
+    for x in combs:
+        index = np.array(x)
+        tk = sum(kval[index])
+       # if np.array_equal(tk,K):
+        count += 1
+        print count, spval[index], spval[index].sum()
+        energy = spval[index].sum()
+        for bval in range(0,len(beta)):
+            exponent = np.exp(-beta[bval]*energy)
+            tenergy[bval] += energy*exponent
+            part[bval] += exponent
+        print tenergy[9], part[9]
+    return (tenergy, part, count)
+
 def print_file(beta, obsv, name):
 
     print "\t", "Beta", "\t", name
@@ -275,14 +298,17 @@ def main(args):
     # Single particle energies.
     (spval, kval) = sp_energies(kfac, ecut)
     spval = np.array(spval)
+    kval = [x for y, x in sorted(zip(spval, kval))]
+    kval = np.array(kval)
     spval.sort()
+    print spval
     deg = compress_spval(spval)
     (t_energy_fin, t_energy_inf) = total_energy_T0(spval, e_f, ne)
     beta = -10
     #for x in range(-10,10):
         #beta = beta + 1
         #print beta, nav_integral(integral_factor,  0.01, beta)
-
+    ne = 1
     print "# of electrons: ", ne
     print "# rs: ", rs
     print "# System Length: ", L
@@ -294,22 +320,38 @@ def main(args):
     print "# Ground state energy for finite system: ", t_energy_fin
     print "# Ground state total energy for infinite system: ", t_energy_inf
 
+    print nav(deg, ne, 0.1, -5.11688)
     start = time.time()
-    (xval, mu) = chem_pot(deg, ne, dis_fermi(spval, ne), 1e-6)
+    (xval, mu) = chem_pot(deg, ne, dis_fermi(spval, ne), 1e-12)
     (xval, mu1) = chem_pot_integral(integral_factor, dis_fermi(spval, ne), 1e-6, ne)
     end = time.time()
     print "# Time taken to find chemical potential: ", end-start
     tenergy = [i for i in energy(xval, mu, deg)]
     tenergy2 = [i for i in energy_integral_loop(xval, mu1, integral_factor, pol)]
     beta = -4.0
+    tenergy3 = np.zeros(len(xval))
+    part = np.zeros(len(xval))
+    counter = 0
+    #for k in kval:
+    result = canonical_partition_function(xval, spval, int(ne), kval, kval[0])
+    tenergy3 += result[0]
+    part += result[1]
+    counter += result[2]
+
+    NAV = []
+    print counter
+    for bval in range(0,len(xval)):
+        NAV.append(nav(deg, ne, xval[bval], mu[bval]))
     #for x in range(-10,100):
         #beta = beta + 0.1
         #print beta, nav_integral(integral_factor,  0.1, 0.3)
 
     print_file(xval, tenergy, name="Energy")
     print_file(xval, tenergy2, name="Energy")
+    print_file(xval, tenergy3/part, name="Energy")
     print_file(xval, mu, name="ChemPot")
-    print_file(xval, mu1, name="ChemPot")
+    #print_file(xval, mu1, name="ChemPot")
+    print_file(xval, NAV, name="N_av")
 
 if __name__ == '__main__':
 
