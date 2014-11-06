@@ -6,7 +6,9 @@ from scipy import integrate
 import numpy as np
 import matplotlib.pyplot as pl
 import time
+import pandas as pd
 import itertools
+import math
 
 def kf(ne, L, ns):
 
@@ -35,7 +37,9 @@ def total_energy_T0(spval, E_f, ne):
 
 def sp_energies(kfac, ecut):
 
-    nmax = int((ecut/kfac)**(1/2.))
+    # Scaled Units to match with HANDE.
+    # So ecut is measured in units of 1/kfac^2.
+    nmax = int(math.ceil(np.sqrt((2*ecut))))
 
     spval = []
     vec = []
@@ -44,10 +48,17 @@ def sp_energies(kfac, ecut):
     for ni in range(-nmax, nmax+1):
         for nj in range(-nmax, nmax+1):
             for nk in range(-nmax, nmax+1):
-                spe = 0.5*kfac**2*(ni**2 + nj**2 + nk**2)
-                if (spe < ecut):
+                spe = 0.5*(ni**2 + nj**2 + nk**2)
+                if (spe <= ecut):
                     kval.append([ni,nj,nk])
-                    spval.append(spe)
+                    # Reintroduce 2 \pi / L factor.
+                    spval.append(kfac**2*spe)
+
+    # Sort the arrays in terms of increasing energy.
+    spval = np.array(spval)
+    kval = [x for y, x in sorted(zip(spval, kval))]
+    kval = np.array(kval)
+    spval.sort()
 
     return (spval, kval)
 
@@ -282,76 +293,113 @@ def print_file(beta, obsv, name):
 
     print "\n"
 
+class System:
+
+    def __init__(self, args):
+
+        # Seitz radius.
+        self.rs = float(args[0])
+        # Number of electrons.
+        self.ne = int(args[1])
+        # Kinetic energy cut-off.
+        self.ecut = float(args[2])
+        # Spin polarisation.
+        self.pol = int(args[3])
+        # Box Length.
+        self.L = self.rs*(4*self.ne*sc.pi/3.)**(1/3.)
+        # k-space grid spacing.
+        self.kfac = 2*sc.pi/self.L
+        # Fermi Wavevector (infinite system).
+        self.kf = (3*self.pol*sc.pi**2*self.ne/self.L**3)**(1/3.)
+        # Fermi energy (inifinite systems).
+        self.ef = 0.5*self.kf**2
+        # Integral Factor.
+        self.integral_factor = self.L**3 * np.sqrt(2) / (self.pol*sc.pi**2)
+        # Single particle eigenvalues and corresponding kvectors
+        (self.spval, self.kval) = sp_energies(self.kfac, self.ecut)
+        # Compress single particle eigenvalues by degeneracy.
+        self.deg = compress_spval(self.spval)
+        # Number of plane waves.
+        self.M = len(self.spval)
+        (self.t_energy_fin, self.t_energy_inf) = total_energy_T0(self.spval, self.ef, self.ne)
+        self.ef_fin = dis_fermi(self.spval, self.ne)
+        self.time = []
+
+    def print_system_variables(self):
+
+        print " # Number of electrons: ", self.ne
+        print " # Spin polarisation: ", self.pol
+        print " # rs: ", self.rs
+        print " # System Length: ", self.L
+        print " # Fermi wavevector for infinite system: ", self.kf
+        print " # kspace grid spacing: ", self.kfac
+        print " # Number of plane waves: ", self.spval.size
+        print " # Fermi energy for infinite system: ", self.ef
+        print " # Fermi energy for discrete system: ", self.ef_fin
+        print " # Ground state energy for finite system: ", self.t_energy_fin
+        print " # Ground state total energy for infinite system: ", self.t_energy_inf
+        print " # Time taken for calculation: ", self.time
+
+def run_calcs(system, calc='All'):
+    '''Run user defined calculations.
+
+Parameters
+----------
+system: class object
+    System parameters
+calc: list of strings
+    What calculations to run on system
+
+Returns
+-------
+data : pandas data frame containing desired quantities.
+'''
+
+    if calc == 'All':
+        data = pd.DataFrame()
+        start = time.time()
+        # Find the chemical potential.
+        (xval, mu) = chem_pot(system.deg, system.ne, system.ef_fin, 1e-8)
+        # Evaluate observables.
+        tenergy = [i for i in energy(xval, mu, system.deg)]
+        data['Beta'] = xval
+        data['Energy_sum'] = tenergy
+        end = time.time()
+        system.time.append(end-start)
+        start = time.time()
+        (xval, mu) = chem_pot_integral(system.integral_factor, system.ef, 1e-6, system.ne)
+        tenergy = [i for i in energy_integral_loop(xval, mu, system.integral_factor, system.pol)]
+        data['Energy_integral'] = tenergy
+        end = time.time()
+        system.time.append(end-start)
+
+        return data
+
 def main(args):
 
     rs = float(args[0])
     ne = float(args[1])
-    ecut = float(args[2])
-    pol = 2
+    pw = float(args[2])
+    pol = float(args[3])
+    calc_type = args[4]
 
-    (L, kfac) = setup(rs, ne)
-    # Fermi Momentum.
-    k_f = kf(ne, L, pol)
-    # Fermi energy.
-    e_f = ef(ne, L, pol)
-    integral_factor = L**3 * np.sqrt(2) / (pol*sc.pi**2)
-    # Single particle energies.
-    (spval, kval) = sp_energies(kfac, ecut)
-    spval = np.array(spval)
-    kval = [x for y, x in sorted(zip(spval, kval))]
-    kval = np.array(kval)
-    spval.sort()
-    print spval
-    deg = compress_spval(spval)
-    (t_energy_fin, t_energy_inf) = total_energy_T0(spval, e_f, ne)
-    beta = -10
-    #for x in range(-10,10):
-        #beta = beta + 1
-        #print beta, nav_integral(integral_factor,  0.01, beta)
-    ne = 1
-    print "# of electrons: ", ne
-    print "# rs: ", rs
-    print "# System Length: ", L
-    print "# Fermi wavevector for infinite system: ", k_f
-    print "# Fermi energy for infinite system: ", e_f
-    print "# Fermi energy for discrete system: ", dis_fermi(spval, ne)
-    print "# kspace grid spacing: ", kfac
-    print "# of plane waves: ", spval.size
-    print "# Ground state energy for finite system: ", t_energy_fin
-    print "# Ground state total energy for infinite system: ", t_energy_inf
+    system = System(args)
+    data = run_calcs(system, calc_type)
+    system.print_system_variables()
+    if calc_type == 'All': print data.to_string()
 
-    print nav(deg, ne, 0.1, -5.11688)
-    start = time.time()
-    (xval, mu) = chem_pot(deg, ne, dis_fermi(spval, ne), 1e-12)
-    (xval, mu1) = chem_pot_integral(integral_factor, dis_fermi(spval, ne), 1e-6, ne)
-    end = time.time()
-    print "# Time taken to find chemical potential: ", end-start
-    tenergy = [i for i in energy(xval, mu, deg)]
-    tenergy2 = [i for i in energy_integral_loop(xval, mu1, integral_factor, pol)]
-    beta = -4.0
-    tenergy3 = np.zeros(len(xval))
-    part = np.zeros(len(xval))
-    counter = 0
-    #for k in kval:
-    result = canonical_partition_function(xval, spval, int(ne), kval, kval[0])
-    tenergy3 += result[0]
-    part += result[1]
-    counter += result[2]
+    #result = canonical_partition_function(xval, spval, int(ne), kval, kval[0])
+    #tenergy3 += result[0]
+    #part += result[1]
+    #counter += result[2]
 
-    NAV = []
-    print counter
-    for bval in range(0,len(xval)):
-        NAV.append(nav(deg, ne, xval[bval], mu[bval]))
-    #for x in range(-10,100):
-        #beta = beta + 0.1
-        #print beta, nav_integral(integral_factor,  0.1, 0.3)
-
-    print_file(xval, tenergy, name="Energy")
-    print_file(xval, tenergy2, name="Energy")
-    print_file(xval, tenergy3/part, name="Energy")
-    print_file(xval, mu, name="ChemPot")
-    #print_file(xval, mu1, name="ChemPot")
-    print_file(xval, NAV, name="N_av")
+    #NAV = []
+    #print counter
+    #for bval in range(0,len(xval)):
+        #NAV.append(nav(deg, ne, xval[bval], mu[bval]))
+    ##for x in range(-10,100):
+        ##beta = beta + 0.1
+        ##print beta, nav_integral(integral_factor,  0.1, 0.3)
 
 if __name__ == '__main__':
 
