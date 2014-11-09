@@ -222,4 +222,63 @@ Integrating equation (), we finally find that
  		 &= -\frac{V}{2\pi^3\beta^2}\int_{-\infty}^{\eta} d\xi \ I(-1/2, \xi)^2,
 \end{align}
 as claimed (this has a plus sign in perrot-dharma).
+\section{Thermal Hartree-Fock}
+The grand canonical density matrix, $\rho$, is found by minimising the Helmholtz free energy
+\begin{align}
+F &= E - \mu N + TS,\\
+  &= \tr{\hat{\rho}(\hat{H} - \mu \hat{N})} + \beta^{-1}\tr{\hat{\rho}\log \hat{\rho}}
+\end{align}
+with respect to variations in $\rho$.
+Carrying this out, one finds that
+\begin{align}
+\rho &= \frac{1}{Z}e^{-\beta(\hat{H}-\mu \hat{N})},\\
+Z &= \tr{e^{-\beta(\hat{H}-\mu \hat{N})}}.
+\end{align}
+The thermal Hartree-Fock approximation amounts to finding the trial density matrix, $\hat{\rho}_T$, of the form
+\begin{align}
+\hat{\rho}_T &= \frac{1}{Z_T} e^{-\beta \hat{H}_T}\\
+			 &= \frac{1}{Z_T} e^{-\beta \sum_{ij} \gamma_{ij} \hat{a}^{\dagger}_i \hat{a}_j},
+\end{align}
+which minimises $F$.
+Working in the basis in which $H_T$ is diagonal we can write
+\begin{align}
+Z_T &= \prod_i (1+e^{-\beta \gamma_{ii}}),\\
+\hat{\rho_T} &= \prod_i(\hat{n}_if_i + (1-f_i)(1-\hat{n}_i))),
+\end{align}
+and by noticing that $e^{-\beta \gamma_{ii}\hat{n}_i} = 1 + (e^{-\beta \gamma_{ii}}-1)\hat{n}_i$ we can find that
+\begin{align}
+\hat{\rho} &= \prod_i\frac{1+\hat{n}_i (e^{-\beta \gamma_{ii}}-1)}{1+e^{-\beta \gamma_{ii}}}\\
+		   &= \prod_i  (\hat{n}_if_i + e^{\beta\gamma_{ii}}f_i(1-\hat{n}_i) )\\
+		   &= \prod_i ( \hat{n}_i f_i + (1-f_i)(1-\hat{n}_i)).
+\end{align}
+To evaluate the traces of $\rho_T$ with $\hat{H}$ we need to know
+\begin{align}
+\langle \ac{i} \ad{j} \rangle_0 = f_{ij} \delta_{ij},
+\end{align}
+and
+\begin{align}
+\langle \ac{i} \ac{j} \ad{k} \ad{l} \rangle_0 = \langle \ac{i} \ad{l} \rangle_0 \langle\ac{j}  \ad{k} \rangle_0 - \langle \ac{i} \ad{k} \rangle_0 \langle\ac{j} \ad{l} \rangle_0,
+\end{align}
+by Wick's theorem, so that
+\begin{align}
+F &= \sum_i t_{ii} f_i + \sum_{ij} v_{ij} f_i f_j + 1/\beta \sum_i f_i \log f_i + (1-f_i) \log (1-f_i),\\
+  &= \tr{tf + v f\times f)} + \tr{f \log f + (1-f) \log (1-f)}
+\end{align}
+where the traces have been evaluated in the basis which diagonalises $H_T$ and $v_{ij} = \bra{ij} v \ket{ij} - \bra{ij} v \ket{ji}$.
+Varying $F$ we find
+\begin{align}
+\delta F &= \tr{\delta f (t + v f)} + 1/\beta \tr{\delta f \log (\frac{f}{1-f})}
+\end{align}
+which is minimal when
+\begin{align}
+\beta \varepsilon_{ij} = - \log (\frac{f}{1-f})
+\end{align}
+or that
+\begin{align}
+\gamma_{ii} = t_{ii} + \sum_{ij} v_{ij} f_j
+\end{align}
+with the self consistency condition
+\begin{align}
+f_i = \frac{1}{e^{\beta \gamma_{ii}} + 1}.
+\end{align}
 \end{document}
