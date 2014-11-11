@@ -263,6 +263,32 @@ def partition_function(beta, mu, spval):
 
     return Z
 
+def classical_ocp(system, Tmin, Tmax):
+    ''' Evaluate the classical excess energy using the parametrised fit given by
+    J. P. Hansen PRA 8, 6 1973.
+
+'''
+
+    a1 = -0.895929
+    b1 = 4.666486
+    a2 = 0.113406
+    b2 = 13.67541
+    a3 = -0.908728
+    b3 = 1.890560
+    a4 = -0.116147
+    b4 = 1.027755
+
+    theta = np.arange(Tmin, Tmax, 0.01)
+    U = []
+
+    for T in theta:
+
+        gamma = 1.0/(system.rs*T)
+        U_xc = 1.5 * gamma**1.5 * (a1/(b1+gamma)**0.5 + a2/(b2+gamma) + a3/(b3+gamma)**1.5 + a4/(b4+gamma)**2)
+        U.append(U_xc)
+
+    return (theta, U)
+
 def canonical_partition_function(beta, spval, nel, kval, K):
 
     label = np.arange(0,len(spval))
@@ -372,6 +398,14 @@ data : pandas data frame containing desired quantities.
         data['Energy_integral'] = tenergy
         end = time.time()
         system.time.append(end-start)
+    elif calc == 'classical':
+        (T, Uxc) = classical_ocp(system, 0.01, 10)
+        #beta = 1.0/xval
+        data['T'] = T
+        data['Theta'] = T / system.ef
+        data['Beta'] = 1 / T
+        data['Classical_Uxc'] = Uxc
+
 
         return data
 
@@ -386,7 +420,7 @@ def main(args):
     system = System(args)
     data = run_calcs(system, calc_type)
     system.print_system_variables()
-    if calc_type == 'All': print data.to_string()
+    print data.to_string(index=False)
 
     #result = canonical_partition_function(xval, spval, int(ne), kval, kval[0])
     #tenergy3 += result[0]
