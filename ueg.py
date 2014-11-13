@@ -426,8 +426,8 @@ Returns
 data : pandas data frame containing desired quantities.
 '''
 
+    data = pd.DataFrame()
     if calc == 'All':
-        data = pd.DataFrame()
         start = time.time()
         # Find the chemical potential.
         (xval, mu) = chem_pot(system.deg_e, system.ne, system.ef_fin, 1e-8)
@@ -435,6 +435,7 @@ data : pandas data frame containing desired quantities.
         tenergy = [i for i in energy(xval, mu, system.deg_e)]
         hfenergy = [i for i in hartree0_sum(system, xval, mu)]
         data['Beta'] = xval
+        data['2M'] = 2*system.M
         data['Energy_sum'] = tenergy
         data['HF0_sum'] = hfenergy
         data['Diff'] = data['Energy_sum'] + data['HF0_sum']
@@ -473,8 +474,9 @@ def main(args):
     calc_type = args[4]
 
     system = System(args)
-    data = run_calcs(system, calc_type)
     system.print_system_variables()
+    data = run_calcs(system, calc_type)
+    print "DATA: ", data
     print data.to_string(index=False)
 
     #result = canonical_partition_function(xval, spval, int(ne), kval, kval[0])
