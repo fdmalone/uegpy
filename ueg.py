@@ -62,13 +62,14 @@ def sp_energies(kfac, ecut):
 
     return (spval, kval)
 
-def compress_spval(spval):
+def compress_spval(spval, kval):
 
     # Work out the degeneracy of each eigenvalue.
     j = 1
     i = 0
     it = 0
-    deg = []
+    deg_e = []
+    deg_k = []
 
     while it < len(spval)-1:
         eval1 = spval[i]
@@ -76,14 +77,16 @@ def compress_spval(spval):
         if eval2 == eval1:
             j += 1
         else:
-            deg.append([j,eval1])
+            deg_e.append([j,eval1])
+            deg_k.append([j,kval[i]])
             i += j
             j = 1
         it += 1
 
-    deg.append([j,eval1])
+    deg_e.append([j,eval1])
+    deg_k.append([j,kval[i]])
 
-    return deg
+    return (deg_e, deg_k)
 
 def dis_fermi(spval, ne):
 
@@ -386,7 +389,7 @@ class System:
         # Single particle eigenvalues and corresponding kvectors
         (self.spval, self.kval) = sp_energies(self.kfac, self.ecut)
         # Compress single particle eigenvalues by degeneracy.
-        self.deg = compress_spval(self.spval)
+        (self.deg_e, self.deg_k) = compress_spval(self.spval, self.kval)
         # Number of plane waves.
         self.M = len(self.spval)
         (self.t_energy_fin, self.t_energy_inf) = total_energy_T0(self.spval, self.ef, self.ne)
@@ -427,9 +430,9 @@ data : pandas data frame containing desired quantities.
         data = pd.DataFrame()
         start = time.time()
         # Find the chemical potential.
-        (xval, mu) = chem_pot(system.deg, system.ne, system.ef_fin, 1e-8)
+        (xval, mu) = chem_pot(system.deg_e, system.ne, system.ef_fin, 1e-8)
         # Evaluate observables.
-        tenergy = [i for i in energy(xval, mu, system.deg)]
+        tenergy = [i for i in energy(xval, mu, system.deg_e)]
         hfenergy = [i for i in hartree0_sum(system, xval, mu)]
         data['Beta'] = xval
         data['Energy_sum'] = tenergy
