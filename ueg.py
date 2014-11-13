@@ -263,6 +263,10 @@ def partition_function(beta, mu, spval):
 
     return Z
 
+def fermi_factor(ek, mu, beta):
+
+    return 1.0/(np.exp(beta*(ek-mu))+1)
+
 def classical_ocp(system, Tmin, Tmax):
     ''' Evaluate the classical excess energy using the parametrised fit given by
     J. P. Hansen PRA 8, 6 1973.
@@ -288,6 +292,44 @@ def classical_ocp(system, Tmin, Tmax):
         U.append(U_xc)
 
     return (theta, U)
+
+def hartree0_sum(system, beta, mu):
+    '''Evaluate the HF0 energy contribution as a summation.
+
+Patrams
+-------
+system : Class
+    system variables.
+beta : list
+    beta values
+mu : list
+    chemical potential
+
+Returns
+-------
+hfx0 : array
+    hf0 exchange energy
+
+'''
+
+    hfx0 = np.zeros(len(beta))
+
+    for x in range(len(beta)):
+        for k in range(len(system.kval)):
+            for q in range(k):
+                K = system.kval[k]
+                Q = system.kval[q]
+                if not np.array_equal(K,Q):
+                    hfx0[x] += 1.0/np.dot(K-Q, K-Q)*fermi_factor(system.spval[k], mu[x], beta[x])*fermi_factor(system.spval[q], mu[x], beta[x])
+    #for x in range(len(beta)):
+        #for k in range(len(system.deg_k)):
+            #for q in range(0,k):
+                #K = system.deg_k[k][1]
+                #Q = system.deg_k[q][1]
+                #if not np.array_equal(K,Q):
+                    #hfx0[x] += system.deg_e[q][0]*system.deg_e[k][0]/np.dot(K-Q, K-Q)*fermi_factor(system.deg_e[k][1], mu[x], beta[x])*fermi_factor(system.deg_e[q][1], mu[x], beta[x])
+
+    return -hfx0 / (system.L*sc.pi)
 
 def canonical_partition_function(beta, spval, nel, kval, K):
 
@@ -388,8 +430,11 @@ data : pandas data frame containing desired quantities.
         (xval, mu) = chem_pot(system.deg, system.ne, system.ef_fin, 1e-8)
         # Evaluate observables.
         tenergy = [i for i in energy(xval, mu, system.deg)]
+        hfenergy = [i for i in hartree0_sum(system, xval, mu)]
         data['Beta'] = xval
         data['Energy_sum'] = tenergy
+        data['HF0_sum'] = hfenergy
+        data['Diff'] = data['Energy_sum'] + data['HF0_sum']
         end = time.time()
         system.time.append(end-start)
         start = time.time()
