@@ -345,15 +345,15 @@ def canonical_partition_function(beta, spval, nel, kval, K):
     for x in combs:
         index = np.array(x)
         tk = sum(kval[index])
-       # if np.array_equal(tk,K):
-        count += 1
-        print count, spval[index], spval[index].sum()
-        energy = spval[index].sum()
-        for bval in range(0,len(beta)):
-            exponent = np.exp(-beta[bval]*energy)
-            tenergy[bval] += energy*exponent
-            part[bval] += exponent
-        print tenergy[9], part[9]
+        if np.array_equal(tk,K):
+            count += 1
+            energy = spval[index].sum()
+            for bval in range(0,len(beta)):
+                exponent = np.exp(-beta[bval]*energy)
+                tenergy[bval] += energy*exponent
+                part[bval] += exponent
+
+    print count
     return (tenergy, part, count)
 
 def print_file(beta, obsv, name):
@@ -446,6 +446,13 @@ data : pandas data frame containing desired quantities.
         data['Energy_integral'] = tenergy
         end = time.time()
         system.time.append(end-start)
+        (tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, 0)
+        data['Canonical_partition'] = tenergy / partition
+    elif calc == 'partition':
+        xval = np.arange(0,5,0.1)
+        (tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, system.kval[0])
+        data['Beta'] = xval
+        data['Partition'] = tenergy/partition
     elif calc == 'classical':
         (T, Uxc) = classical_ocp(system, 0.01, 10)
         #beta = 1.0/xval
