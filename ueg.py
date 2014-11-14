@@ -221,6 +221,25 @@ def nav_constrained(system, beta, mu, xi):
 
     return N
 
+def centre_of_mass_obsv(system, beta):
+    ''' Calculate centre of mass partition function and total energy.
+
+
+'''
+
+    Z = 0
+    E_tot = 0
+
+    for kval in system.kval[1:]:
+
+        E_K = system.kfac**2/(2.0*system.ne)*np.dot(kval, kval)
+        exponent = np.exp(-beta*E_K)
+        Z += exponent
+        E_tot += E_K * exponent
+
+    return (E_tot/Z, Z)
+
+
 def dis_fermi(spval, ne):
 
     return 0.5*(spval[ne-1]+spval[ne])
@@ -563,6 +582,7 @@ data : pandas data frame containing desired quantities.
 '''
 
     data = pd.DataFrame()
+    beta = np.arange(0.1,system.beta_max,0.1)
     if calc == 'All':
         start = time.time()
         # Find the chemical potential.
@@ -581,6 +601,7 @@ data : pandas data frame containing desired quantities.
         (xval, mu) = chem_pot_integral(system.integral_factor, system.ef, 1e-6, system.ne)
         tenergy = [i for i in energy_integral_loop(xval, mu, system.integral_factor, system.pol)]
         data['Energy_integral'] = tenergy
+        data['E_COM'] = [centre_of_mass_obsv(system, b)[0] for b in beta]
         end = time.time()
         system.time.append(end-start)
         #(tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, 0)
@@ -589,7 +610,7 @@ data : pandas data frame containing desired quantities.
         xval = np.arange(0,5,0.1)
         (tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, system.kval[0])
         data['Beta'] = xval
-        data['Partition'] = tenergy/partition
+        data['Partition'] = tenergy / partition
     elif calc == 'classical':
         (T, Uxc) = classical_ocp(system, 0.01, 10)
         #beta = 1.0/xval
@@ -607,7 +628,6 @@ data : pandas data frame containing desired quantities.
     elif calc == 'com':
         data['Beta'] = beta
         data['E_COM'] = [centre_of_mass_obsv(system, b)[0] for b in beta]
-
 
         return data
 
