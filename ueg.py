@@ -281,78 +281,46 @@ def nav_deriv_integral(integral_factor, beta, eta):
 
     return (integral_factor*np.power(beta,-1.5)*N, integral_factor*np.power(beta,-1.5)*Nderiv)
 
-def chem_pot_integral(integral_factor, efermi, de, ne):
+def chem_pot_newton_integral(system, beta):
 
-    beta = 0.01
-    db = beta
-    T = 0
-
-    mu = []
-    xval = []
-    npart = []
-    iterations = int(5/db)
-
-    for x in range(0,iterations):
-        mu.append(newton_integral(integral_factor, beta*efermi, beta, de, ne)/beta)
-        xval.append(beta)
-        beta = beta + db
-
-    return(xval, mu)
-
-def newton_integral(integral_factor, mu, beta, de, ne):
-
+    mu = beta*system.ef
     it = 0
     mu_new = 0
     npart = 0
+    ne = system.ne
 
-    (nav, n_deriv) = nav_deriv_integral(integral_factor, beta, mu)
+    (nav, n_deriv) = nav_deriv_integral(system.integral_factor, beta, mu)
     mu_new = mu - (nav-ne)/n_deriv
     mu = mu_new
 
-    while (abs(ne-npart) > de):
-        (npart, n_deriv) = nav_deriv_integral(integral_factor, beta, mu)
+    while (abs(ne-npart) > system.root_de):
+        (npart, n_deriv) = nav_deriv_integral(system.integral_factor, beta, mu)
         mu_new = mu - (npart-ne)/n_deriv
         mu = mu_new
         it = it + 1
 
-    return mu
+    return mu / beta
 
-def newton(spval, ne, beta, efermi, de):
+def chem_pot_newton_sum(system, beta):
 
-    mu = efermi
+    mu = system.ef
     it = 0
     mu_new = 0
     npart = 0
+    ne = system.ne
 
+    spval = system.deg_e
     (nav, n_deriv) = nav_deriv(spval, mu, beta)
     mu_new = mu - (nav-npart)/n_deriv
     mu = mu_new
 
-    while (abs(npart-ne) > de):
+    while (abs(npart-ne) > system.root_de):
         (npart, n_deriv) = nav_deriv(spval, mu_new, beta)
         mu_new = mu - (npart-ne)/n_deriv
         mu = mu_new
         it = it + 1
 
     return mu
-
-def chem_pot(spval, ne, efermi, de):
-
-    beta = 0.01
-    db = beta
-    T = 0
-
-    mu = []
-    xval = []
-    npart = []
-    iterations = int(5/db)
-
-    for x in range(0,iterations):
-        mu.append(newton(spval, ne, beta, efermi, de))
-        xval.append(beta)
-        beta = beta + db
-
-    return(xval, mu)
 
 def fermi_integrand(x, nu, eta):
 
@@ -366,28 +334,14 @@ def energy_integral(beta, mu, integral_factor):
 
     return integral_factor * np.power(beta, -2.5) * sc.integrate.quad(fermi_integrand, 0, np.inf, args=(1.5, mu*beta))[0]
 
-def energy_integral_loop(beta, mu, integral_factor, pol):
-
-    energy = []
-
-    for x in range(0,len(beta)):
-        energy.append(energy_integral(beta[x], mu[x], integral_factor))
-
-    return energy
-
 def energy(beta, mu, spval):
 
-    tot_energy = []
     tenergy = 0
 
-    for temp in range(0,len(beta)):
-        for speig in range(0,len(spval)):
-            tenergy = tenergy + (spval[speig][0]*spval[speig][1])/(np.exp(-beta[temp]*(mu[temp]-spval[speig][1]))+1)
+    for speig in range(0,len(spval)):
+        tenergy = tenergy + (spval[speig][0]*spval[speig][1])/(np.exp(beta*(spval[speig][1]-mu))+1)
 
-        tot_energy.append(tenergy)
-        tenergy = 0
-
-    return tot_energy
+    return tenergy
 
 def specific_heat(beta, mu, spval):
 
@@ -455,34 +409,27 @@ Patrams
 -------
 system : Class
     system variables.
-beta : list
-    beta values
-mu : list
-    chemical potential
+beta : float
+    beta value
+mu : float
+    chemical potential at beta
 
 Returns
 -------
-hfx0 : array
+hfx0 : float
     hf0 exchange energy
 
 '''
 
-    hfx0 = np.zeros(len(beta))
+    hfx0 = 0
 
-    for x in range(len(beta)):
-        for k in range(len(system.kval)):
-            for q in range(k):
-                K = system.kval[k]
-                Q = system.kval[q]
-                if not np.array_equal(K,Q):
-                    hfx0[x] += 1.0/np.dot(K-Q, K-Q)*fermi_factor(system.spval[k], mu[x], beta[x])*fermi_factor(system.spval[q], mu[x], beta[x])
-    #for x in range(len(beta)):
-        #for k in range(len(system.deg_k)):
-            #for q in range(0,k):
-                #K = system.deg_k[k][1]
-                #Q = system.deg_k[q][1]
-                #if not np.array_equal(K,Q):
-                    #hfx0[x] += system.deg_e[q][0]*system.deg_e[k][0]/np.dot(K-Q, K-Q)*fermi_factor(system.deg_e[k][1], mu[x], beta[x])*fermi_factor(system.deg_e[q][1], mu[x], beta[x])
+    # [todo] - Make this less stupid.
+    for k in range(len(system.kval)):
+        for q in range(k):
+            K = system.kval[k]
+            Q = system.kval[q]
+            if not np.array_equal(K,Q):
+                hfx0 += 1.0/np.dot(K-Q, K-Q)*fermi_factor(system.spval[k], mu, beta)*fermi_factor(system.spval[q], mu, beta)
 
     return -hfx0 / (system.L*sc.pi)
 
@@ -549,7 +496,7 @@ class System:
         # Change this to be more general, selected to be the gamma point.
         self.total_K = self.kval[0]
         self.beta_max = 5.0
-        self.time = []
+        self.root_de = 1e-10
 
     def print_system_variables(self):
 
@@ -564,7 +511,6 @@ class System:
         print " # Fermi energy for discrete system: ", self.ef_fin
         print " # Ground state energy for finite system: ", self.t_energy_fin
         print " # Ground state total energy for infinite system: ", self.t_energy_inf
-        print " # Time taken for calculation: ", self.time
 
 def run_calcs(system, calc='All'):
     '''Run user defined calculations.
@@ -582,30 +528,33 @@ data : pandas data frame containing desired quantities.
 '''
 
     data = pd.DataFrame()
-    beta = np.arange(0.1,system.beta_max,0.1)
+    beta = np.arange(0.1, system.beta_max, 0.1)
+    data['Beta'] = beta
+    data['2M'] = 2*system.M
+    calc_time = []
+
     if calc == 'All':
         start = time.time()
         # Find the chemical potential.
-        (xval, mu) = chem_pot(system.deg_e, system.ne, system.ef_fin, 1e-8)
+        mu = [chem_pot_newton_sum(system, b) for b in beta]
         # Evaluate observables.
-        tenergy = [i for i in energy(xval, mu, system.deg_e)]
-        hfenergy = [i for i in hartree0_sum(system, xval, mu)]
-        data['Beta'] = xval
-        data['2M'] = 2*system.M
-        data['Energy_sum'] = tenergy
-        data['HF0_sum'] = hfenergy
-        data['Diff'] = data['Energy_sum'] + data['HF0_sum']
+        beta_mu = zip(beta, mu)
+        #for b, m in beta_mu:
+            #print b, m, energy(b, m, system.deg_e), nav(system.deg_e, system.ne, b, m)
+        data['Energy_sum'] = [energy(b, m, system.deg_e) for b, m in beta_mu]
+        #data['HF0_sum'] = [hartree0_sum(system, b, m) for b, m in beta_mu]
         end = time.time()
-        system.time.append(end-start)
+        calc_time.append(end-start)
         start = time.time()
-        (xval, mu) = chem_pot_integral(system.integral_factor, system.ef, 1e-6, system.ne)
-        tenergy = [i for i in energy_integral_loop(xval, mu, system.integral_factor, system.pol)]
-        data['Energy_integral'] = tenergy
+        mu = [chem_pot_newton_integral(system, b) for b in beta]
+        beta_mu = zip(beta, mu)
+        data['Energy_integral'] = [energy_integral(b, m, system.integral_factor) for b, m in beta_mu]
         data['E_COM'] = [centre_of_mass_obsv(system, b)[0] for b in beta]
+        #(tenergy, partition, count) = canonical_partition_function(beta, system.spval, system.ne, system.kval, system.kval[0])
+        #data['Partition'] = tenergy / partition
         end = time.time()
-        system.time.append(end-start)
-        #(tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, 0)
-        #data['Canonical_partition'] = tenergy / partition
+        calc_time.append(end-start)
+        print " # Time taken for calculation: ", calc_time
     elif calc == 'partition':
         xval = np.arange(0,5,0.1)
         (tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, system.kval[0])
@@ -613,7 +562,6 @@ data : pandas data frame containing desired quantities.
         data['Partition'] = tenergy / partition
     elif calc == 'classical':
         (T, Uxc) = classical_ocp(system, 0.01, 10)
-        #beta = 1.0/xval
         data['T'] = T
         data['Theta'] = T / system.ef
         data['Beta'] = 1 / T
@@ -629,7 +577,7 @@ data : pandas data frame containing desired quantities.
         data['Beta'] = beta
         data['E_COM'] = [centre_of_mass_obsv(system, b)[0] for b in beta]
 
-        return data
+    return data
 
 def main(args):
 
