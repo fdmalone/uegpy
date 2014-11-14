@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import sys
 import scipy as sc
 from scipy import integrate
+from scipy import optimize
 import numpy as np
 import matplotlib.pyplot as pl
 import time
@@ -87,6 +89,137 @@ def compress_spval(spval, kval):
     deg_k.append([j,kval[i]])
 
     return (deg_e, deg_k)
+
+def total_momentum(system, beta, mu):
+
+    P = 0
+
+    for i in range(len(system.spval)):
+
+        P += system.kfac * np.dot(system.kval[i],system.kval[i]) * fermi_factor(system.spval[i], mu, beta)
+
+    return np.sqrt(P)
+
+def constrained_f(x, system, beta):
+    ''' Function for evaluating the total momentum and number
+    of particles in the GC canonical ensemble. Pack these together
+    to prevent the necesseity of two sum evaluations.
+
+'''
+
+    # Lagrange multiplier for the momentum.
+    xi = x[:3]
+    # Lagrange multiplier for the total number of particles (chemical potential).
+    mu = x[3]
+
+    k_i = system.kfac * system.kval
+
+    P = [0] * 3
+    N = 0
+
+    for i in range(len(system.spval)):
+
+        fermi_factor = 1.0 / (np.exp(-beta*(0.5*np.dot(k_i[i],k_i[i])-mu-np.dot(xi,k_i[i])))+1)
+        P += k_i[i] * fermi_factor
+        print P, k_i[i]
+        N += fermi_factor
+
+    print P, N
+    P = P - system.total_K
+    N = N - system.ne
+    return ([P[0],P[1],P[2], N])
+
+def constrained_canonical_ensemble(system, beta):
+    ''' Attempt to find the chemical potential and momentum lagrange
+    multiplier which will result in a Grand Canonical partition function (GCPF)
+    restricted to the N = ne, P = total_K subspace. Typically we are interested
+    in evaluating everything in the total_K = 0 subspace for comparison with DMQMC
+    calculations.
+
+    This doesn't work as the total momentum is automatically zero in the GC ensemble
+    by symmetry.....
+
+    The GC density matrix can be written
+
+        \\rho = 1 / Z exp(-beta(\\hat{H} - \\mu \\hat{N} - \\vec{\\xi}\cdot\hat{K}),
+
+    where \mu and \\vec{\\xi} are Lagrange multipliers which fix the average total
+    number of particles and momentum respectively.
+
+    For a non-interacting system the partition function, Z, can be shown to read
+
+        Z = \\prod_i (1 + exp(\\beta(\\varepsilon_i - mu - \\vec{\\xi}\\cdot\\vec{p}_i)),
+
+    and now \\varepsilon_i and \\vec{p}_i are single particle energies and the associated
+    momentum.
+
+    To work in a constrained (both by particle number and total momentum) space one needs to find
+    the values of \\mu and \\vec{\\xi} such that
+
+        < \\hat{N} > = \\sum_i 1 / (exp(beta(\\varepsilon - \\mu - \\vec{\\xi}\\cdot\\vec{p}_i))+1) = N_e
+
+    and
+        < \\hat{K} >  = \\sum_i 1 / (exp(beta(\\varepsilon - \\mu  - \\vec{\\xi}\\cdot\\vec{p}_i))+1) = K_{desired}.
+
+    This amounts to finding the roots of the function
+
+        F = (< \\hat{K} > - K_desired, < \\hat{N} > - N_e),
+
+    which can be achieved using "standard" root finding procedures. Here scipy.optimize.fsolve is used
+    which apparently employs MINPACK’s hybrd and hybrj algorithms.
+'''
+
+    # Initial guess for the momentum lagrange multiplier
+    # and chemical potential.
+    x0 = [0, 0, 0, system.ef]
+    xi = []
+    mu = []
+    N = []
+
+    for b in beta:
+        # Find the roots of the function constrained_f.
+        solution = sc.optimize.root(constrained_f, x0, args=(system, b))
+        x0[0:3] = solution[0:3]
+        xi.append(solution[0:3])
+        mu.append(solution[3])
+        N.append(nav_constrained(system, b, solution[3], solution[0:3]))
+
+
+    return (xi, mu, N)
+
+def test_root(system, beta):
+
+    x0 = system.ef
+    mu = []
+    N = []
+
+    for b in beta:
+        solution = sc.optimize.fsolve(n_test, x0, args=(system,beta))[0]
+        print solution
+        #mu.append(solution)
+        #N.append(n_test(solution, system, b))
+
+    return (mu, N)
+
+def n_test(mu, system, beta):
+
+    N = 0.
+
+    for i in range(len(system.spval)):
+
+        N += 1.0 / (np.exp(beta*(system.spval[i]-mu))+1.0)
+
+    return N - system.ne
+
+def nav_constrained(system, beta, mu, xi):
+
+    N = 0
+
+    for i in range(len(system.spval)):
+
+        N += 1.0 / (np.exp(beta*(system.spval[i]-mu-np.dot(xi,system.kval[i])))+1)
+
+    return N
 
 def dis_fermi(spval, ne):
 
@@ -394,6 +527,9 @@ class System:
         self.M = len(self.spval)
         (self.t_energy_fin, self.t_energy_inf) = total_energy_T0(self.spval, self.ef, self.ne)
         self.ef_fin = dis_fermi(self.spval, self.ne)
+        # Change this to be more general, selected to be the gamma point.
+        self.total_K = self.kval[0]
+        self.beta_max = 5.0
         self.time = []
 
     def print_system_variables(self):
@@ -447,8 +583,8 @@ data : pandas data frame containing desired quantities.
         data['Energy_integral'] = tenergy
         end = time.time()
         system.time.append(end-start)
-        (tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, 0)
-        data['Canonical_partition'] = tenergy / partition
+        #(tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, 0)
+        #data['Canonical_partition'] = tenergy / partition
     elif calc == 'partition':
         xval = np.arange(0,5,0.1)
         (tenergy, partition, count) = canonical_partition_function(xval, system.spval, system.ne, system.kval, system.kval[0])
@@ -461,6 +597,16 @@ data : pandas data frame containing desired quantities.
         data['Theta'] = T / system.ef
         data['Beta'] = 1 / T
         data['Classical_Uxc'] = Uxc
+    elif calc == 'constrained':
+        data['Beta'] = beta
+        (data['xi'], data['mu'], data['N']) = constrained_canonical_ensemble(system, beta)
+        print data['mu']
+    elif calc == 'test_root':
+        data['Beta'] = beta
+        (data['mu'], data['N']) = test_root(system, beta)
+    elif calc == 'com':
+        data['Beta'] = beta
+        data['E_COM'] = [centre_of_mass_obsv(system, b)[0] for b in beta]
 
 
         return data
@@ -476,21 +622,7 @@ def main(args):
     system = System(args)
     system.print_system_variables()
     data = run_calcs(system, calc_type)
-    print "DATA: ", data
     print data.to_string(index=False)
-
-    #result = canonical_partition_function(xval, spval, int(ne), kval, kval[0])
-    #tenergy3 += result[0]
-    #part += result[1]
-    #counter += result[2]
-
-    #NAV = []
-    #print counter
-    #for bval in range(0,len(xval)):
-        #NAV.append(nav(deg, ne, xval[bval], mu[bval]))
-    ##for x in range(-10,100):
-        ##beta = beta + 0.1
-        ##print beta, nav_integral(integral_factor,  0.1, 0.3)
 
 if __name__ == '__main__':
 
