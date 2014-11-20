@@ -230,7 +230,7 @@ def centre_of_mass_obsv(system, beta):
     Z = 0
     E_tot = 0
 
-    for kval in system.kval[1:]:
+    for kval in system.kval:
 
         E_K = system.kfac**2/(2.0*system.ne)*np.dot(kval, kval)
         exponent = np.exp(-beta*E_K)
@@ -530,6 +530,7 @@ data : pandas data frame containing desired quantities.
     data = pd.DataFrame()
     beta = np.arange(0.1, system.beta_max, 0.1)
     data['Beta'] = beta
+    data['T/T_F'] = 1.0 / (system.ef*beta)
     data['2M'] = 2*system.M
     calc_time = []
 
@@ -550,6 +551,7 @@ data : pandas data frame containing desired quantities.
         beta_mu = zip(beta, mu)
         data['Energy_integral'] = [energy_integral(b, m, system.integral_factor) for b, m in beta_mu]
         data['E_COM'] = [centre_of_mass_obsv(system, b)[0] for b in beta]
+        data['Diff'] = data['Energy_sum'] - data['E_COM']
         #(tenergy, partition, count) = canonical_partition_function(beta, system.spval, system.ne, system.kval, system.kval[0])
         #data['Partition'] = tenergy / partition
         end = time.time()
