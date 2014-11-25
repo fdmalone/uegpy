@@ -528,16 +528,17 @@ data : pandas data frame containing desired quantities.
 '''
 
     data = pd.DataFrame()
-    beta = np.arange(0.1, system.beta_max, 0.1)
+    beta = np.arange(0.1/system.ef, system.beta_max, 0.1/system.ef)
     data['Beta'] = beta
     data['T/T_F'] = 1.0 / (system.ef*beta)
-    data['2M'] = 2*system.M
+    data['M'] = system.M
     calc_time = []
 
     if calc == 'All':
         start = time.time()
         # Find the chemical potential.
         mu = [chem_pot_newton_sum(system, b) for b in beta]
+        data['chem_pot'] = mu
         # Evaluate observables.
         beta_mu = zip(beta, mu)
         #for b, m in beta_mu:
@@ -571,7 +572,6 @@ data : pandas data frame containing desired quantities.
     elif calc == 'constrained':
         data['Beta'] = beta
         (data['xi'], data['mu'], data['N']) = constrained_canonical_ensemble(system, beta)
-        print data['mu']
     elif calc == 'test_root':
         data['Beta'] = beta
         (data['mu'], data['N']) = test_root(system, beta)
