@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import system
+import ueg_sys
 import sys
 import scipy as sc
 from scipy import integrate
