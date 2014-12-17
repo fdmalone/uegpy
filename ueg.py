@@ -283,14 +283,6 @@ def canonical_partition_function(beta, spval, nel, kval, K):
     print count
     return (tenergy, part, count)
 
-def print_file(beta, obsv, name):
-
-    print "\t", "Beta", "\t", name
-    for i in range(0,len(beta)-1):
-        print "\t", beta[i], "\t", obsv[i]
-
-    print "\n"
-
 def run_calcs(system, calc='All'):
     '''Run user defined calculations.
 
