@@ -53,64 +53,6 @@ def constrained_f(x, system, beta):
     N = N - system.ne
     return ([P[0],P[1],P[2], N])
 
-def constrained_canonical_ensemble(system, beta):
-    ''' Attempt to find the chemical potential and momentum lagrange
-    multiplier which will result in a Grand Canonical partition function (GCPF)
-    restricted to the N = ne, P = total_K subspace. Typically we are interested
-    in evaluating everything in the total_K = 0 subspace for comparison with DMQMC
-    calculations.
-
-    This doesn't work as the total momentum is automatically zero in the GC ensemble
-    by symmetry.....
-
-    The GC density matrix can be written
-
-        \\rho = 1 / Z exp(-beta(\\hat{H} - \\mu \\hat{N} - \\vec{\\xi}\cdot\hat{K}),
-
-    where \mu and \\vec{\\xi} are Lagrange multipliers which fix the average total
-    number of particles and momentum respectively.
-
-    For a non-interacting system the partition function, Z, can be shown to read
-
-        Z = \\prod_i (1 + exp(\\beta(\\varepsilon_i - mu - \\vec{\\xi}\\cdot\\vec{p}_i)),
-
-    and now \\varepsilon_i and \\vec{p}_i are single particle energies and the associated
-    momentum.
-
-    To work in a constrained (both by particle number and total momentum) space one needs to find
-    the values of \\mu and \\vec{\\xi} such that
-
-        < \\hat{N} > = \\sum_i 1 / (exp(beta(\\varepsilon - \\mu - \\vec{\\xi}\\cdot\\vec{p}_i))+1) = N_e
-
-    and
-        < \\hat{K} >  = \\sum_i 1 / (exp(beta(\\varepsilon - \\mu  - \\vec{\\xi}\\cdot\\vec{p}_i))+1) = K_{desired}.
-
-    This amounts to finding the roots of the function
-
-        F = (< \\hat{K} > - K_desired, < \\hat{N} > - N_e),
-
-    which can be achieved using "standard" root finding procedures. Here scipy.optimize.fsolve is used
-    which apparently employs MINPACK’s hybrd and hybrj algorithms.
-'''
-
-    # Initial guess for the momentum lagrange multiplier
-    # and chemical potential.
-    x0 = [0, 0, 0, system.ef]
-    xi = []
-    mu = []
-    N = []
-
-    for b in beta:
-        # Find the roots of the function constrained_f.
-        solution = sc.optimize.root(constrained_f, x0, args=(system, b))
-        x0[0:3] = solution[0:3]
-        xi.append(solution[0:3])
-        mu.append(solution[3])
-        N.append(nav_constrained(system, b, solution[3], solution[0:3]))
-
-
-    return (xi, mu, N)
-
 def test_root(system, beta):
 
     x0 = system.ef
@@ -440,9 +382,6 @@ data : pandas data frame containing desired quantities.
         data['Theta'] = T / system.ef
         data['Beta'] = 1 / T
         data['Classical_Uxc'] = Uxc
-    elif calc == 'constrained':
-        data['Beta'] = beta
-        (data['xi'], data['mu'], data['N']) = constrained_canonical_ensemble(system, beta)
     elif calc == 'test_root':
         data['Beta'] = beta
         (data['mu'], data['N']) = test_root(system, beta)
@@ -471,7 +410,6 @@ args: list
             All: perform all calculations
             partition: calculate the canonical partition function
             classical: calculate the classical excess energy of the one component plasma.
-            contrained: calculate the total energy in a (momentum) contrained grand canonical ensemble.
             test_root: something
             com: calculate the centre-of-mass correction to the total energy.
 Returns
