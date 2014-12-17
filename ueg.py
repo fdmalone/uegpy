@@ -53,40 +53,6 @@ def constrained_f(x, system, beta):
     N = N - system.ne
     return ([P[0],P[1],P[2], N])
 
-def test_root(system, beta):
-
-    x0 = system.ef
-    mu = []
-    N = []
-
-    for b in beta:
-        solution = sc.optimize.fsolve(n_test, x0, args=(system,beta))[0]
-        print solution
-        #mu.append(solution)
-        #N.append(n_test(solution, system, b))
-
-    return (mu, N)
-
-def n_test(mu, system, beta):
-
-    N = 0.
-
-    for i in range(len(system.spval)):
-
-        N += 1.0 / (np.exp(beta*(system.spval[i]-mu))+1.0)
-
-    return N - system.ne
-
-def nav_constrained(system, beta, mu, xi):
-
-    N = 0
-
-    for i in range(len(system.spval)):
-
-        N += 1.0 / (np.exp(beta*(system.spval[i]-mu-np.dot(xi,system.kval[i])))+1)
-
-    return N
-
 def centre_of_mass_obsv(system, beta):
     ''' Calculate centre of mass partition function and total energy.
 
