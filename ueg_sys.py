@@ -26,6 +26,7 @@ class System:
     total_K: symmetry of determinants being considered.
     beta_max: maximum beta value which we calculated properties to.
     ef_fin: Fermi energy for finite system.
+    de: epsilon value for comparing floats.
 '''
 
     def __init__(self, args):
@@ -59,6 +60,7 @@ class System:
         # Change this to be more general, selected to be the gamma point.
         self.total_K = self.kval[0]
         self.beta_max = 5.0
+        self.de = 1e-12
 
     def print_system_variables(self):
         ''' Print out system varaibles.'''

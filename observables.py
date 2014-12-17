@@ -273,3 +273,67 @@ def canonical_partition_function(beta, spval, nel, kval, K):
 
     print count
     return (tenergy, part, count)
+
+def madelung_constant(system):
+    ''' Calculate the Madelung constant as described in Fraser er al. PRB 53 5 1814. Code copied from fortran version provided by James Shepherd.
+    Here vm is given as
+    ::math
+        1/V sum_G exp(-\pi^2 G^2 / \kappa^2) / (pi*G^2) - \pi / (\kappa^2*V) + sum_R erfc(\kappa*|R|) / |R| - 2*\kappa / \sqrt(pi).
+    In the code below we write
+    a = - \pi / (\kappa^2*V)
+    b = - 2*\kappa / \sqrt(pi).
+    [todo] - explain parameters better / learn how to write maths in comments.
+Params
+------
+system: class
+    system parameters.
+
+Returns
+-------
+vm: float
+    Madelung constant.
+---
+'''
+
+    omega = 1.0 / system.L**3
+    # Taken from CASINO manual.
+    kappa = 2.8 / omega**(1./3.)
+    # a and b constants defined in function interface.
+    a = -sc.pi / (kappa**2*system.L**3)
+    b = -2.0*kappa / np.sqrt(sc.pi)
+
+    kmax = 1
+    rec_sum = 10
+    rec_sum_new = 0
+
+    while (abs(rec_sum-rec_sum_new) > system.de):
+        rec_sum_new = rec_sum
+        rec_sum = 0
+        for i in range(-kmax,kmax):
+            for j in range(-kmax,kmax):
+                for k in range(-kmax,kmax):
+                    dotprod = i**2 + j**2 + k**2
+                    if (dotprod != 0):
+                        Gsq = 1.0/system.L**2*dotprod
+                        rec_sum += omega * (1.0/(sc.pi*Gsq)) * np.exp(-sc.pi**2*Gsq/kappa**2)
+        kmax = kmax + 1
+
+    real_sum = 10
+    real_sum_new = 0
+
+    # [todo] - This is just repitition from above.
+    while (abs(real_sum-real_sum_new) > system.de):
+        real_sum_new = real_sum
+        real_sum = 0
+        for i in range(-kmax,kmax):
+            for j in range(-kmax,kmax):
+                for k in range(-kmax,kmax):
+                    dotprod = i**2 + j**2 + k**2
+                    if (dotprod != 0):
+                        modr = system.L * dotprod
+                        real_sum += math.erfc(kappa*modr) / modr
+        kmax = kmax + 1
+
+    vm = real_sum + rec_sum + a + b
+    #[todo] - Return the number of iterations?
+    return vm
