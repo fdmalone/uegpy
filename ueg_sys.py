@@ -51,11 +51,11 @@ class System:
         ## Single particle eigenvalues and corresponding kvectors
         (self.spval, self.kval) = self.sp_energies(self.kfac, self.ecut)
         # Compress single particle eigenvalues by degeneracy.
-        (self.deg_e, self.deg_k) = self.compress_spval(self, self.spval, self.kval)
+        (self.deg_e, self.deg_k) = self.compress_spval(self.spval, self.kval)
         # Number of plane waves.
         self.M = len(self.spval)
-        (self.t_energy_fin, self.t_energy_inf) = self.total_energy_T0(self, self.spval, self.ef, self.ne)
-        self.ef_fin = self.dis_fermi(self, self.spval, self.ne)
+        (self.t_energy_fin, self.t_energy_inf) = self.total_energy_T0(self.spval, self.ef, self.ne)
+        self.ef_fin = self.dis_fermi(self.spval, self.ne)
         # Change this to be more general, selected to be the gamma point.
         self.total_K = self.kval[0]
         self.beta_max = 5.0
@@ -181,3 +181,7 @@ class System:
         deg_k.append([j,kval[i]])
 
         return (deg_e, deg_k)
+
+    def dis_fermi(self, spval, ne):
+
+            return 0.5*(spval[ne-1]+spval[ne])
