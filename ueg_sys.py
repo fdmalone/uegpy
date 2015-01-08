@@ -61,6 +61,7 @@ class System:
         self.total_K = self.kval[0]
         self.beta_max = 5.0
         self.de = 1e-12
+        self.root_de = 1e-10
 
     def print_system_variables(self):
         ''' Print out system varaibles.'''
@@ -76,7 +77,6 @@ class System:
         print " # Fermi energy for discrete system: ", self.ef_fin
         print " # Ground state energy for finite system: ", self.t_energy_fin
         print " # Ground state total energy for infinite system: ", self.t_energy_inf
-        self.root_de = 1e-10
 
     # Remove these.
     def kf(self, ne, L, ns):
