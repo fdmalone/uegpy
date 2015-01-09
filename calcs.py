@@ -28,18 +28,18 @@ data : pandas data frame containing desired quantities.
     if calc == 'All':
         start = time.time()
         # Find the chemical potential.
-        mu = [obs.chem_pot_newton_sum(system, b) for b in beta]
+        mu = [obs.chem_pot_sum(system, b) for b in beta]
         data['chem_pot'] = mu
         # Evaluate observables.
         beta_mu = zip(beta, mu)
         #for b, m in beta_mu:
             #print b, m, energy(b, m, system.deg_e), nav(system.deg_e, system.ne, b, m)
-        data['Energy_sum'] = [obs.energy(b, m, system.deg_e) for b, m in beta_mu]
+        data['Energy_sum'] = [obs.energy_sum(b, m, system.deg_e) for b, m in beta_mu]
         #data['HF0_sum'] = [hartree0_sum(system, b, m) for b, m in beta_mu]
         end = time.time()
         calc_time.append(end-start)
         start = time.time()
-        mu = [obs.chem_pot_newton_integral(system, b) for b in beta]
+        mu = [obs.chem_pot_integral(system, b) for b in beta]
         beta_mu = zip(beta, mu)
         data['Energy_integral'] = [obs.energy_integral(b, m, system.integral_factor) for b, m in beta_mu]
         data['E_COM'] = [obs.centre_of_mass_obsv(system, b)[0] for b in beta]

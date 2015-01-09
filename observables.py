@@ -62,84 +62,27 @@ def centre_of_mass_obsv(system, beta):
 
     return (E_tot/Z, Z)
 
+def nav_sum(mu, ne, spval, beta):
 
-def nav_deriv(spval, x, beta):
-
-    deriv = 0
     N = 0
-
-    for speig in range(0,len(spval)):
-
-        fermi_factor =  spval[speig][0]/(np.exp(beta*(spval[speig][1]-x))+1)
-        N = N + fermi_factor
-        deriv = deriv + beta*np.exp(beta*(spval[speig][1]-x))*fermi_factor**2
-
-    return (N, deriv)
-
-def nav(spval, ne, beta, guess):
-
-    mu = guess
-    N = 0
-    it = 0
 
     for speig in range(0,len(spval)):
 
         N = N + spval[speig][0]/(np.exp(-beta*(mu-spval[speig][1]))+1)
 
-    return N
+    return N - ne
 
-def nav_integral(integral_factor, beta, eta):
+def nav_integral(eta, beta, integral_factor, ne):
 
-    #print sc.integrate.quad(fermi_integrand,np.inf, args=(0.5,eta)), integral_factor, np.power(beta,-1.5)
-    return integral_factor * np.power(beta,-1.5)  * sc.integrate.quad(fermi_integrand, 0, np.inf, args=(0.5, eta))[0]
+    return integral_factor*np.power(beta,-1.5)*sc.integrate.quad(fermi_integrand, 0, np.inf, args=(0.5, eta))[0] - ne
 
-def nav_deriv_integral(integral_factor, beta, eta):
+def chem_pot_sum(system, beta):
 
-    N = sc.integrate.quad(fermi_integrand, 0, np.inf, args=(0.5, eta))[0]
-    Nderiv = sc.integrate.quad(fermi_integrand_deriv, 0, np.inf, args=(0.5, eta))[0]
+    return sc.optimize.fsolve(nav_sum, system.ef, args=(system.ne, system.deg_e, beta))[0]
 
-    return (integral_factor*np.power(beta,-1.5)*N, integral_factor*np.power(beta,-1.5)*Nderiv)
+def chem_pot_integral(system, beta):
 
-def chem_pot_newton_integral(system, beta):
-
-    mu = beta*system.ef
-    it = 0
-    mu_new = 0
-    npart = 0
-    ne = system.ne
-
-    (nav, n_deriv) = nav_deriv_integral(system.integral_factor, beta, mu)
-    mu_new = mu - (nav-ne)/n_deriv
-    mu = mu_new
-
-    while (abs(ne-npart) > system.root_de):
-        (npart, n_deriv) = nav_deriv_integral(system.integral_factor, beta, mu)
-        mu_new = mu - (npart-ne)/n_deriv
-        mu = mu_new
-        it = it + 1
-
-    return mu / beta
-
-def chem_pot_newton_sum(system, beta):
-
-    mu = system.ef
-    it = 0
-    mu_new = 0
-    npart = 0
-    ne = system.ne
-
-    spval = system.deg_e
-    (nav, n_deriv) = nav_deriv(spval, mu, beta)
-    mu_new = mu - (nav-npart)/n_deriv
-    mu = mu_new
-
-    while (abs(npart-ne) > system.root_de):
-        (npart, n_deriv) = nav_deriv(spval, mu_new, beta)
-        mu_new = mu - (npart-ne)/n_deriv
-        mu = mu_new
-        it = it + 1
-
-    return mu
+    return sc.optimize.fsolve(nav_integral, beta*system.ef, args=(beta, system.integral_factor, system.ne))[0] / beta
 
 def fermi_integrand(x, nu, eta):
 
@@ -149,11 +92,15 @@ def fermi_integrand_deriv(x, nu, eta):
 
     return np.power(x,nu) / (np.exp(x-eta)+2+np.exp(eta-x))
 
+def fermi_integral(nu, eta):
+
+    return sc.integrate.quad(fermi_integrand, 0, np.inf, args=(nu, eta))[0]
+
 def energy_integral(beta, mu, integral_factor):
 
-    return integral_factor * np.power(beta, -2.5) * sc.integrate.quad(fermi_integrand, 0, np.inf, args=(1.5, mu*beta))[0]
+    return integral_factor * np.power(beta, -2.5) * fermi_integral(1.5, mu*beta)
 
-def energy(beta, mu, spval):
+def energy_sum(beta, mu, spval):
 
     tenergy = 0
 
@@ -161,6 +108,16 @@ def energy(beta, mu, spval):
         tenergy = tenergy + (spval[speig][0]*spval[speig][1])/(np.exp(beta*(spval[speig][1]-mu))+1)
 
     return tenergy
+
+def hfx0_integrand(eta):
+
+    return fermi_integral(-0.5, eta)**2
+
+def hfx0_integral(system, beta, mu):
+
+    hfx0 = sc.integrate.quad(hfx0_integrand, -np.inf, beta*mu)[0]
+
+    return (-system.L**3/(2.*sc.pi**3*beta**2)) * hfx0
 
 def specific_heat(beta, mu, spval):
 
