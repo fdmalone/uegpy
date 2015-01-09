@@ -109,15 +109,15 @@ def energy_sum(beta, mu, spval):
 
     return tenergy
 
-def hfx0_integrand(eta):
+def hfx_integrand(eta):
 
     return fermi_integral(-0.5, eta)**2
 
-def hfx0_integral(system, beta, mu):
+def hfx_integral(system, beta, mu):
 
-    hfx0 = sc.integrate.quad(hfx0_integrand, -np.inf, beta*mu)[0]
+    hfx = sc.integrate.quad(hfx_integrand, -np.inf, beta*mu)[0]
 
-    return (-system.L**3/(2.*sc.pi**3*beta**2)) * hfx0
+    return (-system.L**3/(2.*sc.pi**3*beta**2)) * hfx
 
 def specific_heat(beta, mu, spval):
 
@@ -178,8 +178,8 @@ def classical_ocp(system, Tmin, Tmax):
 
     return (theta, U)
 
-def hartree0_sum(system, beta, mu):
-    '''Evaluate the HF0 energy contribution as a summation.
+def hfx_sum(system, beta, mu):
+    '''Evaluate the HF exchange contribution as a summation.
 
 Patrams
 -------
@@ -192,12 +192,12 @@ mu : float
 
 Returns
 -------
-hfx0 : float
-    hf0 exchange energy
+hfx : float
+    hf exchange energy
 
 '''
 
-    hfx0 = 0
+    hfx = 0
 
     # [todo] - Make this less stupid.
     for k in range(len(system.kval)):
@@ -205,9 +205,9 @@ hfx0 : float
             K = system.kval[k]
             Q = system.kval[q]
             if not np.array_equal(K,Q):
-                hfx0 += 1.0/np.dot(K-Q, K-Q)*fermi_factor(system.spval[k], mu, beta)*fermi_factor(system.spval[q], mu, beta)
+                hfx += 1.0/np.dot(K-Q, K-Q)*fermi_factor(system.spval[k], mu, beta)*fermi_factor(system.spval[q], mu, beta)
 
-    return -hfx0 / (system.L*sc.pi)
+    return -hfx / (system.L*sc.pi)
 
 def canonical_partition_function(beta, spval, nel, kval, K):
 
