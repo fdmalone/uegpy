@@ -294,3 +294,16 @@ vm: float
     vm = real_sum + rec_sum + a + b
     #[todo] - Return the number of iterations?
     return vm
+
+def propagate_exact_spectrum(beta, eigv):
+
+    Z = 0
+    E_tot = 0
+
+    for eig in eigv:
+
+        exponent = np.exp(-beta*eig)
+        Z += exponent
+        E_tot += eig * exponent
+
+    return E_tot / Z
