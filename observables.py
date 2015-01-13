@@ -274,6 +274,11 @@ vm: float
                         Gsq = 1.0/system.L**2*dotprod
                         rec_sum += omega * (1.0/(sc.pi*Gsq)) * np.exp(-sc.pi**2*Gsq/kappa**2)
         kmax = kmax + 1
+        if (kmax > 100):
+            print "--------------------------------------------------"
+            print "Not coverged with kmax = 100."
+            print "Difference in last two iterations: ", np.abs(rec_sum-rec_sum_new)
+            print "--------------------------------------------------"
 
     real_sum = 10
     real_sum_new = 0
@@ -290,6 +295,11 @@ vm: float
                         modr = system.L * dotprod
                         real_sum += math.erfc(kappa*modr) / modr
         kmax = kmax + 1
+        if (kmax > 100):
+            print "--------------------------------------------------"
+            print "Not coverged with kmax = 100."
+            print "Difference in last two iterations: ", np.abs(rec_sum-rec_sum_new)
+            print "--------------------------------------------------"
 
     vm = real_sum + rec_sum + a + b
     #[todo] - Return the number of iterations?
