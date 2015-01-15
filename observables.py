@@ -62,7 +62,7 @@ def centre_of_mass_obsv(system, beta):
 
     return (E_tot/Z, Z)
 
-def nav_sum(mu, ne, spval, beta):
+def nav_sum(mu, ne, spval, beta, pol):
 
     N = 0
 
@@ -70,7 +70,7 @@ def nav_sum(mu, ne, spval, beta):
 
         N = N + spval[speig][0]/(np.exp(-beta*(mu-spval[speig][1]))+1)
 
-    return N - ne
+    return (2.0/pol)*N - ne
 
 def nav_integral(eta, beta, integral_factor, ne):
 
@@ -78,7 +78,7 @@ def nav_integral(eta, beta, integral_factor, ne):
 
 def chem_pot_sum(system, beta):
 
-    return sc.optimize.fsolve(nav_sum, system.ef, args=(system.ne, system.deg_e, beta))[0]
+    return sc.optimize.fsolve(nav_sum, system.ef, args=(system.ne, system.deg_e, beta, system.pol))[0]
 
 def chem_pot_integral(system, beta):
 
@@ -100,14 +100,14 @@ def energy_integral(beta, mu, integral_factor):
 
     return integral_factor * np.power(beta, -2.5) * fermi_integral(1.5, mu*beta)
 
-def energy_sum(beta, mu, spval):
+def energy_sum(beta, mu, spval, pol):
 
     tenergy = 0
 
     for speig in range(0,len(spval)):
         tenergy = tenergy + (spval[speig][0]*spval[speig][1])/(np.exp(beta*(spval[speig][1]-mu))+1)
 
-    return tenergy
+    return (2.0/pol)*tenergy
 
 def hfx_integrand(eta):
 
