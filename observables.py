@@ -117,7 +117,7 @@ def hfx_integral(system, beta, mu):
 
     hfx = sc.integrate.quad(hfx_integrand, -np.inf, beta*mu)[0]
 
-    return (-system.L**3/(2.*sc.pi**3*beta**2)) * hfx
+    return (-system.L**3/(2.*system.pol*sc.pi**3*beta**2)) * hfx
 
 def specific_heat(beta, mu, spval):
 
