@@ -305,6 +305,24 @@ vm: float
     #[todo] - Return the number of iterations?
     return vm
 
+def madelung_approx(system):
+    ''' Use expression in Schoof et al. (arxiv: 1502.04616) for the Madelung contribution to the total
+    energy. This is a fit to the Fraser expression above.
+
+Parameters
+----------
+system: class
+    system being studied.
+
+Returns
+-------
+E_M: float
+    Madelung contriubtion to total energy (in Hartrees).
+
+'''
+
+    return - 0.5 * 2.837297 * (3.0/(4.0*sc.pi))**(1.0/3.0) * system.ne**(2.0/3.0) * system.rs**(-1.0)
+
 def propagate_exact_spectrum(beta, eigv):
 
     Z = 0
