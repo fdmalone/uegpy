@@ -57,5 +57,7 @@ data : pandas data frame containing desired quantities.
     elif calc == 'com':
         data['Beta'] = beta
         data['E_COM'] = [obs.centre_of_mass_obsv(system, b)[0] for b in beta]
+    elif calc == 'madelung':
+        return obs.madelung_constant(system)
 
     return data
