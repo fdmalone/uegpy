@@ -76,9 +76,9 @@ def nav_integral(eta, beta, integral_factor, ne):
 
     return integral_factor*np.power(beta,-1.5)*sc.integrate.quad(fermi_integrand, 0, np.inf, args=(0.5, eta))[0] - ne
 
-def chem_pot_sum(system, beta):
+def chem_pot_sum(system, evals, beta):
 
-    return sc.optimize.fsolve(nav_sum, system.ef, args=(system.ne, system.deg_e, beta, system.pol))[0]
+    return sc.optimize.fsolve(nav_sum, system.ef, args=(system.ne, evals, beta, system.pol))[0]
 
 def chem_pot_integral(system, beta):
 

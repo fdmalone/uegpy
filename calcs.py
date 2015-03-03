@@ -32,7 +32,7 @@ data : pandas data frame containing desired quantities.
         data['chem_pot'] = mu
         # Evaluate observables.
         beta_mu = zip(beta, mu)
-        data['Energy_sum'] = [obs.energy_sum(b, m, system.deg_e) for b, m in beta_mu]
+        data['Energy_sum'] = [obs.energy_sum(b, m, system.deg_e, system.pol) for b, m in beta_mu]
         end = time.time()
         calc_time.append(end-start)
         start = time.time()

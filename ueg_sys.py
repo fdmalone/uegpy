@@ -52,7 +52,7 @@ class System:
         ## Single particle eigenvalues and corresponding kvectors
         (self.spval, self.kval) = self.sp_energies(self.kfac, self.ecut)
         # Compress single particle eigenvalues by degeneracy.
-        (self.deg_e, self.deg_k) = self.compress_spval(self.spval, self.kval)
+        self.deg_e  = self.compress_spval(self.spval)
         # Number of plane waves.
         self.M = len(self.spval)
         (self.t_energy_fin, self.t_energy_inf) = self.total_energy_T0(self.spval, self.ef, self.ne)
@@ -147,17 +147,14 @@ class System:
 
         return (spval, kval)
 
-    def compress_spval(self, spval, kval):
+    def compress_spval(self, spval):
         ''' Compress the single particle eigenvalues so that we only consider unique
         values which vastly speeds up the k-space summations required.
-        [todo] - Look at more clever optimisations (stars).
 
     Params
     ------
     spval: list
         list containing single particle eigenvalues
-    kval: list
-        list containing momentum space basis functions.
     '''
 
         # Work out the degeneracy of each eigenvalue.
@@ -165,7 +162,6 @@ class System:
         i = 0
         it = 0
         deg_e = []
-        deg_k = []
 
         while it < len(spval)-1:
             eval1 = spval[i]
@@ -174,15 +170,13 @@ class System:
                 j += 1
             else:
                 deg_e.append([j,eval1])
-                deg_k.append([j,kval[i]])
                 i += j
                 j = 1
             it += 1
 
         deg_e.append([j,eval1])
-        deg_k.append([j,kval[i]])
 
-        return (deg_e, deg_k)
+        return deg_e
 
     def dis_fermi(self, spval, ne):
 
