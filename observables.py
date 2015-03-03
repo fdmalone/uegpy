@@ -335,3 +335,49 @@ def propagate_exact_spectrum(beta, eigv):
         E_tot += eig * exponent
 
     return E_tot / Z
+
+def hartree_fock_exchange_potential(spvals, kvecs, ki, beta, mu, L):
+
+    ex = 0.0
+
+    for kj in range(len(spvals)):
+
+        if (kj != ki):
+            q = kvecs[ki] - kvecs[kj]
+            ex += fermi_factor(spvals[kj], beta, mu) / np.dot(q,q)
+
+    return -ex/(sc.pi*L)
+
+def check_self_consist(sp_new, sp_old):
+
+    de = 0.0
+
+    for i, j in zip(sp_new,sp_old): de += np.abs(i-j)
+
+    return de
+
+def hfx0_eigenvalues(system, beta, mu):
+
+    sp_old = system.spval
+    deg_new = np.array(system.deg_e)
+    kinetic = system.spval
+    kvecs = system.kval
+
+    de = 1.
+    att = 0
+    for it in range(0,1):
+        mu = chem_pot_sum(system, deg_new, beta)
+        print mu, energy_sum(beta, mu, system.deg_e, system.pol)
+        while (de > 1e-16):
+            att += 1
+            sp_new = np.array([kinetic[ki]+hartree_fock_exchange_potential(sp_old, kvecs, ki, beta, mu, system.L) for ki in range(len(kvecs))])
+            de = check_self_consist(sp_new, sp_old)/len(kvecs)
+            print att, de
+            sp_old = sp_new
+        deg_new = system.compress_spval(sp_new)
+
+    ex = []
+    mu = chem_pot_sum(system, deg_new, beta)
+    print mu, energy_sum(beta, mu, system.deg_e, system.pol)
+    #for ki in range(len(kvecs)): ex.append(hartree_fock_exchange_potential(sp_new, kvecs, ki, beta, mu, system.L))
+    #print ex
