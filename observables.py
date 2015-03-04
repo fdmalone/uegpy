@@ -3,6 +3,7 @@ import itertools
 import math
 import scipy as sc
 from scipy import integrate
+import random as rand
 from scipy import optimize
 
 def total_momentum(system, beta, mu):
@@ -381,3 +382,46 @@ def hfx0_eigenvalues(system, beta, mu):
     print mu, energy_sum(beta, mu, system.deg_e, system.pol)
     #for ki in range(len(kvecs)): ex.append(hartree_fock_exchange_potential(sp_new, kvecs, ki, beta, mu, system.L))
     #print ex
+
+
+def sample_canonical_energy(system, beta, mu):
+
+    p_i = np.array([fermi_factor(ek, mu, beta) for ek in system.spval])
+    evals = system.spval
+    E = []
+
+    en = 0
+    Z = 0
+
+    for it in range(0,100000):
+
+        (gen, orb_list) = create_orb_list(p_i, system.ne, system.M)
+        if gen:
+            E.append(sum(evals[orb_list]))
+            Z += 1
+
+    print(sum(E), Z, sum(E)/Z,np.array(E).var()/Z)
+
+
+def create_orb_list(probs, ne, M):
+
+    selected_orbs = []
+    nselect = 0
+
+    for iorb in range(0,M):
+
+        r = rand.random()
+
+        if (probs[iorb] > r):
+            nselect += 1
+            selected_orbs.append(iorb)
+        if (nselect > ne):
+            gen = False
+            break
+
+    if (nselect == ne):
+        gen = True
+    else:
+        gen = False
+
+    return (gen, selected_orbs)
