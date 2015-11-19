@@ -47,6 +47,7 @@ class System:
         self.kf = (3*self.pol*sc.pi**2*self.ne/self.L**3)**(1/3.)
         # Fermi energy (inifinite systems).
         self.ef = 0.5*self.kf**2
+        self.de = 1e-12
         # Integral Factor.
         self.integral_factor = self.L**3 * np.sqrt(2) / (self.pol*sc.pi**2)
         ## Single particle eigenvalues and corresponding kvectors
@@ -60,7 +61,6 @@ class System:
         # Change this to be more general, selected to be the gamma point.
         self.total_K = self.kval[0]
         self.beta_max = 5.0
-        self.de = 1e-12
         self.root_de = 1e-10
 
     def print_system_variables(self):
@@ -166,7 +166,8 @@ class System:
         while it < len(spval)-1:
             eval1 = spval[i]
             eval2 = spval[i+j]
-            if eval2 == eval1:
+            #print abs(eval2-eval1), eval1, eval3
+            if eval2 < eval1:
                 j += 1
             else:
                 deg_e.append([j,eval1])

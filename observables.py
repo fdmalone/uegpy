@@ -210,7 +210,7 @@ hfx : float
 
     return -hfx / (system.L*sc.pi)
 
-def canonical_partition_function(beta, spval, nel, kval, K):
+def canonical_partition_function(beta, spval, nel):
 
     label = np.arange(0,len(spval))
     combs = list(itertools.combinations(label, nel))
@@ -220,17 +220,14 @@ def canonical_partition_function(beta, spval, nel, kval, K):
 
     for x in combs:
         index = np.array(x)
-        tk = sum(kval[index])
-        if np.array_equal(tk,K):
-            count += 1
-            energy = spval[index].sum()
-            for bval in range(0,len(beta)):
-                exponent = np.exp(-beta[bval]*energy)
-                tenergy[bval] += energy*exponent
-                part[bval] += exponent
+        energy = spval[index].sum()
+        #print ("%0.12f"%energy)
+        for bval in range(0,len(beta)):
+            exponent = np.exp(-beta[bval]*energy)
+            tenergy[bval] += energy*exponent
+            part[bval] += exponent
 
-    print count
-    return (tenergy, part, count)
+    return (tenergy, part, tenergy/part)
 
 def madelung_constant(system):
     ''' Calculate the Madelung constant as described in Fraser er al. PRB 53 5 1814. Code copied from fortran version provided by James Shepherd.
@@ -337,7 +334,7 @@ def propagate_exact_spectrum(beta, eigv):
 
     return E_tot / Z
 
-def hartree_fock_exchange_potential(spvals, kvecs, ki, beta, mu, L):
+def hfx_potential(spvals, kvecs, ki, beta, mu, L):
 
     ex = 0.0
 
@@ -345,7 +342,7 @@ def hartree_fock_exchange_potential(spvals, kvecs, ki, beta, mu, L):
 
         if (kj != ki):
             q = kvecs[ki] - kvecs[kj]
-            ex += fermi_factor(spvals[kj], beta, mu) / np.dot(q,q)
+            ex += fermi_factor(spvals[kj], mu, beta) / np.dot(q,q)
 
     return -ex/(sc.pi*L)
 
@@ -366,46 +363,68 @@ def hfx0_eigenvalues(system, beta, mu):
 
     de = 1.
     att = 0
-    for it in range(0,1):
-        mu = chem_pot_sum(system, deg_new, beta)
-        print mu, energy_sum(beta, mu, system.deg_e, system.pol)
-        while (de > 1e-16):
-            att += 1
-            sp_new = np.array([kinetic[ki]+hartree_fock_exchange_potential(sp_old, kvecs, ki, beta, mu, system.L) for ki in range(len(kvecs))])
+    mu_new = mu
+    mu_it = 0
+    while mu_it < 100:
+        eig_it = 0
+        mu_it += 1
+        # Self-consistent loop for eigenvalues
+        while  eig_it < 100:
+            eig_it += 1
+            sp_new = np.array([kinetic[ki]+hfx_potential(sp_old, kvecs, ki, beta, mu_new, system.L) for ki in range(len(kvecs))])
             de = check_self_consist(sp_new, sp_old)/len(kvecs)
-            print att, de
+            if (de < 1e-12):
+                break
             sp_old = sp_new
+        # Self-consistency condition for fermi-factors / chemical potential
+        mu_old = chem_pot_sum(system, deg_new, beta)
         deg_new = system.compress_spval(sp_new)
+        mu_new = chem_pot_sum(system, deg_new, beta)
+        if (np.abs(mu_old-mu_new) < 1e-12):
+            break
 
     ex = []
     mu = chem_pot_sum(system, deg_new, beta)
-    print mu, energy_sum(beta, mu, system.deg_e, system.pol)
-    #for ki in range(len(kvecs)): ex.append(hartree_fock_exchange_potential(sp_new, kvecs, ki, beta, mu, system.L))
-    #print ex
+
+    return ((mu_it, eig_it), sp_new, mu)
 
 
-def sample_canonical_energy(system, beta, mu):
+
+def fthf_ex_energy(system, beta):
+
+    e_0 = system.spval
+    (nits, e_hf, mu) = hfx0_eigenvalues(system, beta, system.ef)
+
+    kinetic = sum(e1*fermi_factor(e2, mu, beta) for (e1, e2) in zip(e_0, e_hf))
+    potential = sum(hfx_potential(e_hf, system.kval, ki, beta, mu, system.L)*fermi_factor(e_hf[ki], mu, beta) for ki in range(0,len(e_0)))
+
+    print kinetic, potential
+    return kinetic + 0.5*potential
+
+def sample_canonical_energy(system, beta, mu, nmeasure):
 
     p_i = np.array([fermi_factor(ek, mu, beta) for ek in system.spval])
     evals = system.spval
-    E = []
+    E = np.zeros(nmeasure)
 
     en = 0
     Z = 0
 
-    for it in range(0,100000):
+    for it in range(0,nmeasure):
 
         (gen, orb_list) = create_orb_list(p_i, system.ne, system.M)
         if gen:
-            E.append(sum(evals[orb_list]))
+            E[Z] = sum(evals[orb_list])
             Z += 1
 
-    print(sum(E), Z, sum(E)/Z,np.array(E).var()/Z)
+        if it % 1000 == 0 and Z > 0:
+            print(it, np.mean(E[:Z]), np.std(E[:Z], ddof=1)/np.sqrt(Z))
+
 
 
 def create_orb_list(probs, ne, M):
 
-    selected_orbs = []
+    selected_orbs = np.zeros(ne, dtype=np.int)
     nselect = 0
 
     for iorb in range(0,M):
@@ -414,10 +433,10 @@ def create_orb_list(probs, ne, M):
 
         if (probs[iorb] > r):
             nselect += 1
-            selected_orbs.append(iorb)
-        if (nselect > ne):
-            gen = False
-            break
+            if (nselect > ne):
+                gen = False
+                break
+            selected_orbs[nselect-1] = iorb
 
     if (nselect == ne):
         gen = True
@@ -425,3 +444,41 @@ def create_orb_list(probs, ne, M):
         gen = False
 
     return (gen, selected_orbs)
+
+
+def gc_part_func(sys, cpot, beta):
+
+    Z_GC = 1.0
+
+    for i in sys.spval:
+        Z_GC = Z_GC * (1+np.exp(-beta*(i-cpot)))
+
+    return Z_GC
+
+
+def gc_potential(sys, cpot, beta):
+
+    omega = 0.0
+
+    for i in sys.spval:
+        omega -= np.log(1+np.exp(-beta*(i-cpot)))
+
+    return omega
+
+
+def gc_potential_finite_basis(sys, cpot, beta):
+
+    return 0
+
+def gc_correction_free_energy(sys, cpot, beta, delta):
+
+    # Assumption, Z_GC(N) / Z_GC = naccept/ntotal = delta, so -kT log(delta) = -kT log Z_GC(N) + kT log Z_GC
+    # So -kT log Z_N = -kT log(delta) - kT log(Z_GC) + mu N, or F^0_N = F^0_GC + Delta(N) + mu N.
+
+    muN = cpot * sys.ne
+    F_GC = -(1.0/beta)*(np.log(gc_part_func(sys, cpot, beta)))
+    Delta = -1.0/beta*np.log(delta)
+
+    F_N = F_GC + Delta + muN
+
+    return F_N

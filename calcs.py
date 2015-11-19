@@ -19,7 +19,8 @@ data : pandas data frame containing desired quantities.
 '''
 
     data = pd.DataFrame()
-    beta = np.arange(0.1/system.ef, system.beta_max, 0.1/system.ef)
+    #beta = np.arange(0.1/system.ef, system.beta_max, 0.1/system.ef)
+    beta = np.arange(0.1, system.beta_max, 0.05)
     data['Beta'] = beta
     data['T/T_F'] = 1.0 / (system.ef*beta)
     data['M'] = system.M
