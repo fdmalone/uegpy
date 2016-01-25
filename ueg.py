@@ -43,7 +43,8 @@ data: pandas data frame
     system = ueg_sys.System(args)
     system.print_system_variables()
     data = calcs.run_calcs(system, calc_type)
-    print data.to_string(index=False)
+    #print data.to_string(index=False)
+    print data
 
 if __name__ == '__main__':
 

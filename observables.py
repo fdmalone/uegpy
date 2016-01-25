@@ -210,7 +210,7 @@ hfx : float
 
     return -hfx / (system.L*sc.pi)
 
-def canonical_partition_function(beta, spval, nel):
+def canonical_partition_function(beta, spval, nel, kvecs, L):
 
     label = np.arange(0,len(spval))
     combs = list(itertools.combinations(label, nel))
@@ -219,14 +219,16 @@ def canonical_partition_function(beta, spval, nel):
     part = np.zeros(len(beta))
 
     for x in combs:
-        index = np.array(x)
-        energy = spval[index].sum()
-        #print ("%0.12f"%energy)
-        for bval in range(0,len(beta)):
-            exponent = np.exp(-beta[bval]*energy)
-            tenergy[bval] += energy*exponent
-            part[bval] += exponent
+        index = list(x)
+        if (list(sum(np.array(kvecs[index]))) == [0,0,0]):
+            energy = spval[index].sum() + hf_potential(index, kvecs, L)
+            count += 1
+            for bval in range(0,len(beta)):
+                exponent = np.exp(-beta[bval]*energy)
+                tenergy[bval] += energy*exponent
+                part[bval] += exponent
 
+    print count, len(combs)
     return (tenergy, part, tenergy/part)
 
 def madelung_constant(system):
@@ -333,6 +335,17 @@ def propagate_exact_spectrum(beta, eigv):
         E_tot += eig * exponent
 
     return E_tot / Z
+
+def hf_potential(occ, kvecs, L):
+
+    ex = 0.0
+
+    for i in range(0,len(occ)):
+        for j in range(i+1,len(occ)):
+            q = kvecs[occ[i]] - kvecs[occ[j]]
+            ex += 1.0/np.dot(q,q)
+
+    return (-ex/(sc.pi*L))
 
 def hfx_potential(spvals, kvecs, ki, beta, mu, L):
 
@@ -470,7 +483,11 @@ def gc_potential_finite_basis(sys, cpot, beta):
 
     return 0
 
-def gc_correction_free_energy(sys, cpot, beta, delta):
+def free_energy(Z, beta):
+
+    return -1.0/beta * np.log(Z)
+
+def gc_correction_free_energy(sys, cpot, beta, delta, delta_error):
 
     # Assumption, Z_GC(N) / Z_GC = naccept/ntotal = delta, so -kT log(delta) = -kT log Z_GC(N) + kT log Z_GC
     # So -kT log Z_N = -kT log(delta) - kT log(Z_GC) + mu N, or F^0_N = F^0_GC + Delta(N) + mu N.
@@ -480,5 +497,8 @@ def gc_correction_free_energy(sys, cpot, beta, delta):
     Delta = -1.0/beta*np.log(delta)
 
     F_N = F_GC + Delta + muN
+    F_N_error = delta_error / (beta*delta)
 
-    return F_N
+    return (F_N, F_N_error)
+
+
