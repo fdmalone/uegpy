@@ -316,12 +316,13 @@ system: class
 
 Returns
 -------
-E_M: float
-    Madelung contriubtion to total energy (in Hartrees).
+v_M: float
+    Madelung potential (in Hartrees).
 
 '''
 
-    return - 0.5 * 2.837297 * (3.0/(4.0*sc.pi))**(1.0/3.0) * system.ne**(2.0/3.0) * system.rs**(-1.0)
+    return (-2.837297 * (3.0/(4.0*sc.pi))**(1.0/3.0) *
+            system.ne**(-1.0/3.0) * system.rs**(-1.0))
 
 def propagate_exact_spectrum(beta, eigv):
 
@@ -458,7 +459,6 @@ def create_orb_list(probs, ne, M):
 
     return (gen, selected_orbs)
 
-
 def gc_part_func(sys, cpot, beta):
 
     Z_GC = 1.0
@@ -502,3 +502,24 @@ def gc_correction_free_energy(sys, cpot, beta, delta, delta_error):
     return (F_N, F_N_error)
 
 
+def ewb_finite_size_corrections(system, beta):
+
+    # Plasma frequency.
+    omega_p = np.sqrt(3.0/system.rs**3.0)
+    # Spin polarisation.
+    spin_factor = (system.pol**(2/3.)+(2-system.pol)**(2/3.))**(-1.0)
+    # Kinetic energy ground state correction.
+    dT = 1.0/system.ne*((omega_p/4.0)-5.264*(spin_factor)/(2*sc.pi*system.rs**2*(2*system.ne)**(1.0/3.0)))
+    # Potential energy ground state correction.
+    dV = omega_p / (2*system.ne)
+    v1 = (omega_p/(2.*system.ne))
+    v2 = ((2*sc.pi)**3.0)
+    v3 =(12*system.ef/system.rs**2.)*((5.0*omega_p**2.0)**(-1.0))
+    v4 = (((3.0/(4.0*sc.pi)))**(7./3.))
+    v5 = system.ne**(-2./3.)
+    dV = dV * (1-v1*v2*v3*v4*v5)
+    # Temperature dependence?
+    tfac = np.tanh(2.0*beta*omega_p)
+
+    # This is in Hartrees.
+    return (2*dT*tfac, dV/tfac)
