@@ -37,10 +37,8 @@ def constrained_f(x, system, beta):
 
         fermi_factor = 1.0 / (np.exp(-beta*(0.5*np.dot(k_i[i],k_i[i])-mu-np.dot(xi,k_i[i])))+1)
         P += k_i[i] * fermi_factor
-        print P, k_i[i]
         N += fermi_factor
 
-    print P, N
     P = P - system.total_K
     N = N - system.ne
     return ([P[0],P[1],P[2], N])
@@ -232,7 +230,6 @@ def canonical_partition_function(beta, spval, nel, kvecs, L):
             tenergy[bval] += energy*exponent
             part[bval] += exponent
 
-    print count, len(combs)
     return (tenergy, part, tenergy/part)
 
 def madelung_constant(system):

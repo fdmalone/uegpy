@@ -167,7 +167,7 @@ class System:
             eval1 = spval[i]
             eval2 = spval[i+j]
             #print abs(eval2-eval1), eval1, eval3
-            if eval2 < eval1:
+            if np.abs(eval2-eval1) < 1e-12:
                 j += 1
             else:
                 deg_e.append([j,eval1])
