@@ -110,6 +110,10 @@ def energy_sum(beta, mu, spval, pol):
 
     return (2.0/pol)*tenergy
 
+def gc_free_energy_integral(beta, mu, rs):
+
+    return -(2/3.) * ((4*sc.pi*rs**3.0)/3.0) * np.sqrt(2.0)/sc.pi**2.0 * beta**(-5./2.) * fermi_integral(5./2., mu*beta)
+
 def hfx_integrand(eta):
 
     return fermi_integral(-0.5, eta)**2
@@ -220,13 +224,13 @@ def canonical_partition_function(beta, spval, nel, kvecs, L):
 
     for x in combs:
         index = list(x)
-        if (list(sum(np.array(kvecs[index]))) == [0,0,0]):
-            energy = spval[index].sum() + hf_potential(index, kvecs, L)
-            count += 1
-            for bval in range(0,len(beta)):
-                exponent = np.exp(-beta[bval]*energy)
-                tenergy[bval] += energy*exponent
-                part[bval] += exponent
+        #if (list(sum(np.array(kvecs[index]))) == [0,0,0]):
+        energy = spval[index].sum()# + hf_potential(index, kvecs, L)
+        count += 1
+        for bval in range(0,len(beta)):
+            exponent = np.exp(-beta[bval]*energy)
+            tenergy[bval] += energy*exponent
+            part[bval] += exponent
 
     print count, len(combs)
     return (tenergy, part, tenergy/part)
@@ -323,6 +327,7 @@ v_M: float
 
     return (-2.837297 * (3.0/(4.0*sc.pi))**(1.0/3.0) *
             system.ne**(-1.0/3.0) * system.rs**(-1.0))
+
 
 def propagate_exact_spectrum(beta, eigv):
 
@@ -496,10 +501,11 @@ def gc_correction_free_energy(sys, cpot, beta, delta, delta_error):
     F_GC = -(1.0/beta)*(np.log(gc_part_func(sys, cpot, beta)))
     Delta = -1.0/beta*np.log(delta)
 
-    F_N = F_GC + Delta + muN
+    DF_N = F_GC + muN
+    F_N = DF_N + Delta
     F_N_error = delta_error / (beta*delta)
 
-    return (F_N, F_N_error)
+    return (F_N, F_N_error, DF_N, F_GC)
 
 
 def ewb_finite_size_corrections(system, beta):
