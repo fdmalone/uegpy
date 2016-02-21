@@ -128,28 +128,36 @@ Before I list some things I will introduce the Fermi integral, which is often us
 
 To begin consider \Cref{av_p}, assuming large $V$ throughout and reintroducing units,
 \begin{align}
-    \langle \hat{N} \rangle &= \sum_{\mathbf{k}}\frac{1}{ze^{ \beta\varepsilon_k} + 1}\\
-                            &= \frac{V}{(2\pi)^3}\int d \mathbf{k} \ \frac{1}{ze^{ \beta\varepsilon_k} + 1}\\
-                            &= \frac{V}{(2\pi)^3}4\pi\int_0^{\infty} dk \ \frac{k^2}{ze^{ \beta\varepsilon_k} + 1}\\
-                            &= \frac{V}{(2\pi)^3}4\pi\Big(\frac{2m}{\hbar^2}\Big)^{3/2}\int_0^\infty d\varepsilon  \ \frac{\varepsilon^{1/2}}{ze^{ \beta\varepsilon} + 1}\\
-                            &= \frac{V}{(2\pi)^3}4\pi\Big(\frac{2m}{\hbar^2}\Big)^{3/2}\beta^{-3/2}\int_0^\infty dx\ \frac{x^{1/2}}{e^{ \beta(x-\eta)} + 1}\\
-                            &= \frac{V}{(2\pi)^3}4\pi\Big(\frac{2m}{\hbar^2}\Big)^{3/2}\beta^{-3/2} I(1/2,\eta)
+    \langle \hat{N} \rangle &= \sum_{\mathbf{k}\sigma}\frac{1}{ze^{ \beta\varepsilon_k} + 1}\\
+                            &= n_s\frac{V}{(2\pi)^3}\int d \mathbf{k} \ \frac{1}{ze^{ \beta\varepsilon_k} + 1}\\
+                            &= n_s\frac{V}{(2\pi)^3}4\pi\int_0^{\infty} dk \ \frac{k^2}{ze^{ \beta\varepsilon_k} + 1}\\
+                            &= n_s\frac{V}{(2\pi)^3}4\pi\int_0^\infty d\varepsilon  \ \frac{\varepsilon^{1/2}}{ze^{ \beta\varepsilon} + 1}\\
+                            &= n_s\frac{V}{(2\pi)^3}4\pi\beta^{-3/2}\int_0^\infty dx\ \frac{x^{1/2}}{e^{ \beta(x-\eta)} + 1}\\
+                            &= n_s\frac{V}{(2\pi)^3}4\pi\beta^{-3/2} I(1/2,\eta)
+\end{align}
+or
+\begin{align}
+    n  = n_s\frac{\sqrt{2}}{2\pi^2} \beta^{-3/2} I(1/2,\eta)
 \end{align}
 where,
 \begin{equation}
     I(\nu,\eta) := \int_0^\infty dx\ \frac{x^{\nu}}{e^{ \beta(x-\eta)} + 1}
 \end{equation}
-is the Fermi integral and $\eta = \mu/kT$.
+is the Fermi integral and $\eta = \beta\mu$.
 
 This integral pops up a lot for instance
 \begin{equation}
     \frac{2}{3}\Theta^{-3/2} = I(1/2,\eta)
 \end{equation}
-which can be seen by noting that $E = \frac{\hbar^2}{2m} (3 \pi^2 n)^{2/3} = kT$, and
+which can be seen by noting that $U/V = \frac{1}{2} (3 \pi^2 n_s n)^{2/3} = kT$, and
 \begin{equation}
-    E = \frac{V}{2\pi^2}\Big(\frac{2m}{\hbar^2}\Big)^{3/2} \beta^{-5/2} I(3/2,\eta)
+    U = {2\pi^2}\Big(\frac{2m}{\hbar^2}\Big)^{3/2} \beta^{-5/2} I(3/2,\eta),
 \end{equation}
-which I think differs from what Clark has in the supplementary material, where the units aren't correct.
+which can be written as
+\begin{equation}
+    u = n_s\frac{2\sqrt{2}}{3\pi}r_s^3 \beta^{-5/2} I(3/2,\eta),
+\end{equation}
+
 \section{Approximate Theories}
 In analogy with zero temperature Hartree-Fock theory one can define what is sometimes called the `Hartree-Fock exchange'\footnote{This is somewhat confusingly labelled $E_{HF},x$ in Brown \emph{et al.}, here we'll call it $\Omega_1$ which is more in keeping with the literature around this subject. Although this is also potentially confusing as $\Omega$ is usually reserved for the grand potential...} energy as
 \begin{align}

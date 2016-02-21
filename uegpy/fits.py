@@ -29,6 +29,8 @@ U_xc : float
     a4 = -0.116147
     b4 = 1.027755
 
+    T = 1.0 / beta
+
     gamma = 1.0/(system.rs*T)
     U_xc = (1.5 * gamma**1.5 * (a1/(b1+gamma)**0.5 + a2/(b2+gamma)
             + a3/(b3+gamma)**1.5 + a4/(b4+gamma)**2))

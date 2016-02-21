@@ -34,5 +34,6 @@ __pycache__
 _build/
 build/
 .vimrc
-.gz
-.fdb_latexmk
+*.gz
+*.fdb_latexmk
+*.fls
