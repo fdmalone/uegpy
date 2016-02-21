@@ -3,7 +3,7 @@
 import numpy as np
 import scipy as sc
 from scipy import optimize
-import utils
+from utils import fermi_factor
 import itertools
 
 
@@ -93,18 +93,16 @@ Nav - ne : float
 
 '''
 
-        return nav_sum(mu, ne, spval, beta, pol) - ne
+    return nav_sum(mu, ne, spval, beta, pol) - ne
 
 
-def chem_pot_sum(system, spval, beta):
+def chem_pot_sum(system, beta):
     ''' Find the chemical potential for finite system.
 
 Parameters
 ----------
 system : class
     System class containing system information.
-spval : lists of lists
-    Single particle eigenvalues and degeneracies.
 beta : float
     Inverse temperature.
 
@@ -116,8 +114,8 @@ mu : float
 
 '''
     return (
-        sc.optimize.fsolve(nav_diff, system.ef, args=(system.ne, evals, beta,
-                           system.pol))[0]
+        sc.optimize.fsolve(nav_diff, system.ef, args=(system.ne, system.deg_e, 
+                           beta, system.pol))[0]
     )
 
 
@@ -321,8 +319,8 @@ mu_x : float
         # Self-consistent loop for eigenvalues
         while  eig_it < 100:
             eig_it += 1
-            sp_new = np.array([kinetic[ki]+hfx_potential(sp_old, kvecs, ki, beta
-                               mu_x, system.L) for ki in range(len(kvecs))])
+            sp_new = nparray([kinetic[ki]+hfx_potential(sp_old, kvecs, ki,
+                        beta, mu_x, system.L) for ki in range(len(kvecs))])
             de = check_self_consist(sp_new, sp_old)/len(kvecs)
             if (de < 1e-12):
                 break
@@ -396,7 +394,7 @@ de : float
 
 
 def gc_part_func(sys, cpot, beta):
-    ''' Grand canonical partition function for finite system. 
+    ''' Grand canonical partition function for finite system.
 
     .. math::
         Z_GC = \prod_i (1 + e^{-\beta(e_i-mu)})
