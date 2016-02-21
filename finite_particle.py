@@ -34,6 +34,28 @@ Z : float
 
 
 def nav_sum(mu, ne, spval, beta, pol):
+    ''' Calculate average number of electrons. 
+
+Parameters
+----------
+mu : float 
+    chemical potential. 
+ne : int
+    Number of electrons.
+spval : array
+    Single particle eigenvalues and degeneracies.
+beta : float
+    Inverse temperature.
+pol : int
+    Polarisation.
+
+Returns
+-------
+
+N : float
+    Number of electrons.
+
+'''
 
     N = 0
 
@@ -42,4 +64,26 @@ def nav_sum(mu, ne, spval, beta, pol):
         N = N + spval[speig][0]/(np.exp(-beta*(mu-spval[speig][1]))+1)
 
     return (2.0/pol)*N
+
+
+def chem_pot_sum(system, spval, beta):
+    ''' Find the chemical potential for finite system. 
+
+Parameters
+----------
+system : class
+    System class containing system information.
+spval : array
+    Single particle eigenvalues and degeneracies.
+beta : float
+    Inverse temperature.
+
+Returns
+-------
+
+mu : float
+   Chemical potential. 
+
+'''
+    return sc.optimize.fsolve(nav_sum, system.ef, args=(system.ne, evals, beta, system.pol))[0]
 

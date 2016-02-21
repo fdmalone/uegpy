@@ -6,10 +6,6 @@ from scipy import integrate
 import random as rand
 from scipy import optimize
 
-def chem_pot_sum(system, evals, beta):
-
-    return sc.optimize.fsolve(nav_sum, system.ef, args=(system.ne, evals, beta, system.pol))[0]
-
 def chem_pot_integral(system, beta):
 
     return sc.optimize.fsolve(nav_integral, beta*system.ef, args=(beta, system.integral_factor, system.ne))[0] / beta
