@@ -4,6 +4,7 @@
 import scipy as sc
 import numpy as np
 import math
+import json
 
 class System:
     ''' System Properties - Everything is measured in Hartree atomic units.
@@ -56,7 +57,6 @@ class System:
         self.deg_e  = self.compress_spval(self.spval)
         # Number of plane waves.
         self.M = len(self.spval)
-        (self.t_energy_fin, self.t_energy_inf) = self.total_energy_T0(self.spval, self.ef, self.ne)
         self.ef_fin = self.dis_fermi(self.spval, self.ne)
         # Change this to be more general, selected to be the gamma point.
         self.total_K = self.kval[0]
@@ -78,32 +78,10 @@ class System:
         print " # Ground state energy for finite system: ", self.t_energy_fin
         print " # Ground state total energy for infinite system: ", self.t_energy_inf
 
-    # Remove these.
-    def kf(self, ne, L, ns):
+    def to_json(self):
 
-        k_f = (3*ns*sc.pi**2*ne/L**3)**(1/3.0)
-
-        return k_f
-    # Remove.
-    def ef(self, ne, L, ns):
-
-        e_f = 0.5*(3*ns*sc.pi**2*ne/L**3)**(2/3.)
-
-        return e_f
-    # Remove.
-    def setup(self, rs, ne):
-
-        # System Lenght.
-        L = rs*(4*ne*sc.pi/3.)**(1/3.)
-        # k = 2*pi/L n
-        kfac = 2*sc.pi/L
-
-        return (L, kfac)
-    # Remove.
-    def total_energy_T0(self, spval, E_f, ne):
-
-        return (sum(spval[:ne]), 3*ne/5.*E_f)
-
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True,
+                          indent=4)
     def sp_energies(self, kfac, ecut):
         ''' Calculate the allowed kvectors and resulting single particle eigenvalues
         which can fit in the sphere in kspace determined by ecut.

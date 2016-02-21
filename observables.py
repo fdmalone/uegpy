@@ -6,43 +6,6 @@ from scipy import integrate
 import random as rand
 from scipy import optimize
 
-def total_momentum(system, beta, mu):
-
-    P = 0
-
-    for i in range(len(system.spval)):
-
-        P += system.kfac * np.dot(system.kval[i],system.kval[i]) * fermi_factor(system.spval[i], mu, beta)
-
-    return np.sqrt(P)
-
-def constrained_f(x, system, beta):
-    ''' Function for evaluating the total momentum and number
-    of particles in the GC canonical ensemble. Pack these together
-    to prevent the necesseity of two sum evaluations.
-
-'''
-
-    # Lagrange multiplier for the momentum.
-    xi = x[:3]
-    # Lagrange multiplier for the total number of particles (chemical potential).
-    mu = x[3]
-
-    k_i = system.kfac * system.kval
-
-    P = [0] * 3
-    N = 0
-
-    for i in range(len(system.spval)):
-
-        fermi_factor = 1.0 / (np.exp(-beta*(0.5*np.dot(k_i[i],k_i[i])-mu-np.dot(xi,k_i[i])))+1)
-        P += k_i[i] * fermi_factor
-        N += fermi_factor
-
-    P = P - system.total_K
-    N = N - system.ne
-    return ([P[0],P[1],P[2], N])
-
 def centre_of_mass_obsv(system, beta):
     ''' Calculate centre of mass partition function and total energy.
 
@@ -70,10 +33,6 @@ def nav_sum(mu, ne, spval, beta, pol):
         N = N + spval[speig][0]/(np.exp(-beta*(mu-spval[speig][1]))+1)
 
     return (2.0/pol)*N - ne
-
-def nav_integral(eta, beta, integral_factor, ne):
-
-    return integral_factor*np.power(beta,-1.5)*sc.integrate.quad(fermi_integrand, 0, np.inf, args=(0.5, eta))[0] - ne
 
 def chem_pot_sum(system, evals, beta):
 
@@ -232,79 +191,6 @@ def canonical_partition_function(beta, spval, nel, kvecs, L):
 
     return (tenergy, part, tenergy/part)
 
-def madelung_constant(system):
-    ''' Calculate the Madelung constant as described in Fraser er al. PRB 53 5 1814. Code copied from fortran version provided by James Shepherd.
-    Here vm is given as
-    ::math
-        1/V sum_G exp(-\pi^2 G^2 / \kappa^2) / (pi*G^2) - \pi / (\kappa^2*V) + sum_R erfc(\kappa*|R|) / |R| - 2*\kappa / \sqrt(pi).
-    In the code below we write
-    a = - \pi / (\kappa^2*V)
-    b = - 2*\kappa / \sqrt(pi).
-    [todo] - explain parameters better / learn how to write maths in comments.
-Params
-------
-system: class
-    system parameters.
-
-Returns
--------
-vm: float
-    Madelung constant.
----
-'''
-
-    omega = 1.0 / system.L**3
-    # Taken from CASINO manual.
-    kappa = 2.8 / omega**(1./3.)
-    # a and b constants defined in function interface.
-    a = -sc.pi / (kappa**2*system.L**3)
-    b = -2.0*kappa / np.sqrt(sc.pi)
-
-    kmax = 1
-    rec_sum = 10
-    rec_sum_new = 0
-
-    while (abs(rec_sum-rec_sum_new) > system.de):
-        rec_sum_new = rec_sum
-        rec_sum = 0
-        for i in range(-kmax,kmax):
-            for j in range(-kmax,kmax):
-                for k in range(-kmax,kmax):
-                    dotprod = i**2 + j**2 + k**2
-                    if (dotprod != 0):
-                        Gsq = 1.0/system.L**2*dotprod
-                        rec_sum += omega * (1.0/(sc.pi*Gsq)) * np.exp(-sc.pi**2*Gsq/kappa**2)
-        kmax = kmax + 1
-        if (kmax > 100):
-            print "--------------------------------------------------"
-            print "Not coverged with kmax = 100."
-            print "Difference in last two iterations: ", np.abs(rec_sum-rec_sum_new)
-            print "--------------------------------------------------"
-
-    real_sum = 10
-    real_sum_new = 0
-
-    # [todo] - This is just repitition from above.
-    while (abs(real_sum-real_sum_new) > system.de):
-        real_sum_new = real_sum
-        real_sum = 0
-        for i in range(-kmax,kmax):
-            for j in range(-kmax,kmax):
-                for k in range(-kmax,kmax):
-                    dotprod = i**2 + j**2 + k**2
-                    if (dotprod != 0):
-                        modr = system.L * dotprod
-                        real_sum += math.erfc(kappa*modr) / modr
-        kmax = kmax + 1
-        if (kmax > 100):
-            print "--------------------------------------------------"
-            print "Not coverged with kmax = 100."
-            print "Difference in last two iterations: ", np.abs(rec_sum-rec_sum_new)
-            print "--------------------------------------------------"
-
-    vm = real_sum + rec_sum + a + b
-    #[todo] - Return the number of iterations?
-    return vm
 
 def madelung_approx(system):
     ''' Use expression in Schoof et al. (arxiv: 1502.04616) for the Madelung contribution to the total
@@ -339,6 +225,7 @@ def propagate_exact_spectrum(beta, eigv):
 
     return E_tot / Z
 
+
 def hf_potential(occ, kvecs, L):
 
     ex = 0.0
@@ -349,6 +236,7 @@ def hf_potential(occ, kvecs, L):
             ex += 1.0/np.dot(q,q)
 
     return (-ex/(sc.pi*L))
+
 
 def hfx_potential(spvals, kvecs, ki, beta, mu, L):
 
@@ -362,6 +250,7 @@ def hfx_potential(spvals, kvecs, ki, beta, mu, L):
 
     return -ex/(sc.pi*L)
 
+
 def check_self_consist(sp_new, sp_old):
 
     de = 0.0
@@ -369,6 +258,7 @@ def check_self_consist(sp_new, sp_old):
     for i, j in zip(sp_new,sp_old): de += np.abs(i-j)
 
     return de
+
 
 def hfx0_eigenvalues(system, beta, mu):
 
@@ -416,6 +306,7 @@ def fthf_ex_energy(system, beta):
 
     print kinetic, potential
     return kinetic + 0.5*potential
+
 
 def sample_canonical_energy(system, beta, mu, nmeasure):
 
@@ -481,14 +372,6 @@ def gc_potential(sys, cpot, beta):
     return omega
 
 
-def gc_potential_finite_basis(sys, cpot, beta):
-
-    return 0
-
-def free_energy(Z, beta):
-
-    return -1.0/beta * np.log(Z)
-
 def gc_correction_free_energy(sys, cpot, beta, delta, delta_error):
 
     # Assumption, Z_GC(N) / Z_GC = naccept/ntotal = delta, so -kT log(delta) = -kT log Z_GC(N) + kT log Z_GC
@@ -503,26 +386,3 @@ def gc_correction_free_energy(sys, cpot, beta, delta, delta_error):
     F_N_error = delta_error / (beta*delta)
 
     return (F_N, F_N_error, DF_N, F_GC)
-
-
-def ewb_finite_size_corrections(system, beta):
-
-    # Plasma frequency.
-    omega_p = np.sqrt(3.0/system.rs**3.0)
-    # Spin polarisation.
-    spin_factor = (system.pol**(2/3.)+(2-system.pol)**(2/3.))**(-1.0)
-    # Kinetic energy ground state correction.
-    dT = 1.0/system.ne*((omega_p/4.0)-5.264*(spin_factor)/(2*sc.pi*system.rs**2*(2*system.ne)**(1.0/3.0)))
-    # Potential energy ground state correction.
-    dV = omega_p / (2*system.ne)
-    v1 = (omega_p/(2.*system.ne))
-    v2 = ((2*sc.pi)**3.0)
-    v3 =(12*system.ef/system.rs**2.)*((5.0*omega_p**2.0)**(-1.0))
-    v4 = (((3.0/(4.0*sc.pi)))**(7./3.))
-    v5 = system.ne**(-2./3.)
-    dV = dV * (1-v1*v2*v3*v4*v5)
-    # Temperature dependence?
-    tfac = np.tanh(2.0*beta*omega_p)
-
-    # This is in Hartrees.
-    return (2*dT*tfac, dV/tfac)
