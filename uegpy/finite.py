@@ -96,7 +96,7 @@ Nav - ne : float
     return nav_sum(mu, ne, spval, beta, pol) - ne
 
 
-def chem_pot_sum(system, beta):
+def chem_pot_sum(system, eigs, beta):
     ''' Find the chemical potential for finite system.
 
 Parameters
@@ -114,7 +114,7 @@ mu : float
 
 '''
     return (
-        sc.optimize.fsolve(nav_diff, system.ef, args=(system.ne, system.deg_e, 
+        sc.optimize.fsolve(nav_diff, system.ef, args=(system.ne, eigs, 
                            beta, system.pol))[0]
     )
 
@@ -210,7 +210,7 @@ ex : float
     return (-ex/(sc.pi*L))
 
 
-def hfx_potential(system, ki, beta, mu):
+def hfx_potential(spvals, kvecs, ki, beta, mu, L):
     '''Finite temperature Hartree-Fock potential.
 
 Parameters
@@ -311,7 +311,7 @@ mu_x : float
 
     de = 1.
     att = 0
-    mu_new = mu
+    mu_x = mu
     mu_it = 0
     while mu_it < 100:
         eig_it = 0
@@ -319,17 +319,17 @@ mu_x : float
         # Self-consistent loop for eigenvalues
         while  eig_it < 100:
             eig_it += 1
-            sp_new = nparray([kinetic[ki]+hfx_potential(sp_old, kvecs, ki,
+            sp_new = np.array([kinetic[ki]+hfx_potential(sp_old, kvecs, ki,
                         beta, mu_x, system.L) for ki in range(len(kvecs))])
             de = check_self_consist(sp_new, sp_old)/len(kvecs)
-            if (de < 1e-12):
+            if (de < 1e-6):
                 break
             sp_old = sp_new
         # Self-consistency condition for fermi-factors / chemical potential
         mu_old = chem_pot_sum(system, deg_new, beta)
         deg_new = system.compress_spval(sp_new)
         mu_x = chem_pot_sum(system, deg_new, beta)
-        if (np.abs(mu_old-mu_new) < 1e-12):
+        if (np.abs(mu_old-mu_x) < 1e-6):
             break
 
     ex = []
