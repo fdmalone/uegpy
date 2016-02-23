@@ -1,6 +1,7 @@
 '''Useful functions'''
 
 import numpy as np
+import scipy as sc
 
 
 def fermi_factor(ek, mu, beta):
