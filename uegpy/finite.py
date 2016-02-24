@@ -120,7 +120,7 @@ mu : float
 
 
 def energy_sum(beta, mu, spval, pol):
-    ''' Calculate internal energy.
+    ''' Calculate internal energy for free electron gas.
 
 Parameters
 ----------
