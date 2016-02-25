@@ -40,6 +40,7 @@ class System:
         self.ecut = float(args[2])
         # Spin polarisation.
         self.pol = int(args[3])
+        self.zeta = self.pol - 1 
         # Box Length.
         self.L = self.rs*(4*self.ne*sc.pi/3.)**(1/3.)
         # k-space grid spacing.
