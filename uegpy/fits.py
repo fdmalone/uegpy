@@ -68,7 +68,7 @@ f_xc : float
 
     rs = system.rs
     zeta = system.zeta
-    t = 1.0 / beta
+    t = 1.0 / beta_F
 
     if zeta == 1:
         w = 2.0**(1.0/3.0)
