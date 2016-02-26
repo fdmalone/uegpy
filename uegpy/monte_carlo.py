@@ -4,6 +4,7 @@ import utils as ut
 import numpy as np
 import random as rand
 import finite as fn
+import pandas as pd
 import time
 
 
@@ -27,10 +28,13 @@ nmeasure : int
     mu = fn.chem_pot_sum(system, system.deg_e, beta)
     p_i = np.array([ut.fermi_factor(ek, mu, beta) for ek in system.spval])
     evals = system.spval
-    E = np.zeros(nmeasure/10)
+    ncycles = nmeasure / 10
+    T = np.zeros(ncycles)
+    V = np.zeros(ncycles)
 
     cycle = 0
-    E_loc = 0
+    T_loc = 0
+    V_loc = 0
     it = 0
 
     # Monte Carlo can take a while.
@@ -39,19 +43,32 @@ nmeasure : int
 
         (gen, orb_list) = create_orb_list(p_i, system.ne, system.M)
         if gen:
-            E_loc += sum(evals[orb_list])
+            T_loc += sum(evals[orb_list])
+            V_loc += fn.hf_potential(orb_list, system.kval, system.L)
             it += 1
             if it % 10 == 0:
-                E[cycle] = E_loc / 10
-                E_loc = 0
+                T[cycle] = T_loc / 10
+                V[cycle] = V_loc / 10
+                T_loc = 0
+                V_loc = 0
                 cycle += 1
 
 
     end = time.time()
 
-    return (np.mean(E)/system.ne, np.std(E, ddof=1)/(np.sqrt(len(E))*system.ne),
-            end-start)
+    frame = pd.DataFrame({'t': T, 'v': V})
+    frame['u'] = frame['t'] + frame['v']
+    means = frame.mean().to_frame().transpose()
+    means['ne'] = system.ne
+    std_err = np.sqrt(frame.var()/ncycles).to_frame().transpose()
+    std_err['ne'] = system.ne
+    new = pd.merge(means, std_err, on=['ne'], suffixes=('', '_error'))
+    new = ut.add_mad(system, new)
+    new['rs'] = system.rs
+    new['M'] = len(system.spval)
+    new['Beta'] = beta * system.ef
 
+    return (new[sorted(new.columns.values)], end-start)
 
 
 def create_orb_list(probs, ne, M):

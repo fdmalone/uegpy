@@ -2,6 +2,7 @@
 
 import numpy as np
 import scipy as sc
+import subprocess
 
 
 def fermi_factor(ek, mu, beta):
@@ -87,11 +88,14 @@ frame : Pandas data frame
 
 '''
 
-    names = system.ne
+    mads = [x for x in frame.columns if 'u' in x or 'v' in x]
+    mads = [x for x in mads if 'error' not in x]
+    rest = [x for x in frame.columns if x not in mads and 'ne' not in x]
 
-    for name in frame.columns:
-        if U in name or V in name:
-            frame[name] = frame[name]/system.ne + 0.5*madelung_approx(system)
+    for name in mads:
+        frame[name] = frame[name]/system.ne + 0.5*madelung_approx(system)
+    for name in rest:
+        frame[name] = frame[name] / system.ne
 
     return frame
 
@@ -192,3 +196,8 @@ M : float
 
     # Prefactor is emperically determined so this number will overestimate.
     return 1.23 * (theta/t_ref)**(1.5*sgn) * M_ref * (ne/19.0)
+
+
+def get_git_revision_hash():
+
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
