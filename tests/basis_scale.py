@@ -9,6 +9,7 @@ import finite as fp
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as pl
+import utils as ut
 
 
 system = ue.System([1.0, 33, 10, 2])
@@ -22,7 +23,6 @@ for ne in range(33, 200, 30):
     m = []
     mu = []
     u_0 = []
-    print ne
     for ec in range(100, 1000, 100):
 
         system = ue.System([1.0, ne, ec, 2])
