@@ -1,22 +1,56 @@
+''' Simple Monte Carlo routines for evaluating in the canonical ensemble'''
 
-def sample_canonical_energy(system, beta, mu, nmeasure):
+import utils as ut
+import numpy as np
+import random as rand
+import finite as fn
+import time
 
-    p_i = np.array([fermi_factor(ek, mu, beta) for ek in system.spval])
+
+def sample_canonical_energy(system, beta, nmeasure):
+    ''' Sample canonical energy of a non-interacting system.
+
+    Properties of the non-interacting canonical system can be evaluated by
+    simply discarding configurations generated in grand canonical ensemble whose
+    particle number is not equal to the expected number of particles.
+
+Parameters
+----------
+system : class
+    System being studied.
+beta : float
+    Inverse temperature.
+nmeasure : int
+    Number of attempted Monte Carlo moves.
+'''
+
+    mu = fn.chem_pot_sum(system, system.deg_e, beta)
+    p_i = np.array([ut.fermi_factor(ek, mu, beta) for ek in system.spval])
     evals = system.spval
-    E = np.zeros(nmeasure)
+    E = np.zeros(nmeasure/10)
 
-    en = 0
-    Z = 0
+    cycle = 0
+    E_loc = 0
+    it = 0
 
-    for it in range(0,nmeasure):
+    # Monte Carlo can take a while.
+    start = time.time()
+    while (it < nmeasure):
 
         (gen, orb_list) = create_orb_list(p_i, system.ne, system.M)
         if gen:
-            E[Z] = sum(evals[orb_list])
-            Z += 1
+            E_loc += sum(evals[orb_list])
+            it += 1
+            if it % 10 == 0:
+                E[cycle] = E_loc / 10
+                E_loc = 0
+                cycle += 1
 
-        if it % 1000 == 0 and Z > 0:
-            print(it, np.mean(E[:Z]), np.std(E[:Z], ddof=1)/np.sqrt(Z))
+
+    end = time.time()
+
+    return (np.mean(E)/system.ne, np.std(E, ddof=1)/(np.sqrt(len(E))*system.ne),
+            end-start)
 
 
 
