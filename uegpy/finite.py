@@ -68,6 +68,35 @@ N : float
 
     return (2.0/pol) * N
 
+def nav_deriv(mu, ne, spval, beta, pol):
+    ''' Calculate average number of electrons.
+
+Parameters
+----------
+mu : float
+    chemical potential.
+ne : int
+    Number of electrons.
+spval : list of lists
+    Single particle eigenvalues and degeneracies.
+beta : float
+    Inverse temperature.
+pol : int
+    Polarisation.
+
+Returns
+-------
+
+N : float
+    Number of electrons.
+
+'''
+
+    N = sum(beta*g_k/(2*(np.cosh(beta*(e_k-mu))+1))  for
+            (g_k, e_k) in spval)
+
+    return (2.0/pol) * N
+
 
 def nav_diff(mu, ne, spval, beta, pol):
     ''' Calculate difference between expected and average number of electrons.
