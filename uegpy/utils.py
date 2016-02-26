@@ -50,7 +50,9 @@ fb_k : float
 
 def madelung_approx(system):
     ''' Use expression in Schoof et al. (PhysRevLett.115.130402) for the
-    Madelung contribution to the total energy.
+    Madelung contribution to the total energy. Please cite these guys and 
+    L.M. Fraser et al. Phys. Rev. B 53, 1814 whose functional form they fitted
+    to.
 
 Parameters
 ----------
@@ -66,3 +68,29 @@ v_M: float
 
     return (-2.837297 * (3.0/(4.0*sc.pi))**(1.0/3.0) *
             system.ne**(-1.0/3.0) * system.rs**(-1.0))
+
+def add_mad(system, frame):
+    ''' Add Madelung constant to data.
+
+Parameters
+----------
+system : class
+    system being studied.
+frame : Pandas data frame
+    Frame containing total energies.
+
+Returns
+-------
+frame : Pandas data frame
+    Frame with energies per particle including Madelung constant where
+    appropriate.
+
+'''
+
+    names = system.ne
+
+    for name in frame.columns:
+        if U in name or V in name:
+            frame[name] = frame[name]/system.ne + 0.5*madelung_approx(system)
+
+    return frame
