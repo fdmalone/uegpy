@@ -39,7 +39,7 @@ U_xc : float
     return U_xc
 
 
-def ksdt(rs, zeta, beta_F):
+def ksdt(rs, zeta, t):
     '''
     Fit to RPIMC data of Brown et al (Phys. Rev. Lett. 110, 146405 (2013)) from
     Karasiev, Sjostrom, Dufty and Trickey, PRL 112, 076403. Please cite these
@@ -65,8 +65,6 @@ Returns
 f_xc : float
     Exchange-correlation free energy per-particle.
 '''
-
-    t = 1.0 / beta_F
 
     if zeta == 1:
         w = 2.0**(1.0/3.0)
