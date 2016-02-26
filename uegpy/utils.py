@@ -94,3 +94,101 @@ frame : Pandas data frame
             frame[name] = frame[name]/system.ne + 0.5*madelung_approx(system)
 
     return frame
+
+
+def magic_numbers(system):
+    ''' Work out possible magic electron numbers (i.e. those that will fit in
+    a closed shell) below nmax
+
+Parameters
+----------
+system : class
+    System being studied
+
+Returns
+-------
+pol : list
+    Polarised magic numbers. Unpolarised = 2 * pol
+'''
+
+    ne = 0
+    pol = []
+
+    for i in system.deg_e:
+        ne = ne + i[0]
+        pol.append(ne)
+
+    return pol
+
+
+def kinetic_cutoff(ne, theta):
+    '''Determine number of planewaves necessary to converge kinetic energy.
+
+    The kinetic energy converges exponentially once
+
+    .. math::
+        \varepsilon_c \approx kT
+
+    The following extrapolates from a smaller system size to determine the cutoff
+    necessary at any Theta, N value as
+
+    e_c(N,Theta) =  alpha e_c(19,8) (Theta/8) (N/19)^{2/3}
+
+Parameters
+----------
+ne : int
+    Number of electrons
+theta : float
+    Reduced temperature.
+Returns
+-------
+e_c : float
+    Cutoff required (units of (2pi/L)^2
+'''
+
+    # Determined numerically using `ref`tests/find_max_m.py, ensures results are
+    # converged within 1e-6 Ha.
+    ec_ref = 98
+    t_ref = 8
+
+    sgn = np.sign(t_ref-theta)
+
+    # Prefactor is emperically determined so this number will over estimate.
+    return 1.15 * (theta/t_ref)**(sgn) * ec_ref * (ne/19.0)**(2./3.)
+
+
+def kinetic_plane_waves(ne, theta):
+    '''Determine number of planewaves necessary to converge kinetic energy.
+
+    The kinetic energy converges exponentially once
+
+    .. math::
+        \varepsilon_c \approx kT
+        M \approx N \Theta^{3/2}
+
+    The following extrapolates from a smaller system size to determine the cutoff
+    necessary at any Theta, N value as
+
+    M(N,Theta) = (theta/8)^{3/2} M(19,8) (N/19)
+
+Parameters
+----------
+ne : int
+    Number of electrons
+theta : float
+    Reduced temperature.
+Returns
+-------
+M : float
+    Number of planewaves required
+'''
+
+    # Determined numerically using `ref`tests/find_max_m.py, ensures results are
+    # converged within 1e-6 Ha.
+    M_ref = 11459
+    t_ref = 8
+
+    sgn = np.sign(t_ref-theta)
+
+    # Prefactor is emperically determined so this number will overestimate.
+    return 1.23 * (theta/t_ref)**(1.5*sgn) * M_ref * (ne/19.0)
