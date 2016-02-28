@@ -7,40 +7,61 @@ import math
 import json
 
 class System:
-    ''' System Properties - Everything is measured in Hartree atomic units.
-    rs: seitz radius.
-    ne: number of electrons.
-    ecut: plane wave cutoff.
-    pol: spin polarisation = 2 for fully polarised case.
-    L: box length.
-    kfac: kspace grid spacing.
-    kf: Fermi wavevector.
-    ef: Fermi energy
-    integeral_factor: common factor for all Fermi integrals.
-    spval: array containing single particle eigenvalues, sorted in increasing value of kinetic energy.
-    kval: plane wave basis vectors, sorted in increasing value of kinetic energy.
-    deg_e: compressed list of spval containing unique eigenvalues and their degeneracy.
-    deg_k: REMOVE.
-    M: number of plane waves in our basis.
-    energy_fin: total energy for ne electrons in a finite box.
-    energy_inf: total energy for ne electrons in an inifinite box.
-    total_K: symmetry of determinants being considered.
-    beta_max: maximum beta value which we calculated properties to.
-    ef_fin: Fermi energy for finite system.
-    de: epsilon value for comparing floats.
+    '''System Properties - Everything is measured in Hartree atomic units.
+
+Attributes
+----------
+rs : float
+    Wigner-Seitz radius.
+ne : int
+    Number of electrons.
+ecut : float
+    Plane wave cutoff.
+zeta : int
+    Spin polarisation = 1 for fully polarised case, 0 for unpolarised.
+L : float
+    Box length.
+kfac : float
+    kspace grid spacing.
+kf : float
+    Fermi wavevector.
+ef : float
+    Fermi energy
+spval : list
+    containing single particle eigenvalues, sorted in increasing value of
+    kinetic energy.
+kval : list
+    Plane wave basis vectors, sorted in increasing value of kinetic energy.
+deg_e : list of lists
+    Compressed list of spval containing unique eigenvalues and their
+    degeneracy.
+M : int
+    Number of plane waves in our basis.
 '''
 
-    def __init__(self, args):
+    def __init__(self, rs, ne, ecut, zeta):
+        '''Initialise system.
+
+        Parameters
+        ----------
+        rs : float
+            Wigner-Seitz radius.
+        ne : int
+            Number of electrons.
+        ecut : float
+            Plane wave cutoff.
+        zeta : int
+            Spin polarisation = 1 for fully polarised case, 0 for unpolarised.
+        '''
 
         # Seitz radius.
-        self.rs = float(args[0])
+        self.rs = rs
         # Number of electrons.
-        self.ne = int(args[1])
+        self.ne = ne
         # Kinetic energy cut-off.
-        self.ecut = float(args[2])
+        self.ecut = ecut
         # Spin polarisation.
-        self.pol = int(args[3])
-        self.zeta = self.pol - 1 
+        self.zeta = zeta
         # Box Length.
         self.L = self.rs*(4*self.ne*sc.pi/3.)**(1/3.)
         # k-space grid spacing.
@@ -49,56 +70,31 @@ class System:
         self.kf = (3*self.pol*sc.pi**2*self.ne/self.L**3)**(1/3.)
         # Fermi energy (inifinite systems).
         self.ef = 0.5*self.kf**2
-        self.de = 1e-12
-        # Integral Factor.
-        self.integral_factor = self.L**3 * np.sqrt(2) / (self.pol*sc.pi**2)
-        ## Single particle eigenvalues and corresponding kvectors
+        # Single particle eigenvalues and corresponding kvectors
         (self.spval, self.kval) = self.sp_energies(self.kfac, self.ecut)
         # Compress single particle eigenvalues by degeneracy.
         self.deg_e  = self.compress_spval(self.spval)
         # Number of plane waves.
         self.M = len(self.spval)
-        self.ef_fin = self.dis_fermi(self.spval, self.ne)
-        # Change this to be more general, selected to be the gamma point.
-        self.total_K = self.kval[0]
-        self.beta_max = 5.0
-        self.root_de = 1e-10
 
-    def print_system_variables(self):
-        ''' Print out system varaibles.'''
 
-        print " # Number of electrons: ", self.ne
-        print " # Spin polarisation: ", self.pol
-        print " # rs: ", self.rs
-        print " # System Length: ", self.L
-        print " # Fermi wavevector for infinite system: ", self.kf
-        print " # kspace grid spacing: ", self.kfac
-        print " # Number of plane waves: ", self.spval.size
-        print " # Fermi energy for infinite system: ", self.ef
-        print " # Fermi energy for discrete system: ", self.ef_fin
-        print " # Ground state energy for finite system: ", self.t_energy_fin
-        print " # Ground state total energy for infinite system: ", self.t_energy_inf
-
-    def to_json(self):
-
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True,
-                          indent=4)
     def sp_energies(self, kfac, ecut):
         ''' Calculate the allowed kvectors and resulting single particle eigenvalues
         which can fit in the sphere in kspace determined by ecut.
-    Params
-    ------
-    kfac: float
+
+    Parameters
+    ----------
+    kfac : float
         kspace grid spacing.
-    ecut: float
+    ecut : float
         energy cutoff.
 
     Returns
     -------
-    spval: list
-        list containing single particle eigenvalues
-    kval: list
-        list containing basis vectors.
+    spval : list
+        List containing single particle eigenvalues.
+    kval : list
+        List containing basis vectors.
     '''
 
         # Scaled Units to match with HANDE.
@@ -126,14 +122,19 @@ class System:
 
         return (spval, kval)
 
+
     def compress_spval(self, spval):
         ''' Compress the single particle eigenvalues so that we only consider unique
         values which vastly speeds up the k-space summations required.
 
-    Params
-    ------
-    spval: list
+    Parameters
+    ----------
+    spval : list
         list containing single particle eigenvalues
+    Returns
+    -------
+    def_e : list of lists
+        Compressed single-particle eigenvalues.
     '''
 
         # Work out the degeneracy of each eigenvalue.
@@ -157,7 +158,3 @@ class System:
         deg_e.append([j,eval1])
 
         return deg_e
-
-    def dis_fermi(self, spval, ne):
-
-            return 0.5*(spval[ne-1]+spval[ne])
