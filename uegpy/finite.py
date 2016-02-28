@@ -8,7 +8,7 @@ import itertools
 
 
 def centre_of_mass_obsv(system, beta):
-    ''' Calculate centre of mass partition function and total energy.
+    '''Calculate centre of mass partition function and total energy.
 
 Parameters
 ----------
@@ -19,7 +19,6 @@ beta : float
 
 Returns
 -------
-
 E_tot : float
     Total energy contribution from centre of mass motion.
 Z : float
@@ -41,7 +40,7 @@ Z : float
 
 
 def nav_sum(mu, ne, spval, beta, pol):
-    ''' Calculate average number of electrons.
+    '''Calculate average number of electrons.
 
 Parameters
 ----------
@@ -58,7 +57,6 @@ pol : int
 
 Returns
 -------
-
 N : float
     Number of electrons.
 
@@ -69,7 +67,7 @@ N : float
     return (2.0/pol) * N
 
 def nav_deriv(mu, ne, spval, beta, pol):
-    ''' Calculate average number of electrons.
+    '''Calculate average number of electrons.
 
 Parameters
 ----------
@@ -99,7 +97,7 @@ N : float
 
 
 def nav_diff(mu, ne, spval, beta, pol):
-    ''' Calculate difference between expected and average number of electrons.
+    '''Calculate difference between expected and average number of electrons.
 
 Parameters
 ----------
@@ -126,7 +124,7 @@ Nav - ne : float
 
 
 def chem_pot_sum(system, eigs, beta):
-    ''' Find the chemical potential for finite system.
+    '''Find the chemical potential for finite system.
 
 Parameters
 ----------
@@ -137,7 +135,6 @@ beta : float
 
 Returns
 -------
-
 mu : float
    Chemical potential.
 
@@ -149,7 +146,7 @@ mu : float
 
 
 def energy_sum(beta, mu, spval, pol):
-    ''' Calculate internal energy for free electron gas.
+    '''Calculate internal energy for free electron gas.
 
 Parameters
 ----------
@@ -178,8 +175,8 @@ Nav - ne : float
 def hfx_sum(system, beta, mu):
     '''Evaluate the HF exchange contribution as a summation.
 
-Patrams
--------
+Parameters
+----------
 system : class
     system variables.
 beta : float
@@ -321,7 +318,7 @@ beta : float
 mu : float
     Chemical potential.
 
-Results
+Returns
 -------
 iterations : tuple
     Number of iterations required to find self consistency of mu and single
@@ -408,8 +405,8 @@ sp_new : list
 sp_old : list
     old single particle eigenvalues.
 
-Rerturns
---------
+Returns
+-------
 de : float
     cumulative difference between new and old eigenvalues.
 
@@ -426,7 +423,7 @@ def gc_part_func(sys, cpot, beta):
     ''' Grand canonical partition function for finite system.
 
     .. math::
-        Z_GC = \prod_i (1 + e^{-\beta(e_i-mu)})
+        Z_{GC} = \prod_i (1 + e^{-\\beta(e_i-\\mu)})
 
 
 Parameters

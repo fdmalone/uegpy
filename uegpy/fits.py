@@ -48,17 +48,18 @@ def ksdt(rs, zeta, t):
     The KSDT fit is given as:
 
     .. math::
-        f_{xc}^{\zeta}(r_s, t) = -\frac{1}{r_s}\frac{\omega_{\zeta}a(t)
-                                  + b_{\zeta}(t)r_s^{1/2}
-                                  + c_{\zeta}(t)r_s}{1+d_{\zeta}(t)r_s^{1/2}
-                                  + e_{\zeta}(t)r_s}
+        f_{\mathrm{xc}}^{\zeta}(r_s, t)
+        = -\\frac{1}{r_s}\\frac{\omega_{\zeta}a(t) + b_{\zeta}(t)r_s^{1/2}
+        + c_{\zeta}(t)r_s}{1+d_{\zeta}(t)r_s^{1/2} + e_{\zeta}(t)r_s}
 
 Parameters
 ----------
-system : class
-    System being studied.
-beta : float
-    Inverse (reduced) temperature.
+rs : float
+    Density desired.
+zeta : int
+    Spin polarisation.
+t : float
+    Reduced temperature (:math:`T/T_F`)
 
 Returns
 -------

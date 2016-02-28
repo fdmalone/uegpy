@@ -1,5 +1,4 @@
-''' Simple Monte Carlo routines for evaluating in the canonical ensemble'''
-
+'''Simple Monte Carlo routines for evaluating in the canonical ensemble.'''
 import utils as ut
 import numpy as np
 import random as rand
@@ -23,6 +22,10 @@ beta : float
     Inverse temperature.
 nmeasure : int
     Number of attempted Monte Carlo moves.
+Returns
+-------
+frame : :class:`pandas.DataFrame`
+    Frame containing estimates for properties of system at temperature theta.
 '''
 
     mu = fn.chem_pot_sum(system, system.deg_e, beta)
@@ -41,7 +44,7 @@ nmeasure : int
     start = time.time()
     while (it < nmeasure):
 
-        (gen, orb_list) = create_orb_list(p_i, system.ne, system.M)
+        (gen, orb_list) = create_orb_list(p_i, system.ne)
         if gen:
             T_loc += sum(evals[orb_list])
             V_loc += fn.hf_potential(orb_list, system.kval, system.L)
@@ -71,7 +74,23 @@ nmeasure : int
     return (new[sorted(new.columns.values)], end-start)
 
 
-def create_orb_list(probs, ne, M):
+def create_orb_list(probs, ne):
+    '''Create orbital list with :math:`N` electrons
+
+Parameters
+----------
+probs : list
+    Single particle probabilities (fermi factors).
+ne : int
+    Number of electrons.
+
+Returns
+-------
+gen : boolean
+    True if configuration with ne electrons was generated.
+selected_orbs : list
+    Selected orbitals.
+'''
 
     selected_orbs = np.zeros(ne, dtype=np.int)
     nselect = 0
@@ -95,9 +114,39 @@ def create_orb_list(probs, ne, M):
     return (gen, selected_orbs)
 
 def gc_correction_free_energy(sys, cpot, beta, delta, delta_error):
+    '''Canonical correction to free electron grand canonical partition function.
+    Assumption, :math:`Z_{GC}(N) / Z_{GC} = \\delta`, so
 
-    # Assumption, Z_GC(N) / Z_GC = naccept/ntotal = delta, so -kT log(delta) = -kT log Z_GC(N) + kT log Z_GC
-    # So -kT log Z_N = -kT log(delta) - kT log(Z_GC) + mu N, or F^0_N = F^0_GC + Delta(N) + mu N.
+    .. math::
+        -kT \\log\\delta = -kT \\log Z_{GC}(N) + kT \\log Z_{GC}.
+
+    Therefore,
+
+    .. math::
+        -kT \\log Z_N = -kT \\log \\delta - kT \\log Z_{GC} + \\mu N,
+
+    or
+
+    .. math::
+        F^0_N = \\Omega + \\Delta(N) + \\mu N.
+
+Parameters
+----------
+sys : class
+    System being studied.
+mu : float
+    Chemical potential.
+beta : float
+    Inverse temperature.
+delta : float
+    naccept/ntotal.
+delta_error : float
+    standard error in delta.
+Returns
+-------
+F_N : float
+    Canonical free electron Helmholtz free energy.
+'''
 
     muN = cpot * sys.ne
     F_GC = -(1.0/beta)*(np.log(gc_part_func(sys, cpot, beta)))
@@ -107,4 +156,4 @@ def gc_correction_free_energy(sys, cpot, beta, delta, delta_error):
     F_N = DF_N + Delta
     F_N_error = delta_error / (beta*delta)
 
-    return (F_N, F_N_error, DF_N, F_GC)
+    return (F_N, F_N_error)

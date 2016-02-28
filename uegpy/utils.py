@@ -1,4 +1,4 @@
-'''Useful functions'''
+'''Useful functions.'''
 
 import numpy as np
 import scipy as sc
@@ -7,7 +7,9 @@ import sys
 
 
 def fermi_factor(ek, mu, beta):
-    ''' Usual fermi factor.
+    ''' Usual fermi factor:
+    .. math::
+        f_k = \\frac{1}{e^{\\beta(\\varepsilon_k-\\mu)}+1}
 
 Parameters
 ----------
@@ -29,7 +31,7 @@ f_k : float
 
 
 def fermi_block(ek, mu, beta):
-    ''' Usual fermi factor blocking factor, i.e., fb_k = 1 - f_k.
+    ''' Usual fermi factor blocking factor, i.e., :math:`\\bar{f}_k = 1-f_k`.
 
 Parameters
 ----------
@@ -52,7 +54,7 @@ fb_k : float
 
 def madelung_approx(system):
     ''' Use expression in Schoof et al. (PhysRevLett.115.130402) for the
-    Madelung contribution to the total energy. Please cite these guys and 
+    Madelung contribution to the total energy. Please cite these guys and
     L.M. Fraser et al. Phys. Rev. B 53, 1814 whose functional form they fitted
     to.
 
@@ -71,6 +73,7 @@ v_M: float
     return (-2.837297 * (3.0/(4.0*sc.pi))**(1.0/3.0) *
             system.ne**(-1.0/3.0) * system.rs**(-1.0))
 
+
 def add_mad(system, frame):
     ''' Add Madelung constant to data.
 
@@ -78,12 +81,12 @@ Parameters
 ----------
 system : class
     system being studied.
-frame : Pandas data frame
+frame : :class:`pandas.DataFrame`
     Frame containing total energies.
 
 Returns
 -------
-frame : Pandas data frame
+frame : :class:`pandas.DataFrame`
     Frame with energies per particle including Madelung constant where
     appropriate.
 
@@ -132,12 +135,14 @@ def kinetic_cutoff(ne, theta):
     The kinetic energy converges exponentially once
 
     .. math::
-        \varepsilon_c \approx kT
+        \\varepsilon_c \\approx kT
 
     The following extrapolates from a smaller system size to determine the cutoff
-    necessary at any Theta, N value as
+    necessary at any :math:`\\Theta, N` value as
 
-    e_c(N,Theta) =  alpha e_c(19,8) (Theta/8) (N/19)^{2/3}
+    .. math::
+        \\varepsilon_c(N,\\Theta) =  \\alpha \\varepsilon_c(19,8) (\\Theta/8)
+                                      (N/19)^{2/3}
 
 Parameters
 ----------
@@ -168,13 +173,13 @@ def kinetic_plane_waves(ne, theta):
     The kinetic energy converges exponentially once
 
     .. math::
-        \varepsilon_c \approx kT
-        M \approx N \Theta^{3/2}
+        M \\approx N \\Theta^{3/2}
 
     The following extrapolates from a smaller system size to determine the cutoff
-    necessary at any Theta, N value as
+    necessary at any :math:`\\Theta, N` value as
 
-    M(N,Theta) = (theta/8)^{3/2} M(19,8) (N/19)
+    .. math::
+        M(N,\\Theta) = (\\Theta/8)^{3/2} M(19,8) (N/19)
 
 Parameters
 ----------
@@ -200,12 +205,21 @@ M : float
 
 
 def get_git_revision_hash():
+    '''Return git revision.
+
+    Adapted from: http://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
+
+Returns
+-------
+sha1 : string
+    git hash with -dirty appended if uncommitted changes.
+'''
 
     repo = sys.path[0]
 
     sha1 = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                    cwd=repo).strip()
-    suffix = subprocess.check_output(['git', 'status', '--porcelain'],
+    suffix = subprocess.check_output(['git', 'status', '--porcelain', 'uegpy'],
                                      cwd=repo).strip()
     if suffix:
         return sha1 + '-dirty'

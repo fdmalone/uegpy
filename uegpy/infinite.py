@@ -1,3 +1,5 @@
+'''Evaluate properties of electron gas in thermodynamic limit using grand
+   canonical ensemble'''
 import numpy as np
 import math
 import scipy as sc
@@ -7,7 +9,7 @@ from scipy import optimize
 
 
 def chem_pot_integral(system, beta):
-    ''' Find the chemical potential for infinite system.
+    '''Find the chemical potential for infinite system.
 
 Parameters
 ----------
@@ -18,7 +20,6 @@ beta : float
 
 Returns
 -------
-
 mu : float
    Chemical potential.
 
@@ -31,10 +32,10 @@ mu : float
 
 
 def fermi_integrand(x, nu, eta):
-    ''' Integrand of standard Fermi integral I(eta, nu), where:
+    '''Integrand of standard Fermi integral I(eta, nu), where:
 
     .. math::
-        I(\eta, \nu) = \int_0^{\infty} \frac{x^{\nu}}{(e^{x-nu}+1)} dx
+        I(\\eta, \\nu) = \\int_0^{\\infty} \\frac{x^{\\nu}}{(e^{x-\\eta}+1)} dx
 
 Parameters
 ----------
@@ -43,7 +44,7 @@ x : float
 nu : float
     Order of integral.
 eta : float
-    beta * mu, for beta = 1 / T and mu the chemical potential.
+    :math:`\\beta\\mu`.
 
 '''
 
@@ -51,7 +52,8 @@ eta : float
 
 
 def fermi_integrand_deriv(x, nu, eta):
-    ''' Derivative of integrand of standard Fermi integral I(eta, nu) wrt beta.
+    ''' Derivative of integrand of standard Fermi integral :math:`I(eta, nu)`
+    wrt beta.
 
     TODO : check this.
 
@@ -62,7 +64,7 @@ x : float
 nu : float
     Order of integral.
 eta : float
-    beta * mu, for beta = 1 / T and mu the chemical potential.
+    :math:`\\beta\\mu`.
 
 '''
 
@@ -70,21 +72,21 @@ eta : float
 
 
 def fermi_integral(nu, eta):
-    ''' Standard Fermi integral I(eta, nu), where:
+    ''' Standard Fermi integral :math:`I(\\eta, \\nu)`, where:
 
     .. math::
-        I(\eta, \nu) = \int_0^{\infty} \frac{x^{\nu}}{(e^{x-nu}+1)} dx
+        I(\\eta, \\nu) = \\int_0^{\\infty} \\frac{x^{\\nu}}{(e^{x-\\eta}+1)} dx
 
 Parameters
 ----------
 eta : float
-    beta * mu, for beta = 1 / T and mu the chemical potential.
+    :math:`\\beta\\mu`.
 nu : float
     Order of integral.
 
 Returns
 -------
-I(eta, nu) : float
+:math:`I(\\eta, \\nu)` : float
     Fermi integral.
 
 '''
@@ -96,7 +98,7 @@ def energy_integral(beta, mu, integral_factor):
     ''' Total energy at inverse temperature beta:
 
     .. math::
-        U = \int_0^{\infty} \frac{x^{\nu}}{(e^{x-nu}+1)} dx
+        U = (2-\\zeta) \\frac{2\\sqrt{2}}{3\\pi}r_s^3\\beta^{-5/3} I(3/2, \\eta)
 
 Parameters
 ----------
@@ -119,7 +121,7 @@ def gc_free_energy_integral(beta, mu, rs):
     ''' Free energy:
 
     .. math::
-        \Omega = \int_0^{\infty} \frac{x^{\nu}}{(e^{x-nu}+1)} dx
+        \Omega = 
 
 Parameters
 ----------
@@ -170,7 +172,7 @@ def hfx_integral(system, beta, mu):
     ''' First-order exchange contribution to internal energy:
 
     .. math::
-        \Omega = \int_0^{\infty} \frac{x^{\nu}}{(e^{x-nu}+1)} dx
+        \Omega = 
 
 Parameters
 ----------
