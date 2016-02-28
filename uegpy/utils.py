@@ -3,6 +3,7 @@
 import numpy as np
 import scipy as sc
 import subprocess
+import sys
 
 
 def fermi_factor(ek, mu, beta):
@@ -200,4 +201,13 @@ M : float
 
 def get_git_revision_hash():
 
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
+    repo = sys.path[0]
+
+    sha1 = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
+                                   cwd=repo).strip()
+    suffix = subprocess.check_output(['git', 'status', '--porcelain'],
+                                     cwd=repo).strip()
+    if suffix:
+        return sha1 + '-dirty'
+    else:
+        return sha1
