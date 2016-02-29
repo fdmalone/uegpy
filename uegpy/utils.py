@@ -226,3 +226,34 @@ sha1 : string
         return sha1 + '-dirty'
     else:
         return sha1
+
+
+def add_frame(f1, f2, val1, op='+', val2=None, label=None, err=False):
+    '''Add or subtract two frames and take care of errorbars.
+
+Parameters
+----------
+f1,f2 : :class:`pandas.DataFrame`
+     Frames to add/subtract.
+Returns
+-------
+f : :class:`pandas.DataFrame`
+    f1 +/- f2
+'''
+
+    if val2 == None:
+        val2 = val1
+    if label == None:
+        label = val1
+
+    if op == '+':
+     f1[label] = f1[val1] + f2[val2]
+    else:
+     f1[label] = f1[val1] - f2[val2]
+
+    if err:
+        f1[label+'_error'] = (
+                np.sqrt(f1[val1+'_error']**2.0+f2[val2+'_error']**2.0)
+        )
+
+    return f1
