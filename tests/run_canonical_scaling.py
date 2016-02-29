@@ -18,6 +18,7 @@ cutoff = ut.kinetic_cutoff(ne, 1.0/beta)
 system = ue.System([0.1, ne, cutoff, 2])
 t_per_it = mc.sample_canonical_energy(system, beta/system.ef, 10)[1] / 10
 
+time = 0.9 * time
 iterations = min(int(time/t_per_it), 1e6)
 
 (frame, time) = mc.sample_canonical_energy(system, beta/system.ef, iterations)
