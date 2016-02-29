@@ -94,7 +94,8 @@ frame : :class:`pandas.DataFrame`
 
     mads = [x for x in frame.columns if 'u' in x or 'v' in x]
     mads = [x for x in mads if 'error' not in x]
-    rest = [x for x in frame.columns if x not in mads and 'ne' not in x]
+    rest = [x for x in frame.columns if x not in mads and 'ne' not in x and
+            'Beta' not in x and 'M' not in x and 'rs' not in x]
 
     for name in mads:
         frame[name] = frame[name]/system.ne + 0.5*madelung_approx(system)
