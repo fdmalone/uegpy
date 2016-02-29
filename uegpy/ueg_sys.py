@@ -62,8 +62,11 @@ M : int
         self.ecut = ecut
         # Spin polarisation.
         self.zeta = zeta
+        self.pol = zeta + 1
         # Box Length.
         self.L = self.rs*(4*self.ne*sc.pi/3.)**(1/3.)
+        # Density.
+        self.rho = (4/3.*sc.pi*self.rs**3.0)**(-1.0)
         # k-space grid spacing.
         self.kfac = 2*sc.pi/self.L
         # Fermi Wavevector (infinite system).
