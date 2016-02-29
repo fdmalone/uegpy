@@ -95,7 +95,7 @@ selected_orbs : list
     selected_orbs = np.zeros(ne, dtype=np.int)
     nselect = 0
 
-    for iorb in range(0,M):
+    for iorb in range(0,len(probs)):
 
         r = rand.random()
 
