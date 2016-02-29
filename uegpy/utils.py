@@ -216,12 +216,12 @@ sha1 : string
     git hash with -dirty appended if uncommitted changes.
 '''
 
-    repo = sys.path[0]
+    src = sys.path[0]
 
     sha1 = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
-                                   cwd=repo).strip()
-    suffix = subprocess.check_output(['git', 'status', '--porcelain', 'uegpy'],
-                                     cwd=repo).strip()
+                                   cwd=src).strip()
+    suffix = subprocess.check_output(['git', 'status', '--porcelain', '../uegpy'],
+                                     cwd=src).strip()
     if suffix:
         return sha1 + '-dirty'
     else:
