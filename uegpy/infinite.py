@@ -8,15 +8,19 @@ import random as rand
 from scipy import optimize
 
 
-def chem_pot_integral(system, beta):
+def chem_pot(rs, beta, ef, zeta):
     '''Find the chemical potential for infinite system.
 
 Parameters
 ----------
-system : class
-    System class containing system information.
+rs : float
+    Wigner-Seitz radius.
 beta : float
     Inverse temperature.
+ef : float
+    Fermi energy.
+zeta : int
+    Spin polarisation.
 
 Returns
 -------
@@ -25,10 +29,60 @@ mu : float
 
 '''
 
+    # System density.
+    rho = ((4*sc.pi*rs**3.0)/3.0)**(-1.0)
+
     return (
-        sc.optimize.fsolve(nav_integral, beta*system.ef, args=(beta,
-                            system.integral_factor, system.ne))[0] / beta
+        sc.optimize.fsolve(nav_diff, ef, args=(beta, rho, zeta))[0]
     )
+
+
+def nav(beta, mu, zeta):
+    '''Average density i.e. :math:`N/V`.
+
+Parameters
+----------
+beta : float
+    Inverse temperature.
+mu : float
+    Chemical potential.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+rho : float
+    Average density.
+
+'''
+
+    return (
+        (2-zeta) * (2.0**0.5/(2.0*sc.pi**2.0)) * beta**(-1.5)
+                 * fermi_integral(0.5, mu*beta)
+    )
+
+
+def nav_diff(mu, beta, rho, zeta):
+    '''Deviation of average density for given :math:`\\mu` from true value.
+
+Parameters
+----------
+mu : float
+    Chemical potential.
+beta : float
+    Inverse temperature.
+rho : float
+    True density.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+dev : float
+    :math:`n(\\mu) - n`.
+
+'''
+    return (nav(beta, mu, zeta) - rho)
 
 
 def fermi_integrand(x, nu, eta):
@@ -94,11 +148,11 @@ Returns
     return sc.integrate.quad(fermi_integrand, 0, np.inf, args=(nu, eta))[0]
 
 
-def energy_integral(beta, mu, integral_factor):
+def energy_integral(beta, mu, rs, zeta):
     ''' Total energy at inverse temperature beta:
 
     .. math::
-        U = (2-\\zeta) \\frac{2\\sqrt{2}}{3\\pi}r_s^3\\beta^{-5/3} I(3/2, \\eta)
+        U = (2-\\zeta) \\frac{2\\sqrt{2}}{3\\pi}r_s^3\\beta^{-5/2} I(3/2, \\eta)
 
 Parameters
 ----------
@@ -114,7 +168,10 @@ I(eta, nu) : float
 
 '''
 
-    return integral_factor * np.power(beta, -2.5) * fermi_integral(1.5, mu*beta)
+    return (
+            (2-zeta) * (2**1.5/(3.0*sc.pi)) * rs**3.0 * beta**(-2.5)
+                    * fermi_integral(1.5, mu*beta)
+    )
 
 
 def gc_free_energy_integral(beta, mu, rs):
@@ -168,7 +225,7 @@ I(-1/2, nu)^2 : float
     return fermi_integral(-0.5, eta)**2
 
 
-def hfx_integral(system, beta, mu):
+def hfx_integral(rs, beta, mu, zeta):
     ''' First-order exchange contribution to internal energy:
 
     .. math::
@@ -176,14 +233,12 @@ def hfx_integral(system, beta, mu):
 
 Parameters
 ----------
-system : class
-    system begin studied.
+rs : float
+    Wigner-Seitz radius.
 beta : float
     Inverse temperature.
 mu : float
     Chemical potential.
-rs : float
-    Wigner-Seitz radius.
 
 Returns
 -------
@@ -194,4 +249,4 @@ hfx : float
 
     hfx = sc.integrate.quad(hfx_integrand, -np.inf, beta*mu)[0]
 
-    return (-system.L**3/(2.*system.pol*sc.pi**3*beta**2)) * hfx
+    return - (2-zeta) * rs**3.0/(3*sc.pi**2.0*beta**2.0) * hfx
