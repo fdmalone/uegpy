@@ -140,7 +140,7 @@ mu : float
 
 '''
     return (
-        sc.optimize.fsolve(nav_diff, system.ef, args=(system.ne, eigs, 
+        sc.optimize.fsolve(nav_diff, system.ef, args=(system.ne, eigs,
                            beta, system.pol))[0]
     )
 
