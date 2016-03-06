@@ -203,7 +203,7 @@ Omega : float
     )
 
 
-def hfx_integrand(eta):
+def hfx_integrand(eta, power=2.0):
     ''' Integrand of first order exchange contribution to internal energy.
 
     .. math::
@@ -223,14 +223,14 @@ I(-1/2, nu)^2 : float
 
 '''
 
-    return fermi_integral(-0.5, eta)**2
+    return fermi_integral(-0.5, eta)**power
 
 
 def hfx_integral(rs, beta, mu, zeta):
     ''' First-order exchange contribution to internal energy:
 
     .. math::
-        \Omega = 
+        \Omega =
 
 Parameters
 ----------
@@ -251,6 +251,37 @@ hfx : float
     hfx = sc.integrate.quad(hfx_integrand, -np.inf, beta*mu)[0]
 
     return - (2-zeta) * rs**3.0/(3*sc.pi**2.0*beta**2.0) * hfx
+
+
+def inversion_correction(rs, beta, mu, zeta):
+    '''Correction to Helmholtz free energy when moving from grand canonical to
+    canonical ensemble.
+
+    Turns out to be:
+
+    .. math::
+
+        \\frac{1}{2\\sqrt{2}\\pi^4}\\beta^{-3/2}I_{-1/2}(\\eta_0)^{3}
+
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius.
+beta : float
+    Inverse temperature.
+mu : float
+    Chemical potential.
+zeta : int
+    Spin polarisation
+
+Returns
+-------
+corr : float
+    Correction term for inversion process.
+
+'''
+
+    return 2**(-0.5)/(2.0*sc.pi**4.0)*beta**(-3./2.)*hfx_integrand(beta*mu, 3.0)
 
 
 def thf_integrand_0(q, eq, k, beta, mu):
