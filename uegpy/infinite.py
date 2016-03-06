@@ -6,35 +6,7 @@ import scipy as sc
 from scipy import integrate
 import random as rand
 from scipy import optimize
-
-
-def chem_pot(rs, beta, ef, zeta):
-    '''Find the chemical potential for infinite system.
-
-Parameters
-----------
-rs : float
-    Wigner-Seitz radius.
-beta : float
-    Inverse temperature.
-ef : float
-    Fermi energy.
-zeta : int
-    Spin polarisation.
-
-Returns
--------
-mu : float
-   Chemical potential.
-
-'''
-
-    # System density.
-    rho = ((4*sc.pi*rs**3.0)/3.0)**(-1.0)
-
-    return (
-        sc.optimize.fsolve(nav_diff, ef, args=(beta, rho, zeta))[0]
-    )
+import utils as ut
 
 
 def nav(beta, mu, zeta):
@@ -62,7 +34,34 @@ rho : float
     )
 
 
-def nav_diff(mu, beta, rho, zeta):
+def chem_pot(rs, beta, ef, zeta, method=nav, it=1):
+    '''Find the chemical potential for infinite system.
+
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius.
+beta : float
+    Inverse temperature.
+ef : float
+    Fermi energy.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+mu : float
+   Chemical potential.
+
+'''
+
+    return (
+        sc.optimize.fsolve(nav_diff, ef, args=(beta, rs, zeta, method, it))[0]
+    )
+
+
+
+def nav_diff(mu, beta, rs, zeta, method=nav, it=1):
     '''Deviation of average density for given :math:`\\mu` from true value.
 
 Parameters
@@ -82,7 +81,9 @@ dev : float
     :math:`n(\\mu) - n`.
 
 '''
-    return (nav(beta, mu, zeta) - rho)
+
+    rho = ((4*sc.pi*rs**3.0)/3.0)**(-1.0) # System density.
+    return method(beta, mu, zeta) - rho
 
 
 def fermi_integrand(x, nu, eta):
@@ -250,3 +251,114 @@ hfx : float
     hfx = sc.integrate.quad(hfx_integrand, -np.inf, beta*mu)[0]
 
     return - (2-zeta) * rs**3.0/(3*sc.pi**2.0*beta**2.0) * hfx
+
+
+def thf_integrand_0(q, eq, k, beta, mu):
+
+    # Fix fermi factor here.
+    return (
+        q * ut.fermi_factor(eq, mu, beta) * np.log(np.abs((k+q)/(k-q)))
+    )
+
+
+def thf_spect(k, beta, mu, n):
+
+    # Units
+    return 0.5*k**2.0 - thf_ex_rec(k, beta, mu, n)
+
+def thf_ex_rec(k, beta, mu, n):
+
+    if n == 1:
+        if k == 0:
+            return 1
+        else:
+            return k
+    else:
+        0.5*k**2.0 - ((1.0/(sc.pi*k))*sc.integrate.quad(thf_integrand_0, 0,
+                   np.inf, args=(thf_ex_rec(k, beta, mu, n-1), k, beta, mu)))
+
+
+def t0_hf_integrand(p, k):
+    '''Integrand for T=0 hartree fock exchange potential.'''
+
+    return p*(np.log(np.abs((k+p)/(k-p))))
+
+
+def t0_spect(k, k_f):
+    '''T=0 hf spectrum calculated using integral.'''
+
+    return 0.5*k**2.0 - ((1.0/(sc.pi*k))*sc.integrate.quad(t0_hf_integrand, 0,
+                                                   k_f, args=(k))[0])
+
+
+def t0_spect_dis(k, k_f, dt=1e-6):
+    '''T=0 HF spectrum calculated using discretised (explicitly).'''
+
+    if k < k_f:
+        q0 = np.arange(0, k-dt, dt)
+        q1 = np.arange(k+dt, k_f, dt)
+        q = np.concatenate((q0, q1), axis=0)
+    else:
+        q = np.arange(0, k_f, dt)
+    return 1.0/(sc.pi*k) * sc.integrate.simps(t0_hf_integrand(q,k), q)
+
+
+def nav_hf_integrand(k, beta, mu, n):
+
+    return k**2.0*ut.fermi_factor(thf_spect(k, beta, mu, n), mu, beta)
+
+
+def nav_hf(beta, mu, zeta, n):
+
+    return (
+        (2-zeta) * (2**0.5/(2.0*sc.pi**2.0))*sc.integrate.quad(nav_hf_integrand,
+                                        0, np.inf, args=(beta, mu, n))[0]
+    )
+
+
+def sigmax_discrete(kv, eq, beta, mu, zeta, kmax, dq=0.1):
+
+    sigma = np.zeros(len(eq))
+    q = np.arange(0.1, kmax, dq)
+    q_loc = []
+    eq_loc = [] 
+    it = 0
+    # Look at interpolating.
+    for k in kv:
+        loc = 0
+        for x in q:
+            if k == x:
+                q_loc = np.delete(q, loc)
+                eq_loc = np.delete(eq, loc)
+            loc += 1
+        #print len(q_loc), len(eq_loc), len(eq)
+        sigma[it] = (
+            - 1.0/(sc.pi*k)*sc.integrate.simps(thf_integrand_0(q_loc,
+                                                       eq_loc, k, beta, mu), q_loc)
+        )
+        it += 1
+    return sigma
+
+
+def self_consist(rs, beta, mu, zeta, ef):
+
+    # Free electrons is our reference point.
+    mu_old = chem_pot(rs, beta, ef, zeta)
+
+    it = 1
+    max_it = 2
+    while it < max_it:
+        # Calculate average particle number with given chemical potential and
+        # spectrum.
+        #nav_new = nav_hf(beta, mu_old, it)
+        # Work out new chemical potential.
+        #mu = chem_pot(nav_hf, beta, mu_old, method='nav_hf')
+        print mu, mu_old, nav_new
+        if abs(mu_new-mu_old) < de:
+            break
+        else:
+            mu = mu_old
+        it += 1
+
+    return mu
+
