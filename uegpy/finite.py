@@ -446,3 +446,82 @@ Z_GC : float
         Z_GC = Z_GC * (1+np.exp(-beta*(i-cpot)))
 
     return Z_GC
+
+
+def mp22(sys):
+
+    if sys.zeta == 0:
+        kocc = sys.kval[:sys.ne/2]
+        eocc = sys.spval[:sys.ne/2]
+    else:
+        kocc = sys.kval[:sys.ne]
+        eocc = sys.spval[:sys.ne]
+    emp2 = 0
+    count = 0
+
+    for (k, ek) in zip(kocc, eocc):
+        for (p, ep) in zip(kocc, eocc):
+            for q in sys.kval[1:]:
+                qsq = np.dot(q,q)
+                kq = k + q
+                pq = p - q
+                ekq = 0.5*sys.kfac**2.0*np.dot(kq,kq)
+                epq = 0.5*sys.kfac**2.0*np.dot(pq,pq)
+                # Outside fermi surface
+                print k, p, ekq, epq, eocc[-1], q
+                if ekq > eocc[-1] and epq > eocc[-1] and ekq <= sys.ecut*sys.kfac**2.0 and epq <= sys.ecut*sys.kfac**2.0:
+                    #print k, p
+                    #print k, q, ekq, epq
+                    count += 1
+                    ed = qsq**2.0 # Direct
+                    #print k, p, q, k+q, p-q, ekq, epq, sys.ecut*sys.kfac**2.0
+                    ex = qsq*(np.dot(kq-p, kq-p)) # Exchange
+                    denom = ekq + epq - ek - ep
+                    #print denom, ed, ex, ekq, epq, ek, ep
+                    emp2 += 1.0/(ed*denom) - 0.5/(ex*denom)
+                    #print 1.0/(sc.pi*sys.L*qsq), 1.0/(sc.pi*sys.L*np.dot(kq-p, kq-p))
+                    #print k, p, q, 1.0/(sys.kfac**4.0*ed), 1.0/(sys.kfac**4.0*ex)
+                    print k, p, -2*emp2, 2.0/(ed*denom), - 1.0/(ex*denom)
+                    #emp2 += 1.0/(ex*denom)
+
+
+
+    print count
+    return - emp2 / (sc.pi**2.0*sys.L**2.0)
+
+
+def mp2(sys):
+
+    emp2 = 0.0
+
+    kocc = sys.kval[:sys.ne/2]
+    eocc = sys.spval[:sys.ne/2]
+    kunocc = sys.kval[sys.ne/2:]
+    eunocc = sys.spval[sys.ne/2:]
+
+    it = 0
+    count = 0
+    for (i, ei) in zip(kocc, eocc):
+        it += 1
+        for (j, ej) in zip(kocc, eocc):
+                for (a, ea) in zip(kunocc, eunocc):
+                    kb = i + j - a
+                    eb = 0.5*np.dot(kb,kb)
+                    #print 0.5*sys.kfac**2.0*eb, eocc[sys.ne/2-1], sys.ecut, eb
+                    if eb <= sys.ecut and sys.kfac**2.0*eb > eocc[-1]:
+                        q = i - a
+                        q2 = j - a
+                        qsq = np.dot(q,q)
+                        q2sq = np.dot(q2,q2)
+                        num = 2.0/qsq**2.0 - 1.0/(qsq*q2sq)
+                        denom = ei + ej - ea - sys.kfac**2.0*eb
+                        count += 1
+                        #print num/(sc.pi**2.0*sys.L**2.0)
+                        #print num, denom, i, j, a, eb, kb #ei, ej, ea, sys.kfac**2.0*eb
+                        emp2 += num / denom
+                        print i, j, emp2, 2.0/(qsq**2.0*denom), 1.0/(qsq*q2sq*denom)
+
+
+    print count
+
+    return emp2 / (sc.pi**2.0*sys.L**2.0)
