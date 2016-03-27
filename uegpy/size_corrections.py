@@ -34,8 +34,8 @@ S(q) : float
 
 
     return (
-        0.5*(1.0 + (3.0/(2.0*(2*sc.pi*rs)**3.0)) *
-        sc.integrate.quad(k_integrand, 0, np.inf, args=(q, mu, beta))[0])
+        0.5*(1.0 - (rs**3.0/(3.0*sc.pi)) *
+               sc.integrate.quad(k_integrand, 0, np.inf, args=(q, mu, beta))[0])
     )
 
 def k_integrand(k, q, mu, beta):
@@ -48,7 +48,7 @@ def f_kq(u, k, q, mu, beta):
 
 def ground_state_integral(q, rs, kf):
 
-    return ((rs**3.0)/(3.0*sc.pi) *
+    return 0.5*(1 - (rs**3.0/(3.0*sc.pi)) *
                     sc.integrate.quad(k0_int, 0, 2*kf, args=(q, kf))[0])
 
 def k0_int(k, q, kf):
@@ -76,6 +76,6 @@ def step(k, kf):
 def ground_state(q, kf):
 
     if (q <= 2*kf):
-        return 1 - 3.0/4.0 * q/kf + 1.0/16.0 * (q/kf)**3.0
+        return 0.5*(3.0/4.0 * q/kf - 1.0/16.0 * (q/kf)**3.0)
     else:
         return 0.5
