@@ -25,10 +25,9 @@ bvals = [2**(-n) for n in range(-3, 5)]
 for b in bvals:
     beta = b / system.ef
     mu = inf.chem_pot(rs, beta, system.ef, zeta)
-    ft = [szc.hf_structure_factor(q*system.kf, rs, beta, mu, zeta) for q in qvals]
+    ft = [szc.hf_structure_factor(q*system.kf, rs, beta, mu, zeta) for q in
+          qvals]
     pl.plot(qvals, ft, label=r'$\Theta=%s$'%(1.0/b), linestyle='--')
-gs1 = [szc.ground_state_integral(q*system.kf, rs, system.kf) for q in qvals]
-pl.plot(qvals, gs1, label=r'$\Theta=0$-int', linestyle=':')
 gs = [szc.ground_state(q*system.kf, system.kf) for q in qvals]
 pl.plot(qvals, np.array(gs), label=r'$\Theta=0$', linestyle='--')
 pl.legend(numpoints=1, loc='best')
