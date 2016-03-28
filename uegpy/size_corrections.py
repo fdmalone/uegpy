@@ -79,3 +79,20 @@ def ground_state(q, kf):
         return 0.5*(3.0/4.0 * q/kf - 1.0/16.0 * (q/kf)**3.0)
     else:
         return 0.5
+
+def conv_fac(nmax, alpha):
+
+    g = 0
+    old = 0
+
+    for ni in range(-nmax,nmax+1):
+        for nk in range(-nmax,nmax+1):
+            for nj in range(-nmax,nmax+1):
+                n = ni**2 + nj**2 + nk**2
+                old = g
+                if n != 0:
+                    g += np.exp(-alpha*n) / np.sqrt(n)
+                diff = g-old
+                #print old, g
+
+    return (2.0*sc.pi/alpha, g, diff)
