@@ -92,7 +92,6 @@ def conv_fac(nmax, alpha):
                 old = g
                 if n != 0:
                     g += np.exp(-alpha*n) / np.sqrt(n)
-                diff = g-old
-                #print old, g
+                diff = g - old
 
-    return (2.0*sc.pi/alpha, g, diff)
+    return (2.0*sc.pi/alpha-g, g, diff)
