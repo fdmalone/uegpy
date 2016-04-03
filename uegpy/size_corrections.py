@@ -168,7 +168,7 @@ chi_rpa : float
     denom = ((1.0-vq*re_lind(beta, mu, q, omega))**2.0 +
                                           (vq*im_lind(beta, mu, q, omega))**2.0)
 
-    return num / denom
+    return -(1.0/sc.pi) * (num / denom)
 
 
 def re_lind(beta, mu, q, omega):
