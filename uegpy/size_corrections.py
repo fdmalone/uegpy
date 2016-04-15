@@ -104,6 +104,14 @@ def rpa_structure_factor(q, beta, mu):
                                                 args=(q, beta, mu))[0]
     )
 
+def rpa_structure_factor0(q, kf, rs):
+
+    return (
+        -(4/3.)*rs**3.0 * sc.integrate.quad(im_chi_rpa0, -np.inf, np.inf,
+                                                args=(q, kf))[0]
+    )
+
+
 def s_integrand(omega, q, beta, mu):
 
     return im_chi_rpa(omega, q, beta, mu) * 1.0/(np.tanh(0.5*beta*omega))
@@ -116,7 +124,7 @@ def re_lind0(q, omega, kf):
     nu_mi = omega/(q*kf) - q/(2*kf)
 
     return (
-        (kf/(2*sc.pi**2))*(0.5
+        -(kf/(2*sc.pi**2))*(0.5
             - (1-nu_mi**2.0)/(4*qb)*np.log(np.abs((nu_mi+1)/(nu_mi-1)))
             + (1-nu_pl**2.0)/(4*qb)*np.log(np.abs((nu_pl+1)/(nu_pl-1))))
     )
@@ -129,7 +137,7 @@ def im_lind0(q, omega, kf):
     nu_mi = omega/(q*kf) - q/(2*kf)
 
     return (
-        ((0.5*kf**2.0)/(4*sc.pi*q))*(step_ab(1, nu_mi**2.0)*(1-nu_mi**2.0) -
+        -1*((0.5*kf**2.0)/(4*sc.pi*q))*(step_ab(1, nu_mi**2.0)*(1-nu_mi**2.0) -
                                         step_ab(1, nu_pl**2.0)*(1-nu_pl**2.0))
     )
 
@@ -141,6 +149,36 @@ def step_ab(x,a):
         return 1
     else:
         return 0
+
+def im_chi_rpa0(omega, q, kf):
+    '''Imaginary part of rpa density-density response function.
+
+Parameters
+----------
+omega : float
+    frequency
+q : float
+    (modulus) of wavevector considered.
+beta : float
+    Inverse temperature.
+mu : float
+    Chemical potential.
+
+Returns
+-------
+chi_rpa : float
+    Imaginary part of RPA density-density response function.
+
+'''
+
+    vq = 4.0*sc.pi / q**2.0
+    num = im_lind0(q, omega, kf)
+    re = 1-vq*re_lind0(q, omega, kf)
+    im = -(vq*im_lind0(q, omega, kf))
+    denom = ((1.0-vq*re_lind0(q, omega, kf))**2.0 +
+                                          (vq*im_lind0(q, omega, kf))**2.0)
+
+    return (num/denom, num, denom, re, im)
 
 def im_chi_rpa(omega, q, beta, mu):
     '''Imaginary part of rpa density-density response function.
@@ -164,7 +202,7 @@ chi_rpa : float
 '''
 
     vq = 4.0*sc.pi / q**2.0
-    num = im_lind(beta, mu, q, omega)**2.0
+    num = im_lind(beta, mu, q, omega)
     denom = ((1.0-vq*re_lind(beta, mu, q, omega))**2.0 +
                                           (vq*im_lind(beta, mu, q, omega))**2.0)
 
@@ -194,7 +232,7 @@ re_chi : float
 
 
     return (
-        (1.0/((2*sc.pi)**2.0*q)) * sc.integrate.quad(re_lind_integrand, 0, np.inf,
+        -(1.0/((2*sc.pi)**2.0*q)) * sc.integrate.quad(re_lind_integrand, 0, np.inf,
                                                    args=(beta, mu, q, omega))[0]
     )
 
@@ -258,8 +296,22 @@ im_chi : float
     eq = 0.5*q**2.0
     e_pl = (eq + omega)**2.0/(4*eq)
     e_mi = (eq - omega)**2.0/(4*eq)
+    im = 1.0/(4*sc.pi*beta*q) * np.log((1.0+np.exp(-beta*(e_mi-mu)))/
+                                     (1.0+np.exp(-beta*(e_pl-mu))))
+    return (
+            -im
+    )
+
+
+def fxc_correction(rs, beta, N):
+
+    omega_p = (3.0/(rs**3.0))**0.5
+
+    def integrand(x, beta):
+
+        return x**(-0.5) * 1.0/(np.tanh(0.5*beta*(3.0/x)**(3/2.)))
 
     return (
-        1.0/(4*sc.pi*beta*q) * np.log((1.0+np.exp(-beta*(e_mi-mu)))/
-                                         (1.0+np.exp(-beta*(e_pl-mu))))
+        (0.25 * 3**0.5 / (rs**2.0*N) * sc.integrate.quad(integrand, 0, rs,
+        args=(beta))[0], (omega_p/(4.0*N))/(np.tanh(0.5*beta*omega_p)))
     )
