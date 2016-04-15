@@ -17,7 +17,10 @@ ne = float(sys.argv[2])
 
 m = [len(ue.System(rs, ne, ec, 0).kval) for ec in range(6, 40, 4)]
 
-ec = [fn.mp2(ue.System(rs, ne, ec, 0)) for ec in range(6, 40, 4)]
+ec1 = [fn.mp2(ue.System(rs, ne, ec, 0)) for ec in range(6, 40, 4)]
+ec2 = [fn.mp22(ue.System(rs, ne, ec, 0)) for ec in range(6, 40, 4)]
+print ec2
 
-pl.errorbar(1.0/np.array(m)**(1.0), ec, fmt='s')
+pl.errorbar(1.0/np.array(m)**(1.0), ec1, fmt='s')
+pl.errorbar(1.0/np.array(m)**(1.0), ec2, fmt='o')
 pl.show()
