@@ -119,6 +119,7 @@ s_q : float
     def integrand(omega, q, beta, mu):
 
         return im_chi_rpa(omega, q, beta, mu) * 1.0/(np.tanh(0.5*beta*omega))
+        #return im_chi_rpa(omega, q, beta, mu) * (1.0-np.exp(-beta*omega))
 
     return (
         -(4/3.)*rs**3.0 * sc.integrate.quad(integrand, 0, np.inf,
