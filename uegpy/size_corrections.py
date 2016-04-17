@@ -3,6 +3,7 @@
 import numpy as np
 import scipy as sc
 from utils import fermi_factor
+from scipy import optimize
 
 def hf_structure_factor(q, rs, beta, mu, zeta):
     '''Static structure factor at Hartree--Fock level:
@@ -97,27 +98,74 @@ def conv_fac(nmax, alpha):
     return (2.0*sc.pi/alpha-g, g, diff)
 
 
-def rpa_structure_factor(q, beta, mu):
+def rpa_structure_factor(q, beta, mu, rs):
+    '''Finite temperature RPA static structure factor.
+
+Parameters
+----------
+q : float
+    (modulus) of wavevector considered.
+beta : float
+    Inverse temperature.
+mu : float
+    Chemical potential.
+
+Returns
+-------
+s_q : float
+   Static structure factor.
+'''
+
+    def integrand(omega, q, beta, mu):
+
+        return im_chi_rpa(omega, q, beta, mu) * 1.0/(np.tanh(0.5*beta*omega))
 
     return (
-        -1.0/(2.0*sc.pi) * sc.integrate.quad(s_integrand, 0, np.inf,
+        -(4/3.)*rs**3.0 * sc.integrate.quad(integrand, 0, np.inf,
                                                 args=(q, beta, mu))[0]
     )
 
+
 def rpa_structure_factor0(q, kf, rs):
+    '''Zero temperature RPA static structure factor.
+
+Parameters
+----------
+q : float
+    (modulus) of wavevector considered.
+
+mu : float
+    Chemical potential.
+
+Returns
+-------
+s_q : float
+   Static structure factor.
+'''
 
     return (
-        -(4/3.)*rs**3.0 * sc.integrate.quad(im_chi_rpa0, -np.inf, np.inf,
+        -(4/3.)*rs**3.0 * sc.integrate.quad(im_chi_rpa0, 0, np.inf,
                                                 args=(q, kf))[0]
     )
 
 
-def s_integrand(omega, q, beta, mu):
+def re_lind0(omega, q, kf):
+    '''Real part of Lindhard Dielectric function at :math:`T = 0`.
 
-    return im_chi_rpa(omega, q, beta, mu) * 1.0/(np.tanh(0.5*beta*omega))
+Parameters
+----------
+q : float
+    (modulus) of wavevector considered.
+omega : float
+    Frequency.
+mu : float
+    Chemical potential.
 
-
-def re_lind0(q, omega, kf):
+Returns
+-------
+re_chi_0 : float
+    Real part of Lindhard dielectric function.
+'''
 
     qb = q / kf
     nu_pl = omega/(q*kf) + q/(2*kf)
@@ -130,8 +178,23 @@ def re_lind0(q, omega, kf):
     )
 
 
-def im_lind0(q, omega, kf):
+def im_lind0(omega, q, kf):
+    '''Imaginary part of Lindhard Dielectric function at :math:`T = 0`.
 
+Parameters
+----------
+q : float
+    (modulus) of wavevector considered.
+omega : float
+    Frequency.
+mu : float
+    Chemical potential.
+
+Returns
+-------
+im_chi_0 : float
+   Real part of Lindhard dielectric function.
+'''
     qb = q / kf
     nu_pl = omega/(q*kf) + q/(2*kf)
     nu_mi = omega/(q*kf) - q/(2*kf)
@@ -142,7 +205,7 @@ def im_lind0(q, omega, kf):
     )
 
 
-def step_ab(x,a):
+def step_ab(x, a):
     '''Theta(x-a)'''
 
     if a <= x:
@@ -150,8 +213,9 @@ def step_ab(x,a):
     else:
         return 0
 
+
 def im_chi_rpa0(omega, q, kf):
-    '''Imaginary part of rpa density-density response function.
+    '''Imaginary part of T=0 rpa density-density response function.
 
 Parameters
 ----------
@@ -172,13 +236,15 @@ chi_rpa : float
 '''
 
     vq = 4.0*sc.pi / q**2.0
-    num = im_lind0(q, omega, kf)
-    re = 1-vq*re_lind0(q, omega, kf)
-    im = -(vq*im_lind0(q, omega, kf))
-    denom = ((1.0-vq*re_lind0(q, omega, kf))**2.0 +
-                                          (vq*im_lind0(q, omega, kf))**2.0)
+    num = im_lind0(omega, q, kf)
+    re = 1-vq*re_lind0(omega, q, kf)
+    im = -(vq*im_lind0(omega, q, kf))
+    denom = ((1.0-vq*re_lind0(omega, q, kf))**2.0 +
+                                          (vq*im_lind0(omega, q, kf))**2.0)
 
-    return (num/denom, num, denom, re, im)
+    return num/denom
+    #return (num/denom, num, denom, re, im)
+
 
 def im_chi_rpa(omega, q, beta, mu):
     '''Imaginary part of rpa density-density response function.
@@ -202,14 +268,43 @@ chi_rpa : float
 '''
 
     vq = 4.0*sc.pi / q**2.0
-    num = im_lind(beta, mu, q, omega)
-    denom = ((1.0-vq*re_lind(beta, mu, q, omega))**2.0 +
-                                          (vq*im_lind(beta, mu, q, omega))**2.0)
+    num = im_lind(omega, q, beta, mu)
+    denom = ((1.0-vq*re_lind(omega, q, beta, mu))**2.0 +
+                                          (vq*im_lind(omega, q, beta, mu))**2.0)
 
-    return -(1.0/sc.pi) * (num / denom)
+    return num / denom
 
 
-def re_lind(beta, mu, q, omega):
+def im_chi_rpa_dandrea(omega, q, kf, rs, ef, theta, eta):
+    '''Imaginary part of rpa density-density response function.
+
+Parameters
+----------
+omega : float
+    frequency
+q : float
+    (modulus) of wavevector considered.
+beta : float
+    Inverse temperature.
+mu : float
+    Chemical potential.
+
+Returns
+-------
+chi_rpa : float
+    Imaginary part of RPA density-density response function.
+
+'''
+
+    vq = 4.0*sc.pi / q**2.0
+    num = dandrea_im(omega, q, kf, rs, ef, theta, eta)
+    denom = ((1.0-vq*dandrea_real(omega, q, kf, rs, ef, theta, eta))**2.0 +
+                      (vq*dandrea_im(omega, q, kf, rs, ef, theta, eta))**2.0)
+
+    return num / denom
+
+
+def re_lind(omega, q, beta, mu):
     '''Real part of free-electron Lindhard density-density response function.
 
 Parameters
@@ -261,9 +356,6 @@ int : float
 
     k_pl = (0.5*q**2.0 + omega) / q
     k_mi = (0.5*q**2.0 - omega) / q
-    #print ((np.log(np.abs((k_pl+k)/(k_pl-k)))
-                                             ##- np.log(np.abs((k_mi+k)/(k_mi-k)))))
-
 
     return (
         k * fermi_factor(0.5*k**2.0, mu, beta) * (np.log(np.abs((k_pl+k)/(k_pl-k)))
@@ -271,7 +363,7 @@ int : float
     )
 
 
-def im_lind(beta, mu, q, omega):
+def im_lind(omega, q, beta, mu):
     '''Imaginary part of free-electron Lindhard density-density response function.
 
 Parameters
@@ -296,10 +388,9 @@ im_chi : float
     eq = 0.5*q**2.0
     e_pl = (eq + omega)**2.0/(4*eq)
     e_mi = (eq - omega)**2.0/(4*eq)
-    im = 1.0/(4*sc.pi*beta*q) * np.log((1.0+np.exp(-beta*(e_mi-mu)))/
-                                     (1.0+np.exp(-beta*(e_pl-mu))))
     return (
-            -im
+        -1.0/(4*sc.pi*beta*q) * np.log((1.0+np.exp(-beta*(e_mi-mu)))/
+                                         (1.0+np.exp(-beta*(e_pl-mu))))
     )
 
 
@@ -314,4 +405,48 @@ def fxc_correction(rs, beta, N):
     return (
         (0.25 * 3**0.5 / (rs**2.0*N) * sc.integrate.quad(integrand, 0, rs,
         args=(beta))[0], (omega_p/(4.0*N))/(np.tanh(0.5*beta*omega_p)))
+    )
+
+def re_rpa_dielectric(omega, q, kf):
+
+    vq = 4.0*sc.pi / q**2.0
+    re = 1.0 - vq*re_lind0(omega, q, kf)
+
+    return re
+
+def q0_plasmon_structure_factor(q, rs):
+
+    return q**2.0 / (2.0*(3.0/rs**3.0)**0.5)
+
+def bijl_feynman_structure(q, kf):
+
+    omega_q = sc.optimize.fsolve(re_rpa_dielectric, 0.5*kf**2.0, args=(q, kf))[0]
+
+    return q**2.0 / (2*omega_q)
+
+def dandrea_real(omega, q, kf, rs, ef, theta, eta):
+
+    def integrand(y, theta, x, eta):
+
+        return  y / (1.0+np.exp(y**2.0/theta-eta)) * np.log(np.abs((x-y)/(x+y)))
+
+    Q = q / (2.0*kf)
+    z = omega / (4.0*ef)
+    alpha = (4.0/(9.0*sc.pi))**(1.0/3.0)
+
+    phi_pl = sc.integrate.quad(integrand, 0, np.inf, args=(theta, z/Q+Q, eta))[0]
+    phi_mi = sc.integrate.quad(integrand, 0, np.inf, args=(theta, z/Q-Q, eta))[0]
+
+    return 0.5*q**2.0 * alpha * rs / (16.0*sc.pi**2.0*Q**3.0) * (phi_pl - phi_mi)
+
+
+def dandrea_im(omega, q, kf, rs, ef, theta, eta):
+
+    Q = q / (2.0*kf)
+    z = omega / (4.0*ef)
+    alpha = (4.0/(9.0*sc.pi))**(1.0/3.0)
+
+    return (
+        - (2*sc.pi)**(-1.0)*(q**2.0 * alpha * rs * theta)/(32.0*Q**3.0) *
+        np.log((1+np.exp(eta-(1.0/theta)*(z/Q-Q)**2.0))/(1+np.exp(eta-(1.0/theta)*(z/Q+Q)**2.0)))
     )
