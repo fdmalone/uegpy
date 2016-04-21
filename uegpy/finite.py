@@ -487,6 +487,39 @@ def mp22(sys):
     return - 2*emp2 / (sc.pi**2.0*sys.L**2.0)
 
 
+def ft_mp2(sys, beta, mu):
+
+    kvals = sys.kval
+    evals = sys.spval
+
+    emp2 = 0
+
+    for (k, ek) in zip(kvals, evals):
+        for (p, ep) in zip(kvals, evals):
+            for q in kvals:
+                qsq = np.dot(q,q)
+                kq = k + q
+                pq = p - q
+                ekq = 0.5*sys.kfac**2.0*np.dot(kq,kq)
+                epq = 0.5*sys.kfac**2.0*np.dot(pq,pq)
+                # Outside fermi surface
+                if ekq <= sys.ecut*sys.kfac**2.0 and epq <= sys.ecut*sys.kfac**2.0:
+                    ed = qsq**2.0 # Direct
+                    #print k, p, q, k+q, p-q, ekq, epq, sys.ecut*sys.kfac**2.0
+                    f_k = fermi_factor(ek, mu, beta)
+                    f_p = fermi_factor(ep, mu, beta)
+                    f_kp = fermi_factor(epq, mu, beta)
+                    f_kq = fermi_factor(ekq, mu, beta)
+                    fermi_diff = f_k*f_p*(1-f_kp)*(1-f_kq)-(1-f_k)*(1-f_p)*f_kq*f_kp
+                    ex = qsq*(np.dot(kq-p, kq-p)) # Exchange
+                    denom = ekq + epq - ek - ep
+                    #print denom, ed, ex, ekq, epq, ek, ep
+                    if (ed > 0 and ex > 0 and denom > 0):
+                        emp2 += fermi_diff*(1.0/(ed*denom) - 0.5/(ex*denom))
+
+    return -2*emp2 / (sc.pi**2.0*sys.L**2.0)
+
+
 def mp2(sys):
 
     emp2 = 0.0
