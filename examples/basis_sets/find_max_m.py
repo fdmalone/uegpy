@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             '../uegpy')))
+                                             '../../uegpy')))
 import ueg_sys as ue
 import finite as fp
 import numpy as np
@@ -23,10 +23,7 @@ for b in bvals:
         if M_old != M_new:
             u_new = (fp.energy_sum(b, fp.chem_pot_sum(system,
                        system.deg_e, b), system.deg_e, system.pol))
-            print u_new-u_old
             if u_new-u_old < 1e-6:
-                print b, M_new, ec
                 break
             u_old = u_new
             M_old = len(system.spval)
-

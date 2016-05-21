@@ -9,7 +9,6 @@ import matplotlib.pyplot as pl
 import numpy as np
 import pandas as pd
 import infinite as inf
-import size_corrections as szc
 import structure as st
 import scipy as sc
 import formats as fmt
@@ -26,7 +25,8 @@ frame = []
 for b in beta:
     beta = b / system.ef
     mu = inf.chem_pot(rs, beta, system.ef, zeta)
-    conv = [st.rpa_matsubara(qmax*system.kf, 1.0/b, beta*mu, system.zeta, system.kf, n) for n in nmax]
+    conv = [st.rpa_matsubara(qmax*system.kf, 1.0/b, beta*mu, system.zeta,
+            system.kf, n) for n in nmax]
     frame.append(pd.DataFrame({'S_max': conv, 'n': nmax, 'beta': b},
                  columns=['beta', 'n', 'S_max']))
 

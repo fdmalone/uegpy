@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             '../uegpy')))
+                                             '../../uegpy')))
 import ueg_sys as ue
 import finite as fp
 import infinite as inf
@@ -32,7 +32,7 @@ for (o, v) in zip(['t', 'ux'], ['t', 'v']):
     corrected = (
         ut.add_frame(f2, frame, op='-', val1=o+'_inf', val2=v, label='dN'+o)
     )
-corrected =pd.merge(corrected, frame, on=['Beta', 'rs'])
+corrected = pd.merge(corrected, frame, on=['Beta', 'rs'])
 
 print ("# Running uegpy version: %s"%(ut.get_git_revision_hash()))
 print ("# Time taken: %s s"%time)

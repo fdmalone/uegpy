@@ -3,13 +3,13 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             '../uegpy')))
+                                             '../../uegpy')))
 import ueg_sys as ue
 import finite as fp
 import numpy as np
 import pandas as pd
 
-system = ue.System([1.0, 33, 200, 2])
+system = ue.System(1.0, 33, 200, 2)
 
 bvals = [2**x for x in range(-5,5)]
 

@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             '../uegpy')))
+                                             '../../uegpy')))
 import ueg_sys as ue
 import finite as fp
 import utils as ut
@@ -15,7 +15,7 @@ ne = float(sys.argv[3])
 
 cutoff = ut.kinetic_cutoff(ne, 1.0/beta)
 
-system = ue.System([0.1, ne, cutoff, 2])
+system = ue.System(0.1, ne, cutoff, 2)
 t_per_it = mc.sample_canonical_energy(system, beta/system.ef, 10)[1] / 10
 
 time = 0.9 * time
@@ -28,4 +28,3 @@ print ("# Running uegpy version: %s"%(ut.get_git_revision_hash()))
 print ("# Time taken: %s s"%time)
 
 print frame.to_string(index=False)
-

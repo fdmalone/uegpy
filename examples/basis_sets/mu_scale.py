@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             '../uegpy')))
+                                             '../../uegpy')))
 import ueg_sys as ue
 import finite as fp
 import numpy as np

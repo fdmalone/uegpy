@@ -2,14 +2,13 @@
 
 import sys
 import os
-sys.path.append('/home/fm813/projects/uegpy/uegpy/')
-sys.path.append('/home/fm813/projects/scripts/formatting/')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                             '../../uegpy')))
 import ueg_sys as ue
 import matplotlib.pyplot as pl
 import numpy as np
 import pandas as pd
 import infinite as inf
-import size_corrections as szc
 import structure as st
 import scipy as sc
 import formats as fmt

@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             '../uegpy')))
+                                             '../../uegpy')))
 import ueg_sys as ue
 import matplotlib.pyplot as pl
 import numpy as np
@@ -42,7 +42,6 @@ for b in bvals:
     [a, c]= sc.curve_fit(quad, (qvals)**2.0, ft)[0]
     av.append(a)
     bv.append(c)
-    print a, c
     pl.plot(qvals, quad(qvals**2.0, a, c))
     pl.show()
 

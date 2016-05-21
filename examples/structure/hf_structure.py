@@ -3,7 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                             '../uegpy')))
+                                             ',./../uegpy')))
 import ueg_sys as ue
 import matplotlib.pyplot as pl
 import numpy as np
@@ -28,6 +28,7 @@ for b in bvals:
     ft = [szc.hf_structure_factor(q*system.kf, rs, beta, mu, zeta) for q in
           qvals]
     pl.plot(qvals, ft, label=r'$\Theta=%s$'%(1.0/b), linestyle='--')
+
 gs = [szc.ground_state(q*system.kf, system.kf) for q in qvals]
 pl.plot(qvals, np.array(gs), label=r'$\Theta=0$', linestyle='--')
 pl.legend(numpoints=1, loc='best')
