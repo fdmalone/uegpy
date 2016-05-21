@@ -85,7 +85,7 @@ def hartree_fock_ground_state_integral(q, rs, kf):
     .. math::
         S(q) = 1 - \\frac{r_s^3}{3\pi}
                \int_0^{\infty} dk k^2 \\theta(k_F-k) \int_{-1}^{1} du
-               \\theta(k_F-(k^2+2kq+q^2))
+               \\theta(k_F-(k^2+2kqu+q^2))
 
 Parameters
 ----------
@@ -122,8 +122,8 @@ def rpa(q, beta, mu, rs):
         This uses a naive approach which directly evaluates
         :math:`\mathrm{Im}[\chi^{\mathrm{RPA}}]`. Better results can be found
         using rpa_matsubara. In particular this routine will likely miss the
-        plasmon contribution to the structure factor which dominates at low
-        :math:`q`.
+        plasmon contribution to the structure factor which dominates for some
+        :math:`q_c(r_s, \Theta)` .
 
 Parameters
 ----------
