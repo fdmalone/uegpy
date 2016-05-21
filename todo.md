@@ -1,8 +1,9 @@
-- [ ] different dimensionalities
-- [ ] documentation
-- [ ] travis
-- [ ] hartree-Fock check + grand canonical
-- [ ] notes
-    - [ ] Do thermodynamics generally, then stuff, tabulate quantities + maths in terms of rs then update code and check.
+- [ ] Different Dimensions
+- [ ] Docs
+- [ ] Tests
+- [ ] Thermal Hartree-Fock
 - [ ] input/output/json
 - [ ] Optimise
+- [ ] refactor ueg system / rename.
+- [ ] Check correctness
+- [ ] Asymptotic forms for matsubara sums
