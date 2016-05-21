@@ -55,9 +55,8 @@ def hartree_fock_ground_state(q, kf):
         S(q) =
         \\begin{cases}
             \\frac{1}{2} \Big(\\frac{3}{4} \\frac{q}{q_F} - \\frac{1}{16}
-            \Big(\\frac{q}{q_F}\Big)^3\Big) & \text{if} q <= 2q_F \\\\
-            \frac{1}{2} & \text{if} q > 2q_F
-        \end{cases}
+            \Big(\\frac{q}{q_F}\Big)^3\Big) & \text{if} q <= 2q_F \\\\ \frac{1}{2} & \text{if} q > 2q_F
+        \\end{cases}
 
 Parameters
 ----------
