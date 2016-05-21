@@ -5,7 +5,7 @@
     - [ ] Line length conformity
     - [ ] Infinite Module
 - [ ] Tests
-    - [ ] Refactor directory structure
+    - [x] Refactor directory structure
     - [ ] travis-ci
 - [ ] Thermal Hartree-Fock
 - [ ] input/output/json
