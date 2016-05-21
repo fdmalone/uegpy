@@ -1,6 +1,12 @@
 - [ ] Different Dimensions
 - [ ] Docs
+    - [x] Structure factor
+    - [ ] Dielectric response
+    - [ ] Line length conformity
+    - [ ] Infinite Module
 - [ ] Tests
+    - [ ] Refactor directory structure
+    - [ ] travis-ci
 - [ ] Thermal Hartree-Fock
 - [ ] input/output/json
 - [ ] Optimise
