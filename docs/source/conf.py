@@ -15,6 +15,14 @@
 import sys
 import os
 import shlex
+import mock
+
+# Fake imports to allow docs to build on read the docs.
+# http://stackoverflow.com/questions/11877571/how-to-mock-so-that-from-x-import-$works/
+MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot',
+                'scipy.optimize']
+for mod_name in MOCK_MODULES:
+sys.modules[mod_name] = mock.Mock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
