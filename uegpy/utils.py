@@ -53,6 +53,30 @@ fb_k : float
     return 1.0 - fermi_factor(ek, mu, beta)
 
 
+def fermi_angle(u, k, q, mu, beta):
+    ''' Fermi factor for :math:`k + q`. Used for integration.
+
+Parameters
+----------
+u : float
+    Integration variable = :math:`\cos \theta`.
+k, q : float
+   Magnitude of wavevectors
+mu : float
+    Chemical potential.
+beta : float
+    Inverse temperature.
+
+Returns
+-------
+f_kq : float
+    Fermi factor.
+
+'''
+
+    return fermi_factor(0.5*(k**2.0+2.0*k*q*u+q**2.0), mu, beta)
+
+
 def madelung_approx(system):
     ''' Use expression in Schoof et al. (PhysRevLett.115.130402) for the
     Madelung contribution to the total energy. Please cite these guys and
@@ -258,3 +282,218 @@ f : :class:`pandas.DataFrame`
         )
 
     return f1
+
+
+def vq(q):
+    ''' Coulomb interaction.
+
+Parameters
+----------
+q : float.
+    Magnitude of
+
+Returns
+-------
+vq : float
+    Coulomb interaction.
+
+'''
+
+    return 4.0*sc.pi / q*q
+
+
+def vq_vec(q):
+    ''' Coulomb interaction.
+
+Parameters
+----------
+q : vector.
+    Magnitude of
+
+Returns
+-------
+vq : float
+    Coulomb interaction.
+
+'''
+
+    return 4.0*sc.pi / np.dot(q,q)
+
+
+def ef(rs, zeta):
+    ''' Fermi Energy for 3D UEG.
+
+Parameters
+----------
+rs : float
+    Density parameter.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+ef : float
+    Fermi Energy.
+
+'''
+
+    return 0.5 * (9.0*(zeta+1)*sc.pi*0.25)**(2.0/3.0) * rs**(-2.0)
+
+
+def step_angle(u, k, q, kf):
+    ''' Heaviside steb function for k+q.
+
+Parameters
+----------
+a, b : float
+    Arguments of step function.
+
+Returns:
+--------
+theta(a-b): float
+    Heaviside step function.
+'''
+
+    if (np.sqrt(k**2.0+q**2.0+2*k*q*u) > kf):
+        return 0
+    else:
+        return 1
+
+
+def step(a, b):
+    ''' Heaviside steb function i.e., :math:`\theta(a-b)`
+
+Parameters
+----------
+a, b : float
+    Arguments of step function.
+
+Returns:
+--------
+theta(a-b): float
+    Heaviside step function.
+'''
+
+    if (a < b):
+        return 0
+    else:
+        return 1
+
+
+def step_angle(u, k, q, kf):
+    ''' Heaviside steb function for k+q.
+
+Parameters
+----------
+a, b : float
+    Arguments of step function.
+
+Returns:
+--------
+theta(a-b): float
+    Heaviside step function.
+'''
+
+    if (np.sqrt(k**2.0+q**2.0+2*k*q*u) > kf):
+        return 0
+    else:
+        return 1
+
+
+def plasma_freq(rs):
+    ''' Plasma frequency for 3D UEG.
+
+Parameters
+----------
+rs : float
+    Density parameter.
+
+Returns
+-------
+omega_p : float
+    Plasma frequency.
+
+'''
+
+    return (3.0/rs**3.0)**0.5
+
+
+def alpha(zeta):
+    ''' Alpha Parameter for ueg.
+
+Parameters
+----------
+zeta : int
+
+Returns
+-------
+alpha : float
+
+'''
+
+    return (4.0/(9*sc.pi*(zeta+1)))**(1.0/3.0)
+
+
+def gamma(rs, theta, zeta):
+    ''' Classical plasma coupling parameter for 3D UEG
+
+Parameters
+----------
+rs : float
+    Density Parameter.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+gamma : float
+    Coupling parameter.
+
+'''
+
+    return 2.0 * alpha(zeta)**2.0 * rs / theta
+
+
+def rs_gamma(gamma, theta, zeta):
+    ''' Find rs give a gamma and theta.
+
+Parameters
+----------
+rs : float
+    Density Parameter.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+gamma : float
+    Coupling parameter.
+
+'''
+
+    return gamma * theta / (2.0 * alpha(zeta)**2.0)
+
+def theta_gamma(gamma, rs, zeta):
+    ''' Find theta give a gamma and ts.
+
+Parameters
+----------
+rs : float
+    Density Parameter.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+gamma : float
+    Coupling parameter.
+
+'''
+
+    return 2.0 * alpha(zeta)**2.0 * rs / gamma
