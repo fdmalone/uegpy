@@ -36,3 +36,7 @@ build/
 *.gz
 *.fdb_latexmk
 *.fls
+*.so
+*.pyx
+setup.py
+*.c

@@ -7,6 +7,8 @@ from scipy import integrate
 import random as rand
 from scipy import optimize
 import utils as ut
+import dielectric as di
+import structure as st
 
 
 def nav(beta, mu, zeta):
@@ -179,7 +181,10 @@ def gc_free_energy_integral(beta, mu, rs):
     ''' Free energy:
 
     .. math::
-        \Omega = 
+
+        U = (2-\\zeta) \\frac{8\\sqrt{2}}{9\\pi}r_s^3\\beta^{-5/2} I(5/2, \\eta)
+
+        [todo] : check expression here.
 
 Parameters
 ----------
@@ -193,12 +198,12 @@ rs : float
 Returns
 -------
 Omega : float
-    Grand potential (Helmholtz Free energy.)
+    Ideal grand potential.
 
 '''
 
     return (
-            -(2/3.) * ((4*sc.pi*rs**3.0)/3.0) * np.sqrt(2.0)/sc.pi**2.0
+        -(2/3.) * (2-zeta) * ((4*sc.pi*rs**3.0)/3.0) * np.sqrt(2.0)/sc.pi**2.0
                         * beta**(-5./2.) * fermi_integral(5./2., mu*beta)
     )
 
@@ -263,6 +268,8 @@ def inversion_correction(rs, beta, mu, zeta):
 
         \\frac{1}{2\\sqrt{2}\\pi^4}\\beta^{-3/2}I_{-1/2}(\\eta_0)^{3}
 
+    [todo] : just make this the chemical potential.
+
 Parameters
 ----------
 rs : float
@@ -284,112 +291,125 @@ corr : float
     return 2**(-0.5)/(2.0*sc.pi**4.0)*beta**(-3./2.)*hfx_integrand(beta*mu, 3.0)
 
 
-def thf_integrand_0(q, eq, k, beta, mu):
+def rpa_correlation_free_energy_mats(rs, theta, zeta, lmax):
+    ''' RPA correlation free energy as given in Tanaka and Ichimaru, Phys. Soc.
+    Jap, 55, 2278 (1986).
 
-    # Fix fermi factor here.
-    return (
-        q * ut.fermi_factor(eq, mu, beta) * np.log(np.abs((k+q)/(k-q)))
-    )
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+lmax : int
+    Maximum Matsubara frequency to include.
 
+Returns
+-------
+f_c : float
+    Exchange correlation free energy.
 
-def thf_spect(k, beta, mu, n):
+'''
 
-    # Units
-    return 0.5*k**2.0 - thf_ex_rec(k, beta, mu, n)
+    ef = ut.ef(rs, zeta)
+    beta = 1.0 / (ef*theta)
+    mu = chem_pot(rs, beta, ef, zeta)
+    eta = beta * mu
+    kf = (2.0*ef)**0.5
 
-def thf_ex_rec(k, beta, mu, n):
+    def integrand(q, theta, eta, zeta, kf, l):
 
-    if n == 1:
-        if k == 0:
-            return 1
-        else:
-            return k
-    else:
-        0.5*k**2.0 - ((1.0/(sc.pi*k))*sc.integrate.quad(thf_integrand_0, 0,
-                   np.inf, args=(thf_ex_rec(k, beta, mu, n-1), k, beta, mu)))
+        eps_0 = ut.vq(q) * di.lindhard_0_matsubara(q, theta, eta, zeta, kf, l)
 
+        return q**2.0 * (np.log(1-eps_0) + eps_0)
 
-def t0_hf_integrand(p, k):
-    '''Integrand for T=0 hartree fock exchange potential.'''
+    integral = sum([sc.integrate.quad(integrand, 0, np.inf, args=(theta, eta,
+                                zeta, kf, l))[0] for n in range(-lmax, lmax+1)])
 
-    return p*(np.log(np.abs((k+p)/(k-p))))
-
-
-def t0_spect(k, k_f):
-    '''T=0 hf spectrum calculated using integral.'''
-
-    return 0.5*k**2.0 - ((1.0/(sc.pi*k))*sc.integrate.quad(t0_hf_integrand, 0,
-                                                   k_f, args=(k))[0])
-
-
-def t0_spect_dis(k, k_f, dt=1e-6):
-    '''T=0 HF spectrum calculated using discretised (explicitly).'''
-
-    if k < k_f:
-        q0 = np.arange(0, k-dt, dt)
-        q1 = np.arange(k+dt, k_f, dt)
-        q = np.concatenate((q0, q1), axis=0)
-    else:
-        q = np.arange(0, k_f, dt)
-    return 1.0/(sc.pi*k) * sc.integrate.simps(t0_hf_integrand(q,k), q)
+    return  rs**3.0 / (3.0*sc.pi*beta) * integral
 
 
-def nav_hf_integrand(k, beta, mu, n):
+def rpa_xc_energy_tanaka(rs, theta, zeta, lmax):
+    ''' RPA XC Internal energy as given in Phys. Soc. Jap, 55, 2278 (1986).
 
-    return k**2.0*ut.fermi_factor(thf_spect(k, beta, mu, n), mu, beta)
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+lmax : int
+    Maximum Matsubara frequency to include.
 
+Returns
+-------
+U_xc : float
+    Exchange-Correlation energy.
 
-def nav_hf(beta, mu, zeta, n):
+'''
 
-    return (
-        (2-zeta) * (2**0.5/(2.0*sc.pi**2.0))*sc.integrate.quad(nav_hf_integrand,
-                                        0, np.inf, args=(beta, mu, n))[0]
-    )
+    ef = ut.ef(rs, zeta)
+    beta = 1.0 / (ef*theta)
+    mu = chem_pot(rs, beta, ef, zeta)
+    eta = beta * mu
 
+    def integrand(x, gamma, lamb, theta, eta, nmax):
 
-def sigmax_discrete(kv, eq, beta, mu, zeta, kmax, dq=0.1):
-
-    sigma = np.zeros(len(eq))
-    q = np.arange(0.1, kmax, dq)
-    q_loc = []
-    eq_loc = [] 
-    it = 0
-    # Look at interpolating.
-    for k in kv:
-        loc = 0
-        for x in q:
-            if k == x:
-                q_loc = np.delete(q, loc)
-                eq_loc = np.delete(eq, loc)
-            loc += 1
-        #print len(q_loc), len(eq_loc), len(eq)
-        sigma[it] = (
-            - 1.0/(sc.pi*k)*sc.integrate.simps(thf_integrand_0(q_loc,
-                                                       eq_loc, k, beta, mu), q_loc)
+        return (
+            x**2.0 * (sum([np.log(1.0+2*gamma*theta/(sc.pi*lamb*x**2.0)
+                * di.tanaka(x, rs, theta, eta, zeta, l)) for l in range(-lmax, lmax+1)]) - 4*gamma/(3*sc.pi*lamb*x**2.))
         )
-        it += 1
-    return sigma
 
 
-def self_consist(rs, beta, mu, zeta, ef):
+    return (
+        0.75 * theta * ef * sc.integrate.quad(integrand, 0, 5.1,
+                args=(ut.gamma(rs, theta, zeta), ut.alpha(zeta), theta, eta,
+                      nmax))[0] / (zeta+1)
+    )
 
-    # Free electrons is our reference point.
-    mu_old = chem_pot(rs, beta, ef, zeta)
 
-    it = 1
-    max_it = 2
-    while it < max_it:
-        # Calculate average particle number with given chemical potential and
-        # spectrum.
-        #nav_new = nav_hf(beta, mu_old, it)
-        # Work out new chemical potential.
-        #mu = chem_pot(nav_hf, beta, mu_old, method='nav_hf')
-        print mu, mu_old, nav_new
-        if abs(mu_new-mu_old) < de:
-            break
+def rpa_v_tanaka(rs, theta, zeta, nmax):
+    ''' Evaluate RPA electron-electron energy from Tanaka & Ichimaru JPSJ 55,
+        2278 (1986). This works.
+
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+lmax : int
+    Maximum Matsubara frequency to include.
+
+Returns
+-------
+V : float
+    Potential energy.
+
+'''
+
+    ef = ut.ef(rs, zeta)
+    beta = 1.0 / (ef*theta)
+    mu = chem_pot(rs, beta, ef, zeta)
+    eta = beta * mu
+    kf = (2.0*ef)**0.5
+
+    def integrand(x, rs, theta, eta, zeta, nmax, kf):
+
+        if x > 4:
+            return st.rpa_tanaka_high_k(x, kf) - 1.0
         else:
-            mu = mu_old
-        it += 1
+            return (
+                1.5 * theta * sum([di.im_chi_tanaka(x, rs, theta, eta, zeta, l) for l in range(-nmax, nmax+1)]) - 1.0
+            )
 
-    return mu
+    integral = sc.integrate.quad(integrand, 0, np.inf, args=(rs, theta,
+                                   eta, zeta, nmax, kf))[0]
 
+    return  ut.gamma(rs, theta, zeta) * integral / (sc.pi * ut.alpha(zeta))

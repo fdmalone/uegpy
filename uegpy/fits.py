@@ -152,3 +152,92 @@ f_xc : float
     return ((-1.0/rs)*(w*a(t)+b(t, zeta)*rs**(1.0/2.0)+c(t, zeta)*rs) /
                       (1+d(t, zeta)*rs**(1.0/2.0)+e(t, zeta)*rs))
 
+
+def vwn_rpa(rs, zeta):
+    ''' Vosko Wilk Nusair fit to RPA correlation energy of UEG. Can. J. Phys.
+    58, 1200 (1980).
+
+    Currently unpolarised only.
+
+Parameters
+----------
+rs : float
+    Density Parameter.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+ec : float
+    Correlation energy.
+
+'''
+
+    b = 13.0720
+    c = 42.7198
+    x0 = -0.409286
+    A = 0.0621814
+
+    x = rs**0.5
+    Q = (4*c - b**2.0)**0.5
+
+    def X(q):
+        return q**2.0 + b*q + c
+
+    return (
+        0.5 * A * (np.log(x**2.0/X(x)) + (2*b/Q) * np.arctan(Q/(2.0*x+b)) -
+        (b*x0/X(x0)) * (np.log(((x-x0)**2.0)/X(x)) + (2*(b+2*x0)/Q)
+        * np.arctan(Q/(2*x+b))))
+    )
+
+
+
+def pdw(rs, t, zeta):
+    ''' Perrot, Dharma-wardana (Phys. Rev. A 30, 2619 (1984).)fit to RPA
+    correlation free energy of unpolarised UEG.
+
+Parameters
+----------
+rs : float
+    Density Parameter.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+f_c : float
+    Correlation free energy energy.
+
+'''
+
+
+    def c1(rs):
+
+        return 10.9 / (1.0 + 0.000472*rs)
+
+    def c2(rs):
+
+        return (
+            (39.5422 - 52.2381*rs**0.25 + 8.48554*rs**0.75) /
+            (1 + 17.0999*rs**0.25)
+        )
+
+    def c3(rs):
+
+        return (
+            3.88860 / (1 + 0.133620*rs**0.5)
+        )
+
+    def c4(rs):
+
+        return 0.122285 + 0.254281*rs**0.5
+
+    def fh(rs, t):
+
+        return -0.425437*(t/rs)**0.5 * np.tanh(1.0/t)
+
+
+    return (
+        vwn_rpa(rs, zeta)*(1.0  + c1(rs)*t + c2(rs)*t**0.25)*np.exp(-c3(rs)/t) +
+        fh(rs, t)*np.exp(-c4(rs)/t)
+    )

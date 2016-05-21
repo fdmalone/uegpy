@@ -446,5 +446,3 @@ Z_GC : float
         Z_GC = Z_GC * (1+np.exp(-beta*(i-cpot)))
 
     return Z_GC
-
-
