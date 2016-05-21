@@ -20,7 +20,7 @@ import mock
 # Fake imports to allow docs to build on read the docs.
 # http://stackoverflow.com/questions/11877571/how-to-mock-so-that-from-x-import-$works/
 MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot',
-                'scipy.optimize']
+                'scipy.optimize', 'pandas']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
