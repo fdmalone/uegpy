@@ -6,6 +6,7 @@ properties of the uniform electron gas (UEG). This was intended mostly for my ow
 education but can evaluate useful things albeit in an incredibly suboptimal fashion.
 
 Currently we can do:
+
 * Internal, potential and free energies for the the 3D-UEG as a function of
 temperature at various levels of approximation. Currently we can do ideal,
 Hartree--Fock and RPA.
@@ -14,6 +15,8 @@ Hartree--Fock and RPA.
 
 Most of these quantities can be calculated in the thermodynamic limit as well as
 for a finite number of electrons in the canonical and grand canonical ensemble.
+
+This is a work in progress and probably full of bugs.
 
 Documentation
 -------------
