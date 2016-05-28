@@ -184,7 +184,7 @@ e_c : float
 
     # Determined numerically using `ref`tests/find_max_m.py, ensures results are
     # converged within 1e-6 Ha.
-    ec_ref = 98
+    ec_ref = 207
     t_ref = 8
 
     sgn = np.sign(t_ref-theta)
