@@ -87,7 +87,6 @@ Returns
 
 N : float
     Number of electrons.
-
 '''
 
     N = sum(beta*g_k/(2*(np.cosh(beta*(e_k-mu))+1))  for
@@ -268,7 +267,7 @@ ex : float
     return -ex/(sc.pi*L)
 
 
-def canonical_partition_function(system):
+def canonical_partition_function(system, beta):
     ''' Calculate canonical partition function from single particle eigenvalues.
 
     Warning: This gets very expensive very fast.
@@ -288,7 +287,7 @@ Z : float
 '''
 
     label = np.arange(0,len(system.spval))
-    combs = list(itertools.combinations(label, system.nel))
+    combs = list(itertools.combinations(label, system.ne))
     U = 0
     Z = 0
 
