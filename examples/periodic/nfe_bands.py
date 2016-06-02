@@ -11,29 +11,19 @@ import scipy as sc
 import numpy as np
 import matplotlib.pyplot as pl
 
-# Simple cubic lattice
-basis = pc.Basis(0.5*np.array([1, 1, -1]), 0.5*np.array([-1, 1, 1]),
-                 0.5*np.array([1, -1, 1]))
+# FCC Lattice
+basis = pc.Basis(0.5*np.array([1, 1, 0]), 0.5*np.array([0, 1, 1]),
+                 0.5*np.array([1, 0, 1]))
 
-gamma = [0, 0, 0]
-H = [0, 0, 2*sc.pi]
-N = [0, sc.pi, sc.pi]
-P = [sc.pi, sc.pi, sc.pi]
+kz = np.linspace(0, 2*sc.pi, 100)
 
-kx = np.linspace(0, 2*sc.pi, 100)
-
-print kx
-print basis.b1, basis.b2, basis.b3
-
-ke = [pc.kinetic_energy(np.array([0, 0, k])) for k in kx]
-ke2 = [pc.kinetic_energy(np.array([0, 0, k])+(basis.b3-basis.b1-basis.b2)) for k in kx]
-ke3 = [pc.kinetic_energy(np.array([0, 0, k])+(basis.b2-basis.b1)) for k in kx]
-ke4 = [pc.kinetic_energy(np.array([0, 0, k])+(basis.b1-basis.b2-basis.b3)) for k in kx]
-# ke4 = [pc.kinetic_energy(np.array([0, 0, k])+basis.b3) for k in kx]
-
-# pl.plot(kx, ke)
-pl.plot(kx, ke2)
-pl.plot(kx, ke3)
-pl.plot(kx, ke4)
+nmax = 3
+for m1 in range(-nmax, nmax):
+    for m2 in range(-nmax, nmax):
+        for m3 in range(-nmax, nmax):
+            gn = m1*basis.b1 + m2*basis.b2 + m3*basis.b3
+            ek = ([0.5*np.dot(np.array([0, 0, k])+gn, np.array([0, 0, k])+gn) for
+                  k in kz])
+            pl.plot(kz, ek)
 
 pl.show()
