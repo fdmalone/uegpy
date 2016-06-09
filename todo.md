@@ -13,3 +13,5 @@
 - [ ] refactor ueg system / rename.
 - [ ] Check correctness
 - [ ] Asymptotic forms for matsubara sums
+- [ ] Finite system sizes
+- [ ] Other qchem methods
