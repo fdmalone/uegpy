@@ -4,6 +4,7 @@ import scipy as sc
 import utils as ut
 from scipy import optimize
 import dielectric as di
+import infinite as inf
 
 
 def hartree_fock(q, rs, beta, mu, zeta):
@@ -37,12 +38,12 @@ S(q) : float
     def integrand(k, q, mu, beta):
 
         return (
-            k**2.0 * fermi_factor(0.5*k**2.0, mu, beta) *
-            sc.integrate.quad(fermi_angle, -1.0, 1.0, args=(k, q, mu, beta))[0]
+            k**2.0 * ut.fermi_factor(0.5*k**2.0, mu, beta) *
+            sc.integrate.quad(ut.fermi_angle, -1.0, 1.0, args=(k, q, mu, beta))[0]
         )
 
     return (
-        0.5*(1.0 - (rs**3.0/(3.0*sc.pi)) *
+        (1.0 - (2-zeta)*rs**3.0/(3.0*sc.pi) *
                sc.integrate.quad(integrand, 0, np.inf, args=(q, mu, beta))[0])
     )
 
@@ -70,9 +71,9 @@ S(q) : float
 '''
 
     if (q <= 2*kf):
-        return 0.5*(3.0/4.0 * q/kf - 1.0/16.0 * (q/kf)**3.0)
+        return (3.0/4.0 * q/kf - 1.0/16.0 * (q/kf)**3.0)
     else:
-        return 0.5
+        return 1
 
 
 def hartree_fock_ground_state_integral(q, rs, kf):
