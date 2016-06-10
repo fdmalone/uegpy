@@ -11,7 +11,7 @@ def hartree_fock(q, rs, beta, mu, zeta):
     '''Static structure factor at Hartree--Fock level:
 
     .. math::
-        S(q) = 1 - \\frac{3}{2 (2\pi r_s)^3}
+        S(q) = 1 - \\frac{r_s^3}{3\pi}
                \int_0^{\infty} dk k^2 f_k \int_{-1}^{1} du
                \\frac{1}{e^{\\beta(\\frac{1}{2}(k^2+q^2+2kqu)}+1}
 
@@ -55,9 +55,9 @@ def hartree_fock_ground_state(q, kf):
         S(q) =
         \\begin{cases}
             \\frac{1}{2} \Big(\\frac{3}{4} \\frac{q}{q_F} - \\frac{1}{16}
-            \Big(\\frac{q}{q_F}\Big)^3\Big) & \text{if} q <= 2q_F \\
-            \frac{1}{2} & \text{if} q > 2q_F
-        \end{cases}
+            \Big(\\frac{q}{q_F}\Big)^3\Big) & \\text{if} \\ q \le 2q_F \\\\
+            \\frac{1}{2} & \\text{if} \\ q > 2q_F
+        \\end{cases}
 
 Parameters
 ----------
@@ -83,9 +83,9 @@ def hartree_fock_ground_state_integral(q, rs, kf):
     '''Static structure factor at Hartree--Fock level in the ground state:
 
     .. math::
-        S(q) = 1 - \\frac{3}{2 (2\pi r_s)^3}
-               \int_0^{\infty} dk k^2 f_k \int_{-1}^{1} du
-               \\frac{1}{e^{\beta(1/2(k^2+q^2+2kqu)}+1}
+        S(q) = 1 - \\frac{r_s^3}{3\pi}
+               \int_0^{\infty} dk k^2 \\theta(k_F-k) \int_{-1}^{1} du
+               \\theta(k_F-(k^2+2kqu+q^2))
 
 Parameters
 ----------
@@ -107,16 +107,23 @@ S(q) : float
                ut.step(kf, k) *
                sc.integrate.quad(ut.step_angle, -1, 1, args=(k, q, kf))[0])
 
-    return 0.5*(1 - (rs**3.0/(3.0*sc.pi)) *
+    return (1 - (rs**3.0/(3.0*sc.pi)) *
                     sc.integrate.quad(integrand, 0, 2*kf, args=(q, kf))[0])
 
 
-def rpa_structure_factor(q, beta, mu, rs):
+def rpa(q, beta, mu, rs):
     '''Finite temperature RPA static structure factor evulated as:
 
     .. math::
         S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty}
             \mathrm{Im}[\chi^{\mathrm{RPA}}(q, \omega)] \coth(\\beta\omega/2)
+
+    .. warning::
+        This uses a naive approach which directly evaluates
+        :math:`\mathrm{Im}[\chi^{\mathrm{RPA}}]`. Better results can be found
+        using rpa_matsubara. In particular this routine will likely miss the
+        plasmon contribution to the structure factor which dominates for some
+        :math:`q_c(r_s, \Theta)` .
 
 Parameters
 ----------
@@ -149,7 +156,7 @@ def rpa_ground_state(q, kf, rs):
     '''Zero temperature RPA static structure factor.
 
     .. math::
-        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty}
+        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty} d \\omega
             \mathrm{Im}[\chi^{\mathrm{RPA}}(q, \omega)]
 
 Parameters
@@ -176,7 +183,7 @@ def rpa_matsubara(q, theta, eta, zeta, kf, nmax):
     '''RPA static structure factor evaluated using matsubara frequencies.
 
     .. math::
-        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty}
+        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty} d \\omega
             \mathrm{Im}[\chi^{\mathrm{RPA}}(q, \omega)]
 
 Parameters
@@ -210,6 +217,10 @@ s_q : float
 
 def q0_plasmon(q, rs):
     ''' Plasmon structure factor.
+
+    .. math::
+
+        S(q) = \\frac{q^2}{2\\omega_p}
 
 Parameters
 ----------
