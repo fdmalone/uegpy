@@ -15,7 +15,8 @@ import utils as ut
 rs = float(sys.argv[1])
 ne = float(sys.argv[2])
 
-bvals = np.logspace(-1,1.5, 30)
+bvals = list(np.linspace(0.1,1, 30))
+bvals = bvals + list(np.linspace(1, 10, 100))
 
 frame = []
 t = 0
@@ -23,7 +24,7 @@ t = 0
 for b in bvals:
     c = max(20, ut.kinetic_cutoff(ne, 1.0/b))
     system = ue.System(rs, ne, c, 1)
-    (f, time) = mc.sample_canonical_energy(system, b/system.ef, 100)
+    (f, time) = mc.sample_canonical_energy(system, b/system.ef, 1000)
     t += time
     frame.append(f)
 
