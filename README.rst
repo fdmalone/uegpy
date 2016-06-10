@@ -1,15 +1,14 @@
 UEGPY
 =====
 
-UEGPY is a collection of python module which can be combined to calculate various
+UEGPY is a collection of python modules which can be combined to calculate various
 properties of the uniform electron gas (UEG). This was intended mostly for my own
 education but can evaluate useful things albeit in an incredibly suboptimal fashion.
 
 Currently we can do:
 
 * Internal, potential and free energies for the the 3D-UEG as a function of
-  temperature at various levels of approximation. Currently we can do ideal,
-  Hartree--Fock and RPA.
+  temperature at various levels of approximation (ideal, Hartree--Fock and RPA.)
 * Dynamic properties such as density-density reposonse at any temperature.
 * Static and dynamic structure factors.
 

@@ -13,7 +13,7 @@ def hartree_fock(q, rs, beta, mu, zeta):
     .. math::
         S(q) = 1 - \\frac{3}{2 (2\pi r_s)^3}
                \int_0^{\infty} dk k^2 f_k \int_{-1}^{1} du
-               \\frac{1}{e^{\\beta(0.5*(k^2+q^2+2kqu)}+1}
+               \\frac{1}{e^{\\beta(\\frac{1}{2}(k^2+q^2+2kqu)}+1}
 
 Parameters
 ----------
@@ -52,9 +52,12 @@ def hartree_fock_ground_state(q, kf):
     '''Analytic static structure factor at Hartree--Fock level in the ground state:
 
     .. math::
-        S(q) = 1 - \\frac{3}{2 (2\pi r_s)^3}
-               \int_0^{\infty} dk k^2 f_k \int_{-1}^{1} du
-               \\frac{1}{e^{\\beta(0.5*(k^2+q^2+2kqu)}+1}
+        S(q) =
+        \\begin{cases}
+            \\frac{1}{2} \Big(\\frac{3}{4} \\frac{q}{q_F} - \\frac{1}{16}
+            \Big(\\frac{q}{q_F}\Big)^3\Big) & \text{if} q <= 2q_F \\
+            \frac{1}{2} & \text{if} q > 2q_F
+        \end{cases}
 
 Parameters
 ----------
@@ -82,7 +85,7 @@ def hartree_fock_ground_state_integral(q, rs, kf):
     .. math::
         S(q) = 1 - \\frac{3}{2 (2\pi r_s)^3}
                \int_0^{\infty} dk k^2 f_k \int_{-1}^{1} du
-               \\frac{1}{e^{\beta(0.5*(k^2+q^2+2kqu)}+1}
+               \\frac{1}{e^{\beta(1/2(k^2+q^2+2kqu)}+1}
 
 Parameters
 ----------
@@ -112,7 +115,7 @@ def rpa_structure_factor(q, beta, mu, rs):
     '''Finite temperature RPA static structure factor evulated as:
 
     .. math::
-        S(q) = -\\frac{1}{\pi} \int_{-infty}^{\infty}
+        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty}
             \mathrm{Im}[\chi^{\mathrm{RPA}}(q, \omega)] \coth(\\beta\omega/2)
 
 Parameters
@@ -146,7 +149,7 @@ def rpa_ground_state(q, kf, rs):
     '''Zero temperature RPA static structure factor.
 
     .. math::
-        S(q) = -\\frac{1}{\pi} \int_{-infty}^{\infty}
+        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty}
             \mathrm{Im}[\chi^{\mathrm{RPA}}(q, \omega)]
 
 Parameters
@@ -173,7 +176,7 @@ def rpa_matsubara(q, theta, eta, zeta, kf, nmax):
     '''RPA static structure factor evaluated using matsubara frequencies.
 
     .. math::
-        S(q) = -\\frac{1}{\pi} \int_{-infty}^{\infty}
+        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty}
             \mathrm{Im}[\chi^{\mathrm{RPA}}(q, \omega)]
 
 Parameters
