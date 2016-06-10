@@ -187,10 +187,8 @@ e_c : float
     ec_ref = 207
     t_ref = 8
 
-    sgn = np.sign(t_ref-theta)
-
     # Prefactor is emperically determined so this number will over estimate.
-    return 1.15 * (theta/t_ref)**(sgn) * ec_ref * (ne/19.0)**(2./3.)
+    return 1.15 * (theta/t_ref) * ec_ref * (ne/19.0)**(2./3.)
 
 
 def kinetic_plane_waves(ne, theta):
