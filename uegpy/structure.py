@@ -11,7 +11,7 @@ def hartree_fock(q, rs, beta, mu, zeta):
     '''Static structure factor at Hartree--Fock level:
 
     .. math::
-        S(q) = 1 - \\frac{(2-\zeta)r_s^3}{3\pi}
+        S(q) = 1 - (2-\zeta)\\frac{r_s^3}{3\pi}
                \int_0^{\infty} dk k^2 f_k \int_{-1}^{1} du
                \\frac{1}{e^{\\beta(\\frac{1}{2}(k^2+q^2+2kqu)-\mu)}+1}
 
@@ -56,7 +56,7 @@ def hartree_fock_ground_state(q, kf):
         \\begin{cases}
             \\frac{3}{4} \\frac{q}{q_F} - \\frac{1}{16}
             \Big(\\frac{q}{q_F}\Big)^3 & \\text{if} \\ q \le 2q_F \\\\
-            & \\text{if} \\ q > 2q_F
+            1 & \\text{if} \\ q > 2q_F
         \\end{cases}
 
 Parameters
@@ -83,7 +83,7 @@ def hartree_fock_ground_state_integral(q, rs, kf):
     '''Static structure factor at Hartree--Fock level in the ground state:
 
     .. math::
-        S(q) = 1 - \\frac{r_s^3}{3\pi}
+        S(q) = 1 - (2-\zeta)\\frac{r_s^3}{3\pi}
                \int_0^{\infty} dk k^2 \\theta(k_F-k) \int_{-1}^{1} du
                \\theta(k_F-(k^2+2kqu+q^2))
 
