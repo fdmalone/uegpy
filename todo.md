@@ -11,7 +11,9 @@
 - [ ] input/output/json
 - [ ] Optimise
 - [ ] refactor ueg system / rename.
-- [ ] Check correctness
-- [ ] Asymptotic forms for matsubara sums
+- [ ] Check correctness for energies
+    - [ ] Asymptotic forms for matsubara sums
+    - [ ] Compare with thermodynamic integration
+    - [ ] Scripts for convergence
 - [ ] Finite system sizes
 - [ ] Other qchem methods
