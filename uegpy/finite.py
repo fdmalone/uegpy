@@ -5,6 +5,8 @@ import scipy as sc
 from scipy import optimize
 from utils import fermi_factor
 import itertools
+import utils as ut
+import dielectric as di
 
 
 def centre_of_mass_obsv(system, beta):
@@ -445,3 +447,25 @@ Z_GC : float
         Z_GC = Z_GC * (1+np.exp(-beta*(i-cpot)))
 
     return Z_GC
+
+
+def rpa_xc_free_energy(sys, mu, beta, lmax):
+
+    def integrand(q, sys, mu, beta, lmax):
+
+        #print q, ekq, mu, beta, di.lindhard_matsubara_finite(sys, ekq, mu, beta, 1)
+        #print "TYPE: ", di.lindhard_matsubara_finite(sys, ekq, mu, beta, 1)
+        return (
+            1.0/(sys.rho*beta) *
+            sum([np.log(1.0-ut.vq_vec(q)*
+                di.lindhard_matsubara_finite(sys, q, mu, beta, l))
+                for l in range(-lmax, lmax)]) + ut.vq_vec(q)
+        )
+
+
+    f_xc = sum([integrand(q, sys, mu, beta, lmax) for q in
+                sys.kfac*sys.kval[1:]])
+
+    return - 0.5 / (2*sc.pi)**3.0 * f_xc
+
+
