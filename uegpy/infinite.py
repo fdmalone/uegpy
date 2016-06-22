@@ -259,16 +259,13 @@ hfx : float
 
 
 def inversion_correction(rs, beta, mu, zeta):
-    '''Correction to Helmholtz free energy when moving from grand canonical to
-    canonical ensemble.
+    ''' First order exchange correction to the chemical potential.
 
     Turns out to be:
 
     .. math::
 
-        \\frac{1}{2\\sqrt{2}\\pi^4}\\beta^{-3/2}I_{-1/2}(\\eta_0)^{3}
-
-    [todo] : just make this the chemical potential.
+        -\\frac{1}{\\sqrt{2}\\pi}\\beta^{-1/2}I_{-1/2}(\\eta_0)
 
 Parameters
 ----------
@@ -288,7 +285,7 @@ corr : float
 
 '''
 
-    return 2**(-0.5)/(2.0*sc.pi**4.0)*beta**(-3./2.)*hfx_integrand(beta*mu, 3.0)
+    return -1.0/((2.0**0.5)*sc.pi) * beta**(-1./2.) * hfx_integrand(beta*mu, -0.5)
 
 
 def rpa_correlation_free_energy_mats(rs, theta, zeta, lmax):
