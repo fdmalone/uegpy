@@ -213,7 +213,7 @@ f_c : float
 
     def c1(rs):
 
-        return 10.9 / (1.0 + 0.000472*rs)
+        return 10.9 / (1.0 + 0.00472*rs)
 
     def c2(rs):
 
@@ -234,10 +234,10 @@ f_c : float
 
     def fh(rs, t):
 
-        return -0.425437*(t/rs)**0.5 * np.tanh(1.0/t)
+        return -0.425437 * ((t/rs)**0.5) * np.tanh(1.0/t)
 
 
+    print c1(rs), c2(rs), c3(rs), fh(rs, t)
     return (
-        vwn_rpa(rs, zeta)*(1.0  + c1(rs)*t + c2(rs)*t**0.25)*np.exp(-c3(rs)/t) +
-        fh(rs, t)*np.exp(-c4(rs)/t)
+        (vwn_rpa(rs, zeta)*((1.0  + c1(rs)*t + c2(rs)*t**0.25)*np.exp(-c3(rs)*t))+fh(rs, t)*np.exp(-c4(rs)/t))
     )
