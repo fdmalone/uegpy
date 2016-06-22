@@ -209,12 +209,11 @@ Omega : float
 
 
 def hfx_integrand(eta, power=2.0):
-    ''' Integrand of first order exchange contribution to internal energy.
+    '''Integrand of first order exchange contribution to internal energy.
 
     .. math::
-        U_x = \int_0^{\infty} \frac{x^{\nu}}{(e^{x-nu}+1)} dx
 
-    Todo : maths + reference.
+        I_{-1/2}(\eta_0)^2
 
 Parameters
 ----------
@@ -232,7 +231,7 @@ I(-1/2, nu)^2 : float
 
 
 def hfx_integral(rs, beta, mu, zeta):
-    ''' First-order exchange contribution to internal energy:
+    '''First-order exchange contribution to internal energy:
 
     .. math::
         \Omega =
@@ -259,7 +258,7 @@ hfx : float
 
 
 def inversion_correction(rs, beta, mu, zeta):
-    ''' First order exchange correction to the chemical potential.
+    '''First order exchange correction to the chemical potential.
 
     Turns out to be:
 
@@ -289,8 +288,17 @@ corr : float
 
 
 def rpa_correlation_free_energy_mats(rs, theta, zeta, lmax):
-    ''' RPA correlation free energy as given in Tanaka and Ichimaru, Phys. Soc.
-    Jap, 55, 2278 (1986).
+    '''RPA correlation free energy.
+
+    Calculated as given in Tanaka and Ichimaru, Phys. Soc.  Jap, 55, 2278 (1986)
+    as:
+
+    .. math::
+
+        \\frac{\Omega_{\mathrm{c}}}{N} =
+        -z\\frac{1}{2(2\pi)^3n\\beta}\sum_l\int d\\mathbf{q}\\bq
+        \Big[\log[1-v_{\\mathbf{q}}\chi^0(\\mathbf{q}\\bq,z_l)]+
+        v_{\\mathbf{q}}\chi^0(\\mathbf{q}, z_l)\Big]
 
 Parameters
 ----------
