@@ -468,4 +468,3 @@ def rpa_xc_free_energy(sys, mu, beta, lmax):
 
     return - 0.5 / (2*sc.pi)**3.0 * f_xc
 
-
