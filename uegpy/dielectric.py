@@ -475,7 +475,7 @@ chi(x, l) : float
     Lindhard function evaluated at frequency l (for imaginary frequencies).
 '''
 
-    if l > 100 or x > 100:
+    if np.abs(l) > 100 or x > 100:
 
         denom = (2*sc.pi*l*theta)**2.0 + x**4.0
 
