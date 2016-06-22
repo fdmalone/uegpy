@@ -3,6 +3,7 @@ import numpy as np
 import scipy as sc
 import utils as ut
 from scipy import optimize
+import infinite as inf
 
 
 def re_lind0(omega, q, kf):
@@ -447,6 +448,12 @@ def tanaka(x, rs, theta, eta, zeta, l):
     ''' Dimensionless RPA dielectric function factor from Tanaka and Ichimaru J.
     Phys. Soc. Jap, 55, 2278 (1986).
 
+    For large l or x we use the asyptotic form of
+
+    .. math::
+        phi(x, l) = \\frac{4 x^2}{3(2*\pi l \Theta)^2 + x^4} +
+                     \mathcal{O}(x^{-4}, l^{-4})
+
 Parameters
 ----------
 x : float
@@ -468,32 +475,53 @@ chi(x, l) : float
     Lindhard function evaluated at frequency l (for imaginary frequencies).
 '''
 
-    if l == 0:
+    if np.abs(l) > 100 or x > 100:
 
-        prefactor = 1.0 / (theta*x)
+        denom = (2*sc.pi*l*theta)**2.0 + x**4.0
 
-        def integrand(y, x, theta, eta, l):
+        return (4/3.)*x*x / denom
 
-            return (
-                y * ((y**2.0-0.25*x**2.0)*np.log(np.abs((2.0*y+x)/(2.0*y-x)))
-                    + x*y) / (2*(np.cosh(y**2.0/theta-eta)+1))
-            )
     else:
+        if l == 0:
 
-        prefactor = 1.0 / (2*x)
+            prefactor = 1.0 / (theta*x)
 
-        def integrand(y, x, theta, eta, l):
+            def integrand(y, x, theta, eta, l):
 
-            return (
-                y / (np.exp(y**2.0/theta-eta)+1.0)
-                * np.log(np.abs(((2.0*sc.pi*l*theta)**2.0+(x**2.0+2.0*x*y)**2.0) /
-                         ((2.0*sc.pi*l*theta)**2.0+(x**2.0-2.0*x*y)**2.0)))
-            )
+                return (
+                    y * ((y**2.0-0.25*x**2.0)*np.log(np.abs((2.0*y+x)/(2.0*y-x)))
+                        + x*y) / (2*(np.cosh(y**2.0/theta-eta)+1))
+                )
+        else:
+
+            prefactor = 1.0 / (2*x)
+
+            def integrand(y, x, theta, eta, l):
+
+                return (
+                    y / (np.exp(y**2.0/theta-eta)+1.0)
+                    * np.log(np.abs(((2.0*sc.pi*l*theta)**2.0+(x**2.0+2.0*x*y)**2.0) /
+                             ((2.0*sc.pi*l*theta)**2.0+(x**2.0-2.0*x*y)**2.0)))
+                )
 
 
-    chi_n = sc.integrate.quad(integrand, 0, np.inf, args=(x, theta, eta, l))[0]
+        chi_n = sc.integrate.quad(integrand, 0, np.inf, args=(x, theta, eta, l))[0]
 
-    return prefactor * chi_n / (zeta + 1)
+        return prefactor * chi_n / (zeta + 1)
+
+
+def tanaka_large_l(x, rs, theta, eta, zeta, l):
+    ''' Various orders of asymptotic forms for the Lindhard function'''
+
+    denom = (2*sc.pi*l*theta)**2.0 + x**4.0
+
+    t1 = (4/3.)*x*x / denom
+
+    t2 = 8*x**4*theta**(5/2.) * inf.fermi_integral(1.5, eta) / denom**2.0
+
+    t3 = (8/3.)*theta**(5/2.) * inf.fermi_integral(1.5, eta) * x**4 * (3*(2*sc.pi*l*theta)**2.0 - x**4) / denom**3.0
+
+    return (t1, t2, t3)
 
 
 def im_chi_tanaka(x, rs, theta, eta, zeta, l):

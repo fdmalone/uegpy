@@ -10,10 +10,12 @@
 - [ ] Thermal Hartree-Fock
 - [ ] input/output/json
 - [ ] Optimise
+- [ ] Use constants
 - [ ] refactor ueg system / rename.
 - [ ] Check correctness for energies
     - [ ] Asymptotic forms for matsubara sums
     - [ ] Compare with thermodynamic integration
     - [ ] Scripts for convergence
+    - [ ] Sort out rounding and overflow issues
 - [ ] Finite system sizes
 - [ ] Other qchem methods

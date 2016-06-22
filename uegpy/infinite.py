@@ -325,14 +325,83 @@ f_c : float
 
         return q**2.0 * (np.log(1-eps_0) + eps_0)
 
-    integral = sum([sc.integrate.quad(integrand, 0, np.inf, args=(theta, eta,
-                                zeta, kf, l))[0] for n in range(-lmax, lmax+1)])
+    integral = sum([sc.integrate.quad(integrand, 0, 5, args=(theta, eta,
+                                zeta, kf, l))[0] for l in range(-lmax, lmax+1)])
+
+    return  rs**3.0 / (3.0*sc.pi*beta) * integral
+
+
+def rpa_correlation_free_energy_dl(rs, theta, zeta, lmax):
+
+    ef = ut.ef(rs, zeta)
+    beta = 1.0 / (ef*theta)
+    mu = chem_pot(rs, beta, ef, zeta)
+    eta = beta * mu
+    gamma = ut.gamma(rs, theta, zeta)
+    alpha = ut.alpha(zeta)
+
+    def integrand(x, rs, theta, eta, zeta, lmax, gamma, alpha):
+
+        factor = 2*gamma*theta/(sc.pi*alpha*x*x)
+
+        i = 0
+        for l in range(-lmax, lmax+1):
+
+            eps_0 = factor * di.tanaka(x, rs, theta, eta, zeta, l)
+            i += x*x*(np.log(1+eps_0) - eps_0)
+
+        return i
+
+    integral = sc.integrate.quad(integrand, 0.0, 100, args=(rs, theta, eta,
+                                zeta, lmax, gamma, alpha))[0]
+
+    return  (0.75/beta) * integral
+
+
+def rpa_xc_free_energy(rs, theta, zeta, lmax):
+    ''' RPA correlation free energy as given in Tanaka and Ichimaru, Phys. Soc.
+    Jap, 55, 2278 (1986).
+
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+lmax : int
+    Maximum Matsubara frequency to include.
+
+Returns
+-------
+f_c : float
+    Exchange correlation free energy.
+
+'''
+
+    ef = ut.ef(rs, zeta)
+    beta = 1.0 / (ef*theta)
+    mu = chem_pot(rs, beta, ef, zeta)
+    eta = beta * mu
+    kf = (2*ef)**0.5
+
+    def integrand(x, theta, eta, ef, n, kf, zeta, lmax):
+
+        return (
+            x**2.0*(sum([np.log(1+3.0*n/(2*ef)*ut.vq(x)*
+                        di.tanaka(x/kf, rs, theta, eta, zeta, l))
+                        for l in range(-lmax, lmax+1)]) - ut.vq(x))
+        )
+
+    integral = sc.integrate.quad(integrand, 0, np.inf, args=(theta, eta,
+                        ef, ((4*sc.pi*rs**3.0)/3)**(-1.0), kf, zeta, lmax))[0]
 
     return  rs**3.0 / (3.0*sc.pi*beta) * integral
 
 
 def rpa_xc_energy_tanaka(rs, theta, zeta, lmax):
-    ''' RPA XC Internal energy as given in Phys. Soc. Jap, 55, 2278 (1986).
+    ''' RPA XC free energy as given in Phys. Soc. Jap, 55, 2278 (1986).
 
 Parameters
 ----------
@@ -357,18 +426,20 @@ U_xc : float
     mu = chem_pot(rs, beta, ef, zeta)
     eta = beta * mu
 
-    def integrand(x, gamma, lamb, theta, eta, nmax):
+    def integrand(x, rs, zeta, theta, eta, gamma, lamb, lmax):
 
         return (
             x**2.0 * (sum([np.log(1.0+2*gamma*theta/(sc.pi*lamb*x**2.0)
-                * di.tanaka(x, rs, theta, eta, zeta, l)) for l in range(-lmax, lmax+1)]) - 4*gamma/(3*sc.pi*lamb*x**2.))
+                           * di.tanaka(x, rs, theta, eta, zeta, l))
+                           for l in range(-lmax, lmax+1)])
+                           - 4*gamma/(3*sc.pi*lamb*x**2.))
         )
 
 
     return (
-        0.75 * theta * ef * sc.integrate.quad(integrand, 0, 5.1,
-                args=(ut.gamma(rs, theta, zeta), ut.alpha(zeta), theta, eta,
-                      nmax))[0] / (zeta+1)
+        0.75 * theta * ef * sc.integrate.quad(integrand, 0, np.inf,
+                args=(rs, zeta, theta, eta, ut.gamma(rs, theta, zeta), ut.alpha(zeta),
+                      lmax))[0] / (zeta+1)
     )
 
 
