@@ -296,8 +296,8 @@ def rpa_correlation_free_energy_mats(rs, theta, zeta, lmax):
     .. math::
 
         \\frac{\Omega_{\mathrm{c}}}{N} =
-        -z\\frac{1}{2(2\pi)^3n\\beta}\sum_l\int d\\mathbf{q}\\bq
-        \Big[\log[1-v_{\\mathbf{q}}\chi^0(\\mathbf{q}\\bq,z_l)]+
+        -\\frac{1}{2(2\pi)^3n\\beta}\sum_l\int d\\mathbf{q}
+        \Big[\log[1-v_{\\mathbf{q}}\chi^0(\\mathbf{q},z_l)]+
         v_{\\mathbf{q}}\chi^0(\\mathbf{q}, z_l)\Big]
 
 Parameters
