@@ -468,3 +468,21 @@ def rpa_xc_free_energy(sys, mu, beta, lmax):
 
     return - 0.5 / (2*sc.pi)**3.0 * f_xc
 
+
+def rpa_correlation_free_energy(sys, mu, beta, lmax):
+
+    def integrand(q, sys, mu, beta, l):
+
+        I = 0.0
+        for l in range(-lmax, lmax):
+
+            eps_0 = ut.vq_vec(q) * di.lindhard_matsubara_finite(sys, q, mu, beta, l)
+            I += np.log(1-eps_0) + eps_0
+
+        return I
+
+
+    f_c = sum(integrand(q, sys, mu, beta, lmax) for q in
+               sys.kfac*sys.kval[1:])
+
+    return 0.5 / (sys.ne*beta) * f_c

@@ -12,7 +12,7 @@ import dielectric as di
 import utils as ut
 
 rs = 1
-theta = 0.0625
+theta = 1
 zeta = 0
 beta = 1.0 / (ut.ef(rs, zeta)*theta)
 mu = inf.chem_pot(rs, beta, ut.ef(rs, zeta), zeta)
