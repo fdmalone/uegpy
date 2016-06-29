@@ -128,6 +128,35 @@ chi_rpa : float
     return num / denom
 
 
+def re_chi_rpa(omega, q, beta, mu):
+    '''Imaginary part of rpa density-density response function.
+
+Parameters
+----------
+omega : float
+    frequency
+q : float
+    (modulus) of wavevector considered.
+beta : float
+    Inverse temperature.
+mu : float
+    Fermi wavevector.
+
+Returns
+-------
+chi_rpa : float
+    Imaginary part of RPA density-density response function.
+
+'''
+
+    vq = 4.0*sc.pi / q**2.0
+    num = re_lind(omega, q, beta, mu)
+    denom = ((1.0-vq*re_lind(omega, q, beta, mu))**2.0 +
+                                          (vq*im_lind(omega, q, beta, mu))**2.0)
+
+    return num / denom
+
+
 def re_lind(omega, q, beta, mu):
     '''Real part of free-electron Lindhard density-density response function.
 
@@ -196,6 +225,23 @@ im_chi : float
                                          (1.0+np.exp(-beta*(e_pl-mu))))
     )
 
+def re_rpa_dielectric(omega, q, beta, mu):
+    ''' Real part of RPA dielectric function.'''
+
+    re = 1.0 - (2-zeta)*ut.vq(q)*re_lind(omega, q, beta, mu)
+
+    return re
+
+
+def im_rpa_dielectric(omega, q, beta, mu):
+    ''' Imaginary part of RPA dielectric function.
+
+'''
+
+    im = -(2-zeta)*ut.vq(q)*im_lind(omega, q, beta, mu)
+
+    return im
+
 
 def re_rpa_dielectric0(omega, q, kf, zeta):
     ''' Real part of the :math:`T=0` RPA dielectric function.
@@ -229,18 +275,18 @@ def im_rpa_dielectric0(omega, q, kf, zeta):
 Parameters
 ----------
 omega : float
-    frequency
+    frequencydef im_chi_rpa_dandrea(omega, q, kf, rs, ef, theta, eta):
+
 q : float
     (modulus) of wavevector considered.
 kf : float
     Fermi wavevector.
-zeta : int
-    Spin polarisation.
+
 
 Returns
 -------
-re_eps : float
-    Real part of rpa dielectric function.
+im_eps : float
+    Imaginary part of rpa dielectric function.
 
 '''
 
