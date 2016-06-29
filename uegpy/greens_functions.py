@@ -27,7 +27,20 @@ g0 : float
 
     return (re, im)
 
+def re_G0(omega, ek):
+    ''' Real part of retarded free electron  Green's function
 
-def Grpa(beta, ek, l):
+Parameters
+----------
+omega : float
+    frequency
+ek : float
+    single particle energy
 
-    
+Returns
+-------
+reg0 : float
+    Real part of retarded free Green's function.
+'''
+
+    return 1.0 / (omega - ek)
