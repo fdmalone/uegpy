@@ -31,6 +31,30 @@ f_k : float
     return 1.0/(np.exp(beta*(ek-mu))+1)
 
 
+def bose_factor(ek, mu, beta):
+    ''' Usual fermi factor:
+    .. math::
+        n_B(\\k) = \\frac{1}{e^{\\beta(\\varepsilon_k-\\mu)}-1}
+
+Parameters
+----------
+ek : float
+    Single particle eigenvalue.
+mu : float
+    Chemical potential.
+beta : float
+    Inverse temperature.
+
+Returns
+-------
+n_B(k) : float
+    Fermi factor.
+
+'''
+
+    return 1.0/(np.exp(beta*(ek-mu))-1)
+
+
 def fermi_block(ek, mu, beta):
     ''' Usual fermi factor blocking factor, i.e., :math:`\\bar{f}_k = 1-f_k`.
 
