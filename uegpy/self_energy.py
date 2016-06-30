@@ -3,7 +3,24 @@
 import numpy as np
 import scipy as sc
 import dielectric as di
+import utils as ut
 import greens_functions as gf
+
+def angular_integrand(u, k, q, xi, beta, mu):
+
+    omega = 0.5*k*k + 0.5*q*q + k*q*u
+
+    return (
+        di.im_chi_rpa(omega, q, beta, mu) *
+        (ut.bose_factor(omega, mu, beta)+ut.fermi_factor(omega, mu, beta))
+    )
+
+def q_integrand(q, k, xi, beta, mu):
+
+    return (
+        ut.vq(q) * sc.integrate.quad(angular_integrand, -1, 1,
+                                  args=(k, q, xi, beta, mu))[0]
+    )
 
 
 def im_sigma_rpa(k, xi, beta, mu):
@@ -24,22 +41,7 @@ g0 : float
     Matsubara Green's function.
 '''
 
-    def angular_integrand(u, k, q, xi, beta, mu):
 
-        omega = 0.5*k*k + 0.5*q*q + k*q*u
-
-        return (
-            di.im_chi_rpa(omega, q, beta, mu) *
-            (ut.bose_factor(omega, mu, beta)+ut.fermi_factor(omega, mu, beta))
-        )
-
-    def q_integrand(q, k, xi, beta, mu):
-
-        return (
-            ut.vq(q) * sc.integrate.quad(angular_integrand, -1, 1,
-                                      args=(k, q, xi, beta, mu))
-        )
-
-    I = sc.integrate.quad(q_integrand, 0, 1, args=(k, xi, beta, mu))
+    I = sc.integrate.quad(q_integrand, 0, 1, args=(k, xi, beta, mu))[0]
 
     return (1.0 / sc.pi) * I
