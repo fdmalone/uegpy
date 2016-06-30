@@ -31,10 +31,10 @@ f_k : float
     return 1.0/(np.exp(beta*(ek-mu))+1)
 
 
-def bose_factor(ek, mu, beta):
+def bose_factor(ek, beta):
     ''' Usual fermi factor:
     .. math::
-        n_B(\\k) = \\frac{1}{e^{\\beta(\\varepsilon_k-\\mu)}-1}
+        n_B(\\k) = \\frac{1}{e^{\\beta(\\varepsilon_k)}-1}
 
 Parameters
 ----------
@@ -52,7 +52,7 @@ n_B(k) : float
 
 '''
 
-    return 1.0/(np.exp(beta*(ek-mu))-1)
+    return 1.0/(np.exp(beta*ek)-1)
 
 
 def fermi_block(ek, mu, beta):

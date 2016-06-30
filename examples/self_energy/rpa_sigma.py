@@ -9,6 +9,7 @@ import numpy as np
 import utils as ut
 import matplotlib.pyplot as pl
 import self_energy as se
+from mpl_toolkits.mplot3d import Axes3D
 
 theta = 0.625
 rs = 1
@@ -22,17 +23,21 @@ omega = np.linspace(0, 2*ef, 10)
 mu = inf.chem_pot(rs, beta, ut.ef(rs, zeta), zeta)
 
 k = 1.1 * kf
+qvals = np.linspace(0.1, 200, 100)
+uvals = np.linspace(-1, 1, 100)
 
-for q in np.linspace(0.01, 10, 10):
-    a = []
-    uvals = np.linspace(-1, 1, 10)
-    for u in uvals:
-        a.append(se.angular_integrand(u, k, q, 0.5, beta, mu))
+fig = pl.figure()
+# ax = fig.add_subplot(111, projection='3d')
+a = []
+# for q in qvals:
+    # for u in uvals:
+    # a.append(se.f_qu(q*kf, k, -1, omega[9], beta, mu))
 
-    pl.plot(uvals, a)
-    pl.show()
+    # ax.scatter([q]*len(qvals), uvals, a)
 
-#im_sigma = [se.im_sigma_rpa(k, o, beta, mu) for o in omega]
+# pl.plot(qvals, a)
+
+im_sigma = [se.im_sigma_rpa(k, o, beta, mu) for o in omega]
 
 pl.errorbar(omega/ef, im_sigma, fmt='o')
 pl.show()
