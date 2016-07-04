@@ -215,6 +215,40 @@ s_q : float
     )
 
 
+def rpa_matsubara_dl(q, rs, theta, eta, zeta, lmax):
+    '''RPA static structure factor evaluated using matsubara frequencies.
+
+    .. math::
+        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty} d \\omega
+            \mathrm{Im}[\chi^{\mathrm{RPA}}(q, \omega)]
+
+Parameters
+----------
+q/qf : float
+    (modulus) of wavevector considered.
+rs : float
+    Wigner-Seitz radius.
+theta : float
+    Degeneracy temperature.
+eta : float
+    :math:`\beta\mu`
+zeta : int
+    Spin polarisation.
+nmax : int
+    Maximum number of matsubara frequencies to include.
+
+Returns
+-------
+s_q : float
+   Static structure factor.
+'''
+
+    sum_chi = sum([di.im_chi_tanaka(q, rs, theta, eta, zeta, l) for l in
+                   range(-lmax, lmax+1)])
+
+    return 1.5 * (zeta+1) * theta * sum_chi
+
+
 def q0_plasmon(q, rs):
     ''' Plasmon structure factor.
 
