@@ -298,7 +298,7 @@ vq : float
 
 '''
 
-    return 4.0*sc.pi / q*q
+    return 4.0*sc.pi / (q*q)
 
 
 def vq_vec(q):
