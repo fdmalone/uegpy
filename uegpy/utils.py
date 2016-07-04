@@ -77,7 +77,7 @@ f_kq : float
     return fermi_factor(0.5*(k**2.0+2.0*k*q*u+q**2.0), mu, beta)
 
 
-def madelung_approx(system):
+def madelung_approx(rs, ne):
     ''' Use expression in Schoof et al. (PhysRevLett.115.130402) for the
     Madelung contribution to the total energy. Please cite these guys and
     L.M. Fraser et al. Phys. Rev. B 53, 1814 whose functional form they fitted
@@ -85,8 +85,10 @@ def madelung_approx(system):
 
 Parameters
 ----------
-system: class
-    system being studied.
+rs : float
+    Wigner-Seitz radius.
+ne : int
+    Number of electrons.
 
 Returns
 -------
@@ -95,8 +97,7 @@ v_M: float
 
 '''
 
-    return (-2.837297 * (3.0/(4.0*sc.pi))**(1.0/3.0) *
-            system.ne**(-1.0/3.0) * system.rs**(-1.0))
+    return (-2.837297*(3.0/(4.0*sc.pi))**(1.0/3.0)*ne**(-1.0/3.0)*rs**(-1.0))
 
 
 def add_mad(system, frame):
