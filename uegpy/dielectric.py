@@ -549,7 +549,7 @@ Im(chi) : float
     Imaginary part of dielectric function in the RPA.
 '''
 
-    phi = tanaka(x, rs, theta, eta, l)
+    phi = tanaka(x, rs, theta, eta, zeta, l)
 
     pre = 2.0*ut.gamma(rs, theta, zeta)*theta / (sc.pi*ut.alpha(zeta)*x**2.0)
 
