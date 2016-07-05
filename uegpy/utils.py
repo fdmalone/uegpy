@@ -347,7 +347,7 @@ Parameters
 a, b : float
     Arguments of step function.
 
-Returns:
+Returns
 --------
 theta(a-b): float
     Heaviside step function.
@@ -367,7 +367,7 @@ Parameters
 a, b : float
     Arguments of step function.
 
-Returns:
+Returns
 --------
 theta(a-b): float
     Heaviside step function.
@@ -387,7 +387,7 @@ Parameters
 a, b : float
     Arguments of step function.
 
-Returns:
+Returns
 --------
 theta(a-b): float
     Heaviside step function.
