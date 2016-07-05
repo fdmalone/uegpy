@@ -60,7 +60,9 @@ Parameters
 ----------
 u : float
     Integration variable = :math:`\cos \theta`.
-k, q : float
+k : float
+   Magnitude of wavevectors
+q : float
    Magnitude of wavevectors
 mu : float
     Chemical potential.
@@ -288,7 +290,7 @@ def vq(q):
 
 Parameters
 ----------
-q : float.
+q : float
     Magnitude of
 
 Returns
@@ -306,7 +308,7 @@ def vq_vec(q):
 
 Parameters
 ----------
-q : vector.
+q : array_like
     Magnitude of
 
 Returns
@@ -344,12 +346,18 @@ def step_angle(u, k, q, kf):
 
 Parameters
 ----------
-a, b : float
-    Arguments of step function.
+u : float
+    Argument of step function.
+k : float
+    Argument of step function.
+q : float
+    Argument of step function.
+kf : float
+    Fermi Wave vector
 
 Returns
 --------
-theta(a-b): float
+theta(kf - |a-b|): float
     Heaviside step function.
 '''
 
@@ -364,8 +372,11 @@ def step(a, b):
 
 Parameters
 ----------
-a, b : float
-    Arguments of step function.
+a : float
+    Argument of step function.
+b : float
+    Argument of step function.
+
 
 Returns
 --------
@@ -374,26 +385,6 @@ theta(a-b): float
 '''
 
     if (a < b):
-        return 0
-    else:
-        return 1
-
-
-def step_angle(u, k, q, kf):
-    ''' Heaviside steb function for k+q.
-
-Parameters
-----------
-a, b : float
-    Arguments of step function.
-
-Returns
---------
-theta(a-b): float
-    Heaviside step function.
-'''
-
-    if (np.sqrt(k**2.0+q**2.0+2*k*q*u) > kf):
         return 0
     else:
         return 1
