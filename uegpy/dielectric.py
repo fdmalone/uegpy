@@ -71,7 +71,7 @@ im_chi_0 : float
 
 
 def im_chi_rpa0(omega, q, kf, zeta):
-    '''Imaginary part of T=0 rpa density-density response function.
+    '''Imaginary part of :math:`T=0` rpa density-density response function.
 
 Parameters
 ----------
@@ -124,118 +124,6 @@ chi_rpa : float
     num = im_lind(omega, q, beta, mu)
     denom = ((1.0-vq*re_lind(omega, q, beta, mu))**2.0 +
                                           (vq*im_lind(omega, q, beta, mu))**2.0)
-
-    return num / denom
-
-
-def dandrea_real(omega, q, kf, rs, ef, theta, eta):
-    '''Real part of rpa density-density response function.
-
-Parameters
-----------
-omega : float
-    frequency
-q : float
-    (modulus) of wavevector considered.
-kf : float
-    Fermi wavevector.
-rs : float
-    Density parameter.
-ef : float
-    Fermi energy.
-theta : float
-    Degeneracy temperature.
-eta : float
-    :math:`\beta\mu`.
-
-Returns
--------
-chi_rpa : float
-    Imaginary part of RPA density-density response function.
-
-'''
-    def integrand(y, theta, x, eta):
-
-        return  y / (1.0+np.exp(y**2.0/theta-eta)) * np.log(np.abs((x-y)/(x+y)))
-
-    Q = q / (2.0*kf)
-    z = omega / (4.0*ef)
-    alpha = (4.0/(9.0*sc.pi))**(1.0/3.0)
-
-    phi_pl = sc.integrate.quad(integrand, 0, np.inf, args=(theta, z/Q+Q, eta))[0]
-    phi_mi = sc.integrate.quad(integrand, 0, np.inf, args=(theta, z/Q-Q, eta))[0]
-
-    return 0.5*q**2.0 * alpha * rs / (16.0*sc.pi**2.0*Q**3.0) * (phi_pl - phi_mi)
-
-
-def dandrea_im(omega, q, kf, rs, ef, theta, eta):
-    '''Imaginary part of rpa density-density response function in reduced units.
-
-Parameters
-----------
-omega : float
-    frequency
-q : float
-    (modulus) of wavevector considered.
-kf : float
-    Fermi wavevector.
-rs : float
-    Density parameter.
-ef : float
-    Fermi energy.
-theta : float
-    Degeneracy temperature.
-eta : float
-    :math:`\beta\mu`.
-
-Returns
--------
-chi_rpa : float
-    Imaginary part of RPA density-density response function.
-
-'''
-
-    Q = q / (2.0*kf)
-    z = omega / (4.0*ef)
-    alpha = (4.0/(9.0*sc.pi))**(1.0/3.0)
-
-    return (
-        - (2*sc.pi)**(-1.0)*(q**2.0 * alpha * rs * theta)/(32.0*Q**3.0) *
-        np.log((1+np.exp(eta-(1.0/theta)*(z/Q-Q)**2.0))/(1+np.exp(eta-(1.0/theta)*(z/Q+Q)**2.0)))
-    )
-
-
-def im_chi_rpa_dandrea(omega, q, kf, rs, ef, theta, eta):
-    '''Imaginary part of rpa density-density response function.
-
-Parameters
-----------
-omega : float
-    frequency
-q : float
-    (modulus) of wavevector considered.
-kf : float
-    Fermi wavevector.
-rs : float
-    Density parameter.
-ef : float
-    Fermi energy.
-theta : float
-    Degeneracy temperature.
-eta : float
-    :math:`\beta\mu`.
-
-Returns
--------
-chi_rpa : float
-    Imaginary part of RPA density-density response function.
-
-'''
-
-    vq = 4.0*sc.pi / q**2.0
-    num = dandrea_im(omega, q, kf, rs, ef, theta, eta)
-    denom = ((1.0-vq*dandrea_real(omega, q, kf, rs, ef, theta, eta))**2.0 +
-                      (vq*dandrea_im(omega, q, kf, rs, ef, theta, eta))**2.0)
 
     return num / denom
 
