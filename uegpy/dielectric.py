@@ -9,6 +9,8 @@ import infinite as inf
 def re_lind0(omega, q, kf):
     '''Real part of Lindhard Dielectric function at :math:`T = 0`.
 
+    Note this is :math:`\mathrm{Re}\left[chi_{0\sigma}(\q, \omega)\\right]`
+
 Parameters
 ----------
 omega : float
@@ -39,6 +41,9 @@ re_chi_0 : float
 def im_lind0(omega, q, kf):
     '''Imaginary part of Lindhard Dielectric function at :math:`T = 0`.
 
+    Note this is :math:`\mathrm{Im}\left[chi_{0\sigma}(\q, \omega)\\right]`
+
+
 Parameters
 ----------
 q : float
@@ -65,7 +70,7 @@ im_chi_0 : float
     )
 
 
-def im_chi_rpa0(omega, q, kf):
+def im_chi_rpa0(omega, q, kf, zeta):
     '''Imaginary part of T=0 rpa density-density response function.
 
 Parameters
@@ -76,6 +81,8 @@ q : float
     (modulus) of wavevector considered.
 kf : float
     Fermi wavevector.
+zeta : int
+    Spin polarisation.
 
 Returns
 -------
@@ -84,12 +91,10 @@ chi_rpa : float
 
 '''
 
-    vq = 4.0*sc.pi / q**2.0
-    num = im_lind0(omega, q, kf)
-    re = 1.0 - vq*re_lind0(omega, q, kf)
-    im = -vq*im_lind0(omega, q, kf)
-    denom = ((1.0-vq*re_lind0(omega, q, kf))**2.0 +
-                                          (vq*im_lind0(omega, q, kf))**2.0)
+    num = (2-zeta)*im_lind0(omega, q, kf)
+    re = re_rpa_dielectric(omega, q, kf, zeta)
+    im = im_rpa_dielectric0(omega, q, kf, zeta)
+    denom = re**2.0 + im**2.0
 
     return num / denom
 
@@ -304,7 +309,7 @@ im_chi : float
     )
 
 
-def re_rpa_dielectric(omega, q, kf):
+def re_rpa_dielectric0(omega, q, kf, zeta):
     ''' Real part of RPA dielectric function.
 
 Parameters
@@ -315,7 +320,8 @@ q : float
     (modulus) of wavevector considered.
 kf : float
     Fermi wavevector.
-
+zeta : int
+    Spin polarisation.
 
 Returns
 -------
@@ -324,9 +330,35 @@ re_eps : float
 
 '''
 
-    re = 1.0 - ut.vq(q)*re_lind0(omega, q, kf)
+    re = 1.0 - (2-zeta)*ut.vq(q)*re_lind0(omega, q, kf)
 
     return re
+
+
+def im_rpa_dielectric0(omega, q, kf, zeta):
+    ''' Imaginary part of RPA dielectric function.
+
+Parameters
+----------
+omega : float
+    frequency
+q : float
+    (modulus) of wavevector considered.
+kf : float
+    Fermi wavevector.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+re_eps : float
+    Real part of rpa dielectric function.
+
+'''
+
+    im = - (2-zeta)*ut.vq(q)*im_lind0(omega, q, kf)
+
+    return im
 
 
 def chi_rpa_matsubara(q, theta, eta, zeta, kf, n):
