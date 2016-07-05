@@ -179,42 +179,6 @@ s_q : float
     )
 
 
-def rpa_matsubara(q, theta, eta, zeta, kf, nmax):
-    '''RPA static structure factor evaluated using matsubara frequencies.
-
-    .. math::
-        S(q) = -\\frac{1}{\pi} \int_{-\infty}^{\infty} d \\omega
-            \mathrm{Im}[\chi^{\mathrm{RPA}}(q, \omega)]
-
-Parameters
-----------
-q : float
-    (modulus) of wavevector considered.
-theta : float
-    Degeneracy temperature.
-eta : float
-    :math:`\beta\mu`
-zeta : int
-    Spin polarisation.
-kf : float
-    Fermi Wavevector.
-nmax : int
-    Maximum number of matsubara frequencies to include.
-
-Returns
--------
-s_q : float
-   Static structure factor.
-'''
-
-    sum_chi = sum([di.chi_rpa_matsubara(q, theta, eta, zeta, kf, n) for n in
-                   range(-nmax, nmax+1)])
-
-    return (
-        - (1.5*(zeta+1)*sc.pi**2.0*theta/kf) * sum_chi
-    )
-
-
 def rpa_matsubara_dl(q, rs, theta, eta, zeta, lmax):
     '''RPA static structure factor evaluated using matsubara frequencies.
 
