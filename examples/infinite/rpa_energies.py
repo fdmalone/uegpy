@@ -19,9 +19,10 @@ beta = 1.0 / (ut.ef(rs, zeta)*theta)
 mu = inf.chem_pot(rs, beta, ut.ef(rs, zeta), zeta)
 f_c = inf.rpa_correlation_free_energy_dl(rs, theta, zeta, lmax)
 f_x = inf.hfx_integral(rs, beta, mu, zeta)
+f_xc = inf.rpa_xc_energy_tanaka(rs, theta, zeta, lmax)
 
 frame = pd.DataFrame({'rs': rs, 'theta': theta, 'zeta': float(zeta), 'f_x': f_x,
-                      'f_c': f_c}, index=[0],
-                      columns=['rs', 'theta', 'zeta', 'f_x', 'f_c'])
+                    'f_c': f_c, 'f_xc': f_xc}, index=[0],
+                      columns=['rs', 'theta', 'zeta', 'f_x', 'f_c', 'f_xc'])
 
 print (frame.to_string(index=False))

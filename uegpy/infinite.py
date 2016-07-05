@@ -364,48 +364,6 @@ def rpa_correlation_free_energy_dl(rs, theta, zeta, lmax):
 
 
 def rpa_xc_free_energy(rs, theta, zeta, lmax):
-    ''' RPA correlation free energy as given in Tanaka and Ichimaru, Phys. Soc.
-    Jap, 55, 2278 (1986).
-
-Parameters
-----------
-rs : float
-    Wigner-Seitz radius.
-theta : float
-    Degeneracy temperature.
-zeta : int
-    Spin polarisation.
-lmax : int
-    Maximum Matsubara frequency to include.
-
-Returns
--------
-f_c : float
-    Exchange correlation free energy.
-
-'''
-
-    ef = ut.ef(rs, zeta)
-    beta = 1.0 / (ef*theta)
-    mu = chem_pot(rs, beta, ef, zeta)
-    eta = beta * mu
-    kf = (2*ef)**0.5
-
-    def integrand(x, theta, eta, ef, n, kf, zeta, lmax):
-
-        return (
-            x**2.0*(sum([np.log(1+3.0*n/(2*ef)*ut.vq(x)*
-                        di.tanaka(x/kf, rs, theta, eta, zeta, l))
-                        for l in range(-lmax, lmax+1)]) - ut.vq(x))
-        )
-
-    integral = sc.integrate.quad(integrand, 0, np.inf, args=(theta, eta,
-                        ef, ((4*sc.pi*rs**3.0)/3)**(-1.0), kf, zeta, lmax))[0]
-
-    return  rs**3.0 / (3.0*sc.pi*beta) * integral
-
-
-def rpa_xc_energy_tanaka(rs, theta, zeta, lmax):
     ''' RPA XC free energy as given in Phys. Soc. Jap, 55, 2278 (1986).
 
 Parameters
@@ -430,21 +388,21 @@ U_xc : float
     beta = 1.0 / (ef*theta)
     mu = chem_pot(rs, beta, ef, zeta)
     eta = beta * mu
+    gamma = ut.gamma(rs, theta, zeta)
+    alpha = ut.alpha(zeta)
 
     def integrand(x, rs, zeta, theta, eta, gamma, lamb, lmax):
 
         return (
-            x**2.0 * (sum([np.log(1.0+2*gamma*theta/(sc.pi*lamb*x**2.0)
+            x*x*(sum([np.log(1.0+2*gamma*theta/(sc.pi*lamb*x**2.0)
                            * di.tanaka(x, rs, theta, eta, zeta, l))
                            for l in range(-lmax, lmax+1)])
                            - 4*gamma/(3*sc.pi*lamb*x**2.))
         )
 
-
     return (
-        0.75 * theta * ef * sc.integrate.quad(integrand, 0, np.inf,
-                args=(rs, zeta, theta, eta, ut.gamma(rs, theta, zeta), ut.alpha(zeta),
-                      lmax))[0] / (zeta+1)
+        0.75 * theta * ef * sc.integrate.quad(integrand, 0.001, 5,
+         args=(rs, zeta, theta, eta, gamma, alpha, lmax))[0] / (zeta+1)
     )
 
 
@@ -482,7 +440,8 @@ V : float
             return st.rpa_tanaka_high_k(x, kf) - 1.0
         else:
             return (
-                1.5 * theta * sum([di.im_chi_tanaka(x, rs, theta, eta, zeta, l) for l in range(-nmax, nmax+1)]) - 1.0
+                1.5 * theta * sum([di.im_chi_tanaka(x, rs, theta, eta, zeta, l)
+                                  for l in range(-nmax, nmax+1)]) - 1.0
             )
 
     integral = sc.integrate.quad(integrand, 0, np.inf, args=(rs, theta,
