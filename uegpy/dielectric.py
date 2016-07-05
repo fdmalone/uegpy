@@ -60,8 +60,8 @@ im_chi_0 : float
     nu_mi = omega/(q*kf) - q/(2*kf)
 
     return (
-        -1*((0.5*kf**2.0)/(4*sc.pi*q))*(step_ab(1, nu_mi**2.0)*(1-nu_mi**2.0) -
-                                        step_ab(1, nu_pl**2.0)*(1-nu_pl**2.0))
+        -1*((0.5*kf**2.0)/(4*sc.pi*q))*(ut.step(1, nu_mi**2.0)*(1-nu_mi**2.0) -
+                                        ut.step(1, nu_pl**2.0)*(1-nu_pl**2.0))
     )
 
 
