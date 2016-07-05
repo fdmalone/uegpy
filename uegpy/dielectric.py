@@ -91,9 +91,9 @@ chi_rpa : float
 
 '''
 
-    num = (2-zeta)*im_lind0(omega, q, kf)
-    re = re_rpa_dielectric(omega, q, kf, zeta)
+    re = re_rpa_dielectric0(omega, q, kf, zeta)
     im = im_rpa_dielectric0(omega, q, kf, zeta)
+    num = -im / ut.vq(q)
     denom = re**2.0 + im**2.0
 
     return num / denom
