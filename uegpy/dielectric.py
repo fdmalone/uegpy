@@ -198,7 +198,7 @@ im_chi : float
 
 
 def re_rpa_dielectric0(omega, q, kf, zeta):
-    ''' Real part of RPA dielectric function.
+    ''' Real part of the :math:`T=0` RPA dielectric function.
 
 Parameters
 ----------
@@ -224,7 +224,7 @@ re_eps : float
 
 
 def im_rpa_dielectric0(omega, q, kf, zeta):
-    ''' Imaginary part of RPA dielectric function.
+    ''' Imaginary part of the :math:`T=0` RPA dielectric function.
 
 Parameters
 ----------
@@ -249,124 +249,10 @@ re_eps : float
     return im
 
 
-def chi_rpa_matsubara(q, theta, eta, zeta, kf, n):
-    ''' RPA density response function evaluated for complex (matsubara) frequencies.
+def lindhard_matsubara(x, rs, theta, eta, zeta, l):
+    '''Dimensionless Lindhard function function factor.
 
-Parameters
-----------
-q : float
-    (modulus) of wavevector considered.
-theta : float
-    Degeneracy temperature.
-eta : float
-    :math:`\beta\mu`.
-kf : float
-    Fermi wavevector.
-zeta : int
-    Polarisation.
-n : int
-    nth Matsubara frequency.
-
-Returns
--------
-chi_rpa_n : float
-    RPA dielectric function evaluated at nth matsubara frequency.
-
-'''
-
-    chi_n = lindhard_0_matsubara(q, theta, eta, zeta, kf, n)
-
-    return chi_n / (1.0-ut.vq(q)*chi_n)
-
-
-def lindhard_0_mats_n0(q, theta, eta, zeta, kf):
-    ''' Lindhard function evaluated at zeroth matsubara frequency.
-
-Parameters
-----------
-q : float
-    (modulus) of wavevector considered.
-theta : float
-    Degeneracy temperature.
-eta : float
-    :math:`\beta\mu`.
-zeta : int
-    Polarisation.
-kf : float
-    Fermi wavevector.
-
-Returns
--------
-chi_rpa_n : float
-    Lindhard function evaluated at zeroth matsubara frequency.
-
-'''
-
-    def integrand(y, x, theta, eta):
-
-        return (
-            y * ((y**2.0-0.25*x**2.0)*np.log(np.abs((2.0*y+x)/(2.0*y-x)))+x*y)
-            / (2*(np.cosh(y**2.0/theta-eta)+1))
-        )
-
-    x = q / kf
-
-    return (
-        -kf / ((zeta+1)*sc.pi**2.0*x*theta) *
-        sc.integrate.quad(integrand, 0, np.inf, args=(x, theta, eta))[0]
-    )
-
-
-def lindhard_0_matsubara(q, theta, eta, zeta, kf, n):
-    '''Real part of free-electron Lindhard density-density response function.
-
-Parameters
-----------
-q : float
-    (modulus) of wavevector considered.
-beta : float
-    Inverse temperature.
-mu : float
-    Chemical potential.
-
-Returns
--------
-re_chi : float
-    Imaginary part of thermal Lindard function.
-
-'''
-
-    if n == 0:
-
-        prefactor = kf / (sc.pi**2.0*(zeta+1)*theta)
-
-        def integrand(y, x, n, theta, eta):
-
-            return (
-                y * ((y**2.0-0.25*x**2.0)*np.log(np.abs((2.0*y+x)/(2.0*y-x)))
-                    + x*y) / (2*(np.cosh(y**2.0/theta-eta)+1))
-            )
-    else:
-
-        prefactor = kf / (2.0*sc.pi**2.0*(zeta+1))
-
-        def integrand(y, x, n, theta, eta):
-
-            return (
-                y / (np.exp(y**2.0/theta-eta)+1.0)
-                * np.log(np.abs(((2.0*sc.pi*n*theta)**2.0+(x**2.0+2.0*x*y)**2.0) /
-                         ((2.0*sc.pi*n*theta)**2.0+(x**2.0-2.0*x*y)**2.0)))
-            )
-
-    x = q / kf
-    chi_n = sc.integrate.quad(integrand, 0, np.inf, args=(x, n, theta, eta))[0]
-
-    return - prefactor * chi_n / x
-
-
-def tanaka(x, rs, theta, eta, zeta, l):
-    ''' Dimensionless RPA dielectric function factor from Tanaka and Ichimaru J.
-    Phys. Soc. Jap, 55, 2278 (1986).
+    Taken from Tanaka and Ichimaru J.  Phys. Soc. Jap, 55, 2278 (1986).
 
     For large l or x we use the asyptotic form of
 
@@ -430,23 +316,10 @@ chi(x, l) : float
         return prefactor * chi_n / (zeta + 1)
 
 
-def tanaka_large_l(x, rs, theta, eta, zeta, l):
-    ''' Various orders of asymptotic forms for the Lindhard function'''
-
-    denom = (2*sc.pi*l*theta)**2.0 + x**4.0
-
-    t1 = (4/3.)*x*x / denom
-
-    t2 = 8*x**4*theta**(5/2.) * inf.fermi_integral(1.5, eta) / denom**2.0
-
-    t3 = (8/3.)*theta**(5/2.) * inf.fermi_integral(1.5, eta) * x**4 * (3*(2*sc.pi*l*theta)**2.0 - x**4) / denom**3.0
-
-    return (t1, t2, t3)
-
-
 def im_chi_tanaka(x, rs, theta, eta, zeta, l):
-    ''' Imaginary part of rpa dielectric function in dimensionless form from:
-    Tanaka and Ichimary, Phys. Soc. Jap, 55, 2278 (1986).
+    ''' Imaginary part of RPA dielectric function in dimensionless form.
+
+    Taken from Tanaka and Ichimary, Phys. Soc. Jap, 55, 2278 (1986).
 
 Parameters
 ----------
@@ -469,7 +342,7 @@ Im(chi) : float
     Imaginary part of dielectric function in the RPA.
 '''
 
-    phi = tanaka(x, rs, theta, eta, zeta, l)
+    phi = lindhard_matsubara(x, rs, theta, eta, zeta, l)
 
     pre = 2.0*ut.gamma(rs, theta, zeta)*theta / (sc.pi*ut.alpha(zeta)*x**2.0)
 
