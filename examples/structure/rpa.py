@@ -22,11 +22,9 @@ kf = (2.0*ef)**0.5
 beta = 1.0 / (theta*ef)
 mu = inf.chem_pot(rs, beta, ef, zeta)
 eta = beta * mu
-sq1 = [st.rpa_matsubara_dl(q, rs, theta, eta, zeta, 1000) for q in qvals]
-sq2 = [st.rpa_matsubara(q*kf, theta, eta, zeta, kf, 1000) for q in qvals]
+sq = [st.rpa_matsubara(q, rs, theta, eta, zeta, 1000) for q in qvals]
 
-pl.plot(qvals, np.array(sq2))
-pl.plot(qvals, np.array(sq1), label=r'Old: $\Theta=%s$'%theta, linewidth=0, marker='o')
+pl.plot(qvals, np.array(sq), label=r'$\Theta=%s$'%theta)
 
 pl.legend(loc='best')
 pl.show()

@@ -179,7 +179,7 @@ s_q : float
     )
 
 
-def rpa_matsubara_dl(q, rs, theta, eta, zeta, lmax):
+def rpa_matsubara(q, rs, theta, eta, zeta, lmax):
     '''RPA static structure factor evaluated using matsubara frequencies.
 
     .. math::
