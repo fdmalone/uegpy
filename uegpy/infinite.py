@@ -287,26 +287,6 @@ corr : float
     return -1.0/((2.0**0.5)*sc.pi) * beta**(-1./2.) * hfx_integrand(beta*mu, -0.5)
 
 
-def rpa_correlation_free_energy_mats(rs, theta, zeta, lmax):
-
-    ef = ut.ef(rs, zeta)
-    beta = 1.0 / (ef*theta)
-    mu = chem_pot(rs, beta, ef, zeta)
-    eta = beta * mu
-    kf = (2.0*ef)**0.5
-
-    def integrand(q, theta, eta, zeta, kf, l):
-
-        eps_0 = ut.vq(q) * di.lindhard_0_matsubara(q, theta, eta, zeta, kf, l)
-
-        return q**2.0 * (np.log(1-eps_0) + eps_0)
-
-    integral = sum([sc.integrate.quad(integrand, 0, 5, args=(theta, eta,
-                                zeta, kf, l))[0] for l in range(-lmax, lmax+1)])
-
-    return  rs**3.0 / (3.0*sc.pi*beta) * integral
-
-
 def rpa_correlation_free_energy(rs, theta, zeta, lmax):
     '''RPA correlation free energy.
 
