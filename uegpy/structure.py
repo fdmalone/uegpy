@@ -236,7 +236,7 @@ S(q) : float
     return q**2.0 / (2.0*(3.0/rs**3.0)**0.5)
 
 
-def bijl_feynman(q, kf):
+def bijl_feynman(q, kf, zeta):
     ''' Bijl-Feynman structure factor.
 
 Parameters
@@ -253,7 +253,7 @@ S(q) : float
 '''
 
     # Zeros of real part of RPA dielectric function.
-    omega_q = sc.optimize.fsolve(di.re_rpa_dielectric, 0.5*kf**2.0, args=(q,
-                                 kf))[0]
+    omega_q = sc.optimize.fsolve(di.re_rpa_dielectric0, 0.5*kf**2.0, args=(q,
+                                 kf, zeta))[0]
 
     return q**2.0 / (2*omega_q)
