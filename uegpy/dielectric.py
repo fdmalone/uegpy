@@ -4,6 +4,7 @@ import scipy as sc
 import utils as ut
 from scipy import optimize
 import infinite as inf
+from numpy import arctan2
 
 
 def re_lind0(omega, q, kf):
@@ -393,3 +394,52 @@ Im(chi) : float
     pre = 2.0*ut.gamma(rs, theta, zeta)*theta / (sc.pi*ut.alpha(zeta)*x**2.0)
 
     return phi / (1.0 + pre*phi)
+
+def integrand2(k, omega, q, beta, mu, delta):
+
+    ek = 0.5*k*k
+    om_pl = omega + ek
+    om_mi = - omega + ek
+    qk = q*k
+
+
+    #if (k < 1e-10): print om_pl, om_mi, (om_mi+qk)/delta
+    return (
+        #k*ut.fermi_factor(0.5*k*k, mu, beta) * (atan((om_mi+qk)/delta) -
+        1.0/(sc.pi)*(arctan2((om_mi+qk), delta) -
+                                                arctan2((om_mi-qk), delta) -
+                                                arctan2((om_pl+qk), delta) +
+                                                arctan2((om_pl-qk), delta)), #)#
+        ut.step(k, np.abs(om_mi/q)) - ut.step(k, np.abs(om_pl/q))
+    )
+
+def integrand(k, omega, q, beta, mu, delta):
+
+    eq = 0.5*q*q
+    om_pl = omega + eq
+    om_mi = - omega + eq
+    qk = q*k
+
+
+    #if (k < 1e-10): print om_pl, om_mi, (om_mi+qk)/delta
+    return (
+        k*ut.fermi_factor(0.5*k*k, mu, beta) *
+        1.0/(sc.pi)*(arctan2((om_mi+qk), delta) -
+                                                arctan2((om_mi-qk), delta) -
+                                                arctan2((om_pl+qk), delta) +
+                                                arctan2((om_pl-qk), delta))#
+                        #ut.step(k, np.abs(om_mi/q)) - ut.step(k, np.abs(om_pl/q))
+    )
+
+def im_lind_smeared(omega, q, beta, mu, delta=0.01, qmax=10):
+
+    I = sc.integrate.quad(integrand, 0, qmax, args=(omega, q, beta, mu, delta))[0]
+
+    return - 1.0/(4.0*sc.pi*q) * I
+
+def kramers_kronig(im_eps, omega, o, omega_max, delta=0.001, do=0.01):
+
+    integrand = omega*im_eps/(omega*omega-o*o+delta)
+    I = sc.integrate.simps(integrand, dx=do)
+
+    return 1.0 + 2.0/(sc.pi) * I
