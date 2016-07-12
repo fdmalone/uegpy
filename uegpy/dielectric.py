@@ -454,7 +454,7 @@ def kramers_kronig(im_eps, omega, o, idx, do=0.01):
         integrand = omega[idx+1:]*im_eps[idx+1:]/(omega[idx+1:]**2.0-o*o)
         I2 = sc.integrate.simps(integrand, dx=do)
 
-    return 1.0 + 2.0/(sc.pi) * (I1+I2)
+    return 2.0/(sc.pi) * (I1+I2)
 
 
 def kramers_kronig_int(omega, q, beta, mu, omax):
