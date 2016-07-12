@@ -27,8 +27,8 @@ beta = 1.0 / (theta*ef)
 mu = inf.chem_pot(rs, beta, ef, zeta)
 kf = (2*ef)**0.5
 
-nkpoints = 2000
-nomega = 400
+nkpoints = 200
+nomega = 40
 omega = np.linspace(0, 4*ef, nomega)
 qvals = np.linspace(0, 10*kf, nkpoints)
 (re_eps_inv, im_eps_inv, re_eps1, im_eps1) = se.tabulate_dielectric(beta, mu, 4*ef, 10*kf, nomega, nkpoints, zeta, delta=0.001)
