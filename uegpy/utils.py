@@ -52,7 +52,12 @@ n_B(k) : float
 
 '''
 
-    return 1.0/(np.exp(beta*ek)-1)
+    n_B =  1.0 / (np.exp(beta*ek)-1)
+
+    if n_B > 1e5:
+        return 1e5
+    else:
+        return n_B
 
 
 def fermi_block(ek, mu, beta):
