@@ -437,9 +437,37 @@ def im_lind_smeared(omega, q, beta, mu, delta=0.01, qmax=10):
 
     return - 1.0/(4.0*sc.pi*q) * I
 
-def kramers_kronig(im_eps, omega, o, omega_max, delta=0.001, do=0.01):
 
-    integrand = omega*im_eps/(omega*omega-o*o+delta)
-    I = sc.integrate.simps(integrand, dx=do)
+def kramers_kronig(im_eps, omega, o, idx, do=0.01):
 
-    return 1.0 + 2.0/(sc.pi) * I
+    if idx == 0 or idx == 1:
+        I1 = 0
+        integrand = omega[idx+1:]*im_eps[idx+1:]/(omega[idx+1:]**2.0-o*o)
+        I2 = sc.integrate.simps(integrand[idx+1:], dx=do)
+    elif idx+1 == len(omega):
+        integrand = omega[:idx]*im_eps[:idx]/(omega[:idx]**2.0-o*o)
+        I1 = sc.integrate.simps(integrand, dx=do)
+        I2 = 0
+    else:
+        integrand = omega[:idx]*im_eps[:idx]/(omega[:idx]**2.0-o*o)
+        I1 = sc.integrate.simps(integrand, dx=do)
+        integrand = omega[idx+1:]*im_eps[idx+1:]/(omega[idx+1:]**2.0-o*o)
+        I2 = sc.integrate.simps(integrand, dx=do)
+
+    return 1.0 + 2.0/(sc.pi) * (I1+I2)
+
+
+def kramers_kronig_int(omega, q, beta, mu, omax):
+
+    delta = 0.018
+
+    def integrand(o2, omega, q, beta, mu):
+
+        return -ut.vq(q)*o2*im_lind(o2, q, beta, mu)/(o2*o2-omega*omega)
+
+    # conv = im_lind(omega, q, beta, mu)
+    I1 = sc.integrate.quad(integrand, 0, omega-delta, args=(omega, q, beta, mu))[0]
+    I2 = sc.integrate.quad(integrand, omega+delta, omax, args=(omega, q, beta, mu))[0]
+    # I2 = -ut.vq(q)*conv*np.log((omax-omega)/omega)
+
+    return 1.0 + 2/(sc.pi) * (I1+I2)
