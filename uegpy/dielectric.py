@@ -413,6 +413,7 @@ def integrand2(k, omega, q, beta, mu, delta):
         ut.step(k, np.abs(om_mi/q)) - ut.step(k, np.abs(om_pl/q))
     )
 
+
 def integrand(k, omega, q, beta, mu, delta):
 
     eq = 0.5*q*q
@@ -455,6 +456,13 @@ def kramers_kronig(im_eps, omega, o, idx, do=0.01):
         I2 = sc.integrate.simps(integrand, dx=do)
 
     return 2.0/(sc.pi) * (I1+I2)
+
+def kramers_kronig_eta(im_eps, omega, o, do, eta=0.00001):
+
+    #integrand = im_eps / (omega - o + complex(0,eta))
+    integrand = (omega-o)*im_eps / ((omega - o)**2.0 + eta**2.0)
+
+    return (1.0/sc.pi) * sc.integrate.simps(integrand, dx=do)
 
 
 def kramers_kronig_int(omega, q, beta, mu, omax):

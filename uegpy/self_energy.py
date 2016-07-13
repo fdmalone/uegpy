@@ -63,7 +63,7 @@ g0 : float
 
 def tabulate_dielectric(beta, mu, omax, kmax, nomega, nkpoints, zeta, delta=0.001):
 
-    omega = np.linspace(0, omax, nomega)
+    omega = np.linspace(-omax, omax, nomega)
     qvals = np.linspace(0, kmax, nkpoints)
 
     im_eps = np.zeros((len(omega), len(qvals)))
@@ -77,37 +77,38 @@ def tabulate_dielectric(beta, mu, omax, kmax, nomega, nkpoints, zeta, delta=0.00
         else:
             im_eps[:, iq] = np.array([-(2-zeta)*ut.vq(q)*di.im_lind_smeared(o, q, beta, mu, delta=delta, qmax=kmax)
                                                                     for o in omega])
-        re_eps[:, iq] = [1.0+di.kramers_kronig(im_eps[:, iq], omega, o, io, do=omega[1]) for (io, o) in enumerate(omega)]
+        re_eps[:, iq] = [1.0+di.kramers_kronig_eta(im_eps[:, iq], omega, o, do=omega[1]-omega[0]) for (io, o) in enumerate(omega)]
         denom = re_eps[:, iq]**2.0 + im_eps[:, iq]**2.0 + delta**2.0
         im_eps_inv[:, iq] = -im_eps[:, iq] / denom
         re_eps_inv[:, iq] = re_eps[:, iq] / denom
 
     return (re_eps_inv, im_eps_inv, re_eps, im_eps)
 
+def angular_integral(q, im_eps_inv, xi, k, beta, mu, u_grid, omega_grid):
+    # Grid for angular integral
+    # Values of E-E_{k-q}
+    omega_new = np.array([xi-(0.5*k*k+0.5*q*q-k*q*u) for u in u_grid])
+    # Integrand found by interpolating Im[1/eps] at new frequency values.
+    #F = [np.interp(np.abs(o), omega_grid, im_eps_inv) * (1.0+ut.bose_factor(o, beta)-ut.fermi_factor(o-xi, mu, beta)) for o in omega_new]
+    F = [np.interp(o, omega_grid, im_eps_inv) * (np.sign(o)*ut.step(o, 0)-ut.step(mu, np.abs(o-xi))) for o in omega_new]
+    # Integrand found by interpolating Im[1/eps] at new frequency values.
+    # F = []
+    # for o in omega_new:
+        # if o > 0 and o < omega_grid[-1]:
+            # F.append(np.interp(o, omega_grid, im_eps_inv) * (ut.step(o, 0)-ut.step(mu, np.abs(o-xi))))
+        # elif o < 0 and -o < omega_grid[-1]:
+            # F.append(-np.interp(np.abs(o), omega_grid, im_eps_inv) * (ut.step(o, 0)-ut.step(mu, np.abs(o-xi))))
+        # else:
+            # F.append(0)
+    # Finally integrate F
+    I = sc.integrate.simps(F, dx=(u_grid[1]-u_grid[0]))
+
+    #print q, xi, k, I, F[-1]
+
+    return (I, F)
 
 
 def im_g0w0_self_energy(xi, k, beta, mu, im_eps_inv, nupoints, nkpoints, kmax, omega_grid):
-
-    def angular_integral(q, im_eps_inv, xi, k, beta, mu, u_grid, omega_grid):
-        # Grid for angular integral
-        # Values of E-E_{k-q}
-        omega_new = np.array([xi-(0.5*k*k+0.5*q*q-k*q*u) for u in u_grid])
-        # Integrand found by interpolating Im[1/eps] at new frequency values.
-        #F = [np.interp(np.abs(o), omega_grid, im_eps_inv) * (1.0+ut.bose_factor(o, beta)-ut.fermi_factor(o-xi, mu, beta)) for o in omega_new]
-        F = [np.interp(np.abs(o), omega_grid, im_eps_inv) * (ut.step(o, 0)-ut.step(mu, np.abs(o-xi))) for o in omega_new]
-        # Integrand found by interpolating Im[1/eps] at new frequency values.
-        # F = []
-        # for o in omega_new:
-            # if o > 0 and o < omega_grid[-1]:
-                # F.append(np.interp(o, omega_grid, im_eps_inv) * (ut.step(o, 0)-ut.step(mu, np.abs(o-xi))))
-            # elif o < 0 and -o < omega_grid[-1]:
-                # F.append(-np.interp(np.abs(o), omega_grid, im_eps_inv) * (ut.step(o, 0)-ut.step(mu, np.abs(o-xi))))
-            # else:
-                # F.append(0)
-        # Finally integrate F
-        I = sc.integrate.simps(F, dx=(u_grid[1]-u_grid[0]))
-
-        return (I, F)
 
     u_grid = np.linspace(-1, 1, nupoints)
     qp_grid = np.linspace(0, kmax, nkpoints)
@@ -117,7 +118,7 @@ def im_g0w0_self_energy(xi, k, beta, mu, im_eps_inv, nupoints, nkpoints, kmax, o
 
     q_integral = sc.integrate.simps(I, dx=(qp_grid[1]-qp_grid[0]))
 
-    return - 1.0 / (sc.pi) * q_integral
+    return 1.0 / (sc.pi) * q_integral
 
 
 def re_g0w0_self_energy(xi, k, beta, mu, im_eps_inv, nupoints, nkpoints, kmax, omega_grid):

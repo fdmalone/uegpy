@@ -19,7 +19,7 @@ import self_energy as se
 # pl.plot(omega/ef, im_eps_inv[:,1], label='Im-num')
 # pl.plot(omega/ef, re_eps_inv[:,1], label='Re-num')
 
-rs = 1.0
+rs = 5.0
 theta = 0.000625
 zeta = 0
 ef = ut.ef(rs, zeta)
@@ -28,15 +28,16 @@ mu = inf.chem_pot(rs, beta, ef, zeta)
 kf = (2*ef)**0.5
 
 nkpoints = 200
-nomega = 40
-omega = np.linspace(0, 4*ef, nomega)
+nomega = 100
+omega = np.linspace(-10*ef, 10*ef, nomega)
 qvals = np.linspace(0, 10*kf, nkpoints)
-(re_eps_inv, im_eps_inv, re_eps1, im_eps1) = se.tabulate_dielectric(beta, mu, 4*ef, 10*kf, nomega, nkpoints, zeta, delta=0.001)
+print omega
+(re_eps_inv, im_eps_inv, re_eps1, im_eps1) = se.tabulate_dielectric(beta, mu, 10*ef, 10*kf, nomega, nkpoints, zeta, delta=0.001)
 re_eps = np.array([di.re_rpa_dielectric0(ef, q, kf, 0) for q in qvals])
 im_eps = np.array([di.im_rpa_dielectric0(ef, q, kf, 0) for q in qvals])
 
 #se.im_g0w0_self_energy(ef, (2*ef)**0.5, beta, mu, im_eps_inv, 200, 40, 10*kf, omega)
-im_sigma = [se.im_g0w0_self_energy(o, (2*o)**0.5, beta, mu, im_eps_inv, nomega, nkpoints, 10*kf, omega) for o in omega]
+im_sigma = [se.im_g0w0_self_energy(o+ef, 1.4*kf, beta, mu, im_eps_inv, nomega, nkpoints, 10*kf, omega) for o in omega]
 
 u_grid = np.linspace(-1, 1, 100)
 
@@ -45,7 +46,7 @@ u_grid = np.linspace(-1, 1, 100)
 #pl.legend()
 #pl.show()
 
-pl.plot(omega/ef, np.abs(im_sigma), label='Im Sigma')
+pl.plot(omega/ut.plasma_freq(rs), im_sigma, label='Im Sigma')
 pl.show()
 
 pl.plot(qvals, re_eps1[10,:], qvals, re_eps, 'ro')
