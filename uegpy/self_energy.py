@@ -6,6 +6,7 @@ import dielectric as di
 import utils as ut
 import greens_functions as gf
 import matplotlib.pyplot as pl
+import pandas as pd
 
 def angular_integrand(u, k, q, xi, beta, mu):
 
@@ -87,10 +88,12 @@ def tabulate_dielectric(beta, mu, omax, kmax, nomega, nkpoints, zeta, delta=0.00
 def angular_integral(q, im_eps_inv, xi, k, beta, mu, u_grid, omega_grid):
     # Grid for angular integral
     # Values of E-E_{k-q}
-    omega_new = np.array([xi-(0.5*k*k+0.5*q*q-k*q*u) for u in u_grid])
+    # omega_new = np.array([xi-(0.5*k*k+0.5*q*q-k*q*u) for u in u_grid])
+    omega_new = np.array([(0.5*k*k+0.5*q*q+k*q*u-mu)-xi for u in u_grid])
     # Integrand found by interpolating Im[1/eps] at new frequency values.
     #F = [np.interp(np.abs(o), omega_grid, im_eps_inv) * (1.0+ut.bose_factor(o, beta)-ut.fermi_factor(o-xi, mu, beta)) for o in omega_new]
-    F = [np.interp(o, omega_grid, im_eps_inv) * (np.sign(o)*ut.step(o, 0)-ut.step(mu, np.abs(o-xi))) for o in omega_new]
+    F = [np.interp(o, omega_grid, im_eps_inv) * (ut.bose_factor(o, beta)+ut.fermi_factor(o+xi, 0, beta)) for o in omega_new]
+    # F = [np.interp(o, omega_grid, im_eps_inv) * (ut.step(o, 0)+ut.step(0, xi+o)-1) for o in omega_new]
     # Integrand found by interpolating Im[1/eps] at new frequency values.
     # F = []
     # for o in omega_new:
@@ -105,7 +108,7 @@ def angular_integral(q, im_eps_inv, xi, k, beta, mu, u_grid, omega_grid):
 
     #print q, xi, k, I, F[-1]
 
-    return (I, F)
+    return (I, F, omega_new)
 
 
 def im_g0w0_self_energy(xi, k, beta, mu, im_eps_inv, nupoints, nkpoints, kmax, omega_grid):
@@ -155,3 +158,52 @@ def g0w0_self_energy(xi, k, beta, mu, im_eps_inv, nupoints, nkpoints, kmax, omeg
     return (re_sigma, im_sigma)
 
 
+def spectral_function(im_sigma, re_sigma, mu, k, omega_grid):
+
+    numerator = abs(im_sigma)
+    denominator = ((omega_grid+mu-0.5*k*k-re_sigma)**2.0+im_sigma**2.0)
+    A = (1.0/sc.pi) * numerator / denominator
+
+    return A
+
+
+def momentum_distribution(A, beta, mu, k, omega_grid):
+
+    n_k = sc.integrate.simps(A * ut.fermi_factor(0.5*k*k, mu, beta), dx=omega_grid[1]-omega_grid[0])
+
+    return n_k
+
+
+def hartree_fock(k, beta, mu, qmax):
+
+    qvals = np.linspace(0, qmax, 2000)
+    integrand = [ut.fermi_factor(0.5*q*q, mu, beta)*q*np.log(np.abs((k*k+q*q-2*k*q)/(k*k+q*q+2*k*q))) for q in qvals]
+
+    return 1.0 / (2*sc.pi*k) * sc.integrate.simps(integrand, dx=qvals[1])
+
+def write_table(table, row, column, name):
+
+    f = pd.DataFrame()
+
+    for (ik, k) in enumerate(column):
+
+        f[k] = table[:, ik]
+
+    f.colums = column
+    f.set_index(row).to_csv(name)
+
+
+def read_table(name):
+
+    f = pd.read_csv(name, index_col=0)
+
+    a = np.zeros(np.shape(f))
+
+    for (ik, k) in enumerate(f.columns.values):
+
+        a[:, ik] = f[k]
+
+    cols = np.array(f.columns.values, dtype=float)
+    rows = f.index.values
+
+    return (a, rows, cols)
