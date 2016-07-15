@@ -273,10 +273,8 @@ sha1 : string
 
     src = sys.path[0]
 
-    sha1 = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
-                                   cwd=src).strip()
-    suffix = subprocess.check_output(['git', 'status', '--porcelain'],
-                                     cwd=src).strip()
+    sha1 = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
+    suffix = subprocess.check_output(['git', 'status', '--porcelain', '../../uegpy']).strip()
     if suffix:
         return sha1 + '-dirty'
     else:
