@@ -168,16 +168,18 @@ def hartree_fock(k, beta, mu, qmax):
     return 1.0 / (2*sc.pi*k) * sc.integrate.simps(integrand, dx=qvals[1])
 
 
-def write_table(table, row, column, name):
+def write_table(table, row, column, name, variables, calc_type):
 
-    f = pd.DataFrame()
+    df = pd.DataFrame()
 
     for (ik, k) in enumerate(column):
 
-        f[k] = table[:, ik]
+        df[k] = table[:, ik]
 
-    f.colums = column
-    f.set_index(row).to_csv(name)
+    f = write_header(name, variables, calc_type)
+    df.colums = column
+    df.set_index(row).to_csv(f)
+    f.close()
 
 
 def read_table(name):
@@ -194,3 +196,22 @@ def read_table(name):
     rows = f.index.values
 
     return (a, rows, cols)
+
+
+def write_header(filename, variables, calc_type='None'):
+
+    f = open(filename, 'a')
+    rev = ut.get_git_revision_hash()
+    f.write('# -----------------\n')
+    f.write('# Running uegpy at: %s\n'%rev)
+    f.write('# -----------------\n')
+    f.write('# System Details\n')
+    f.write('# -----------------\n')
+    for (key, value) in variables.items():
+        f.write('# %s: %f\n'%(key, value))
+
+    f.write('# -----------------\n')
+    f.write('# Calculation type: %s\n'%calc_type)
+    f.write('# -----------------\n')
+
+    return f
