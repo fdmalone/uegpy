@@ -11,27 +11,34 @@ import infinite as inf
 import dielectric as di
 import self_energy as se
 import pandas as pd
+import time
 
-rs = 5.0
-theta = 0.5
+rs = float(sys.argv[1])
+theta = float(sys.argv[2])
 zeta = 0
 ef = ut.ef(rs, zeta)
 beta = 1.0 / (theta*ef)
 mu = inf.chem_pot(rs, beta, ef, zeta)
 kf = (2*ef)**0.5
 
-variables = ({'rs': rs, 'theta': theta, 'zeta': zeta})
+start = time.time()
 
-nkpoints = int(sys.argv[1])
-nomega = int(sys.argv[2])
+
+nkpoints = int(sys.argv[3])
+nomega = int(sys.argv[4])
 omega = np.linspace(-10*ef, 10*ef, nomega)
 qvals = np.linspace(0, 10*kf, nkpoints)
+
+variables = ({'rs': rs, 'theta': theta, 'zeta': zeta, 'nkpoints': nkpoints,
+              'nomega': nomega})
 
 (re_eps_inv, im_eps_inv) = se.tabulate_dielectric(beta, mu, 10*ef, 10*kf,
                                             nomega, nkpoints, zeta, delta=0.001)
 
 se.write_table(im_eps_inv, omega, qvals, 'im_eps.csv', variables,
                calc_type='Dielectric function')
+
+print ("Dielectic completed.")
 
 ksel = np.linspace(0, 2*kf, 40)
 im_sigma = np.zeros((len(omega), len(ksel)))
@@ -57,4 +64,6 @@ se.write_table(A, omega, ksel, 'spectral_function.csv', variables,
 
 frame = pd.DataFrame({'k': ksel/kf, 'n_k': nk})
 
+end = time.time()
+print ("Time Take: %f s"%(end-start))
 print (frame.to_csv('n_k.csv', index=False))
