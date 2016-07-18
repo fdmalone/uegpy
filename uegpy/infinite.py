@@ -288,7 +288,10 @@ corr : float
 
 '''
 
-    return -1.0/((2.0**0.5)*sc.pi) * beta**(-1./2.) * hfx_integrand(beta*mu, -0.5)
+    return -1.0/((2.0**0.5)*sc.pi) * beta**(-1./2.) * fermi_integral(-0.5, beta*mu)
+
+
+def exchange_energy(rs, beta, mu, zeta):
 
 
 def rpa_correlation_free_energy(rs, theta, zeta, lmax):
