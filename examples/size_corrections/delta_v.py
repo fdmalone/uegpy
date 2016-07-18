@@ -52,7 +52,7 @@ mad_sum = szc.mad_summation(theta, beta*mu, system.zeta, system.kf, nmax,
 v_int = szc.v_integral(rs, theta, beta*mu, system.zeta, system.kf, 0, qvals[-1],
                        nmax)
 # S(k_max)-1
-s_kmax = st.rpa_matsubara_dl(qvals[-1], rs, theta, beta*mu, zeta, nmax)
+s_kmax = st.rpa_matsubara(qvals[-1], rs, theta, beta*mu, zeta, nmax)
 
 # Madelung constant.
 mad = ut.madelung_approx(rs, ne)

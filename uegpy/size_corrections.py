@@ -124,7 +124,7 @@ delta_V : float
     def integrand(q, rs, theta, eta, zeta, kf, lmax):
 
         return (
-            st.rpa_matsubara_dl(q/kf, rs, theta, eta, zeta, lmax)
+            st.rpa_matsubara(q/kf, rs, theta, eta, zeta, lmax)
         )
 
     return (
@@ -158,7 +158,7 @@ delta_V : float
     def integrand(q, rs, theta, eta, zeta, kf, lmax):
 
         return (
-            st.rpa_matsubara_dl(q/kf, rs, theta, eta, zeta, lmax)-1.0
+            st.rpa_matsubara(q/kf, rs, theta, eta, zeta, lmax)-1.0
         )
 
     return (
@@ -221,7 +221,7 @@ Returns
 delta_V : float
     RPA finite size correction.
 '''
-    v = sum([ut.vq(q)*(st.rpa_matsubara_dl(q/kf, rs, theta, eta, zeta, lmax)
+    v = sum([ut.vq(q)*(st.rpa_matsubara(q/kf, rs, theta, eta, zeta, lmax)
               -1.0) for q in qvals])
 
     return 1.0 / (2.0*L**3.0) * v
