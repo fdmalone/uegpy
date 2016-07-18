@@ -237,7 +237,7 @@ def f_x(rs, beta, mu, zeta):
     Horovitz and Thieberger, Physica 71, 99 (1974).
 
     .. math::
-        f_\mathrm{x} = -(2-\zeta) \\frac{r_s^3}{3*\pi^2*\\beta^2}
+        f_\mathrm{x} = -(2-\zeta) \\frac{r_s^3}{3\pi^2\\beta^2}
                        \int_{-\infty}^{\eta_0} d\eta I_{-1/2}(\eta)
 
 Parameters
@@ -268,7 +268,7 @@ def mu_x(rs, beta, mu, zeta):
 
     .. math::
 
-        -\\frac{1}{\\sqrt{2}\\pi}\\beta^{-1/2}I_{-1/2}(\\eta_0)
+        \mu_\mathrm{x} = -\\frac{1}{\\sqrt{2}\\pi}\\beta^{-1/2}I_{-1/2}(\\eta_0)
 
 Parameters
 ----------
@@ -380,7 +380,7 @@ f_c : float
 
 
 def rpa_xc_free_energy(rs, theta, zeta, lmax):
-    ''' RPA XC free energy as given in Phys. Soc. Jap, 55, 2278 (1986).
+    '''RPA XC free energy as given in Phys. Soc. Jap, 55, 2278 (1986).
 
 Parameters
 ----------
@@ -423,8 +423,9 @@ U_xc : float
 
 
 def rpa_v_tanaka(rs, theta, zeta, nmax):
-    ''' Evaluate RPA electron-electron energy from Tanaka & Ichimaru JPSJ 55,
-        2278 (1986). This works.
+    '''Evaluate RPA electron-electron (potential) energy.
+
+    Taken from Tanaka & Ichimaru JPSJ 55, 2278 (1986) and benchmarked against this.
 
 Parameters
 ----------
