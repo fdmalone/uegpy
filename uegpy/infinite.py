@@ -256,12 +256,12 @@ hfx : float
 
 '''
 
-    hfx = sc.integrate.quad(hfx_integrand, -np.inf, beta*mu)[0]
+    hfx = sc.integrate.quad(hfx_integrand, -np.inf, beta*mu, args=(2))[0]
 
     return - (2-zeta) * rs**3.0/(3*sc.pi**2.0*beta**2.0) * hfx
 
 
-def inversion_correction(rs, beta, mu, zeta):
+def mu_x(rs, beta, mu, zeta):
     '''First order exchange correction to the chemical potential.
 
     Turns out to be:
