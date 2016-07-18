@@ -151,11 +151,11 @@ Returns
     return sc.integrate.quad(fermi_integrand, 0, np.inf, args=(nu, eta))[0]
 
 
-def energy_integral(beta, mu, rs, zeta):
-    ''' Total energy at inverse temperature beta:
+def ideal_kinetic_energy(beta, mu, rs, zeta):
+    '''Total energy of ideal gas (Kinetic only):
 
     .. math::
-        U = (2-\\zeta) \\frac{2\\sqrt{2}}{3\\pi}r_s^3\\beta^{-5/2} I(3/2, \\eta)
+        U_0 = (2-\\zeta) \\frac{2\\sqrt{2}}{3\\pi}r_s^3\\beta^{-5/2} I(3/2, \\eta)
 
 Parameters
 ----------
@@ -177,7 +177,7 @@ I(eta, nu) : float
     )
 
 
-def gc_free_energy_integral(beta, mu, rs):
+def gc_free_energy(beta, mu, rs):
     ''' Free energy:
 
     .. math::
