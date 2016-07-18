@@ -292,6 +292,36 @@ corr : float
 
 
 def exchange_energy(rs, beta, mu, zeta):
+    '''Exchange contribution to internal energy
+
+    Turns out to be:
+
+    .. math::
+
+        u_\mathrm{x} = \\frac{3}{2} \mu_\mathrm{x} - f_{\mathrm{x}}
+
+
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius.
+beta : float
+    Inverse temperature.
+mu : float
+    Chemical potential.
+zeta : int
+    Spin polarisation
+
+Returns
+-------
+u_x : float
+    Exchange energy.
+
+'''
+
+    u_x = 1.5 * mu_x(rs, beta, mu, zeta) - hfx_integral(rs, beta, mu, zeta)
+
+    return u_x
 
 
 def rpa_correlation_free_energy(rs, theta, zeta, lmax):
