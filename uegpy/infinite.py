@@ -230,11 +230,15 @@ I(-1/2, nu)^2 : float
     return fermi_integral(-0.5, eta)**power
 
 
-def hfx_integral(rs, beta, mu, zeta):
-    '''First-order exchange contribution to internal energy:
+def f_x(rs, beta, mu, zeta):
+    '''First-order exchange contribution to free energy:
+
+    Uses the convenient form for the exchange integral from:
+    Horovitz and Thieberger, Physica 71, 99 (1974).
 
     .. math::
-        \Omega =
+        f_\mathrm{x} = -(2-\zeta) \\frac{r_s^3}{3*\pi^2*\\beta^2}
+                       \int_{-\infty}^{\eta_0} d\eta I_{-1/2}(\eta)
 
 Parameters
 ----------
