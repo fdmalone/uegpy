@@ -208,7 +208,7 @@ Omega : float
     )
 
 
-def hfx_integrand(eta, power=2.0):
+def hfx_integrand(eta, power):
     '''Integrand of first order exchange contribution to internal energy.
 
     .. math::
