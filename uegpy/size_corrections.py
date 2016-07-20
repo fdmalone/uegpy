@@ -162,7 +162,7 @@ delta_V : float
         )
 
     return (
-        1.0/(sc.pi) * (sc.integrate.quad(integrand, kmin, kmax, args=(rs, theta,
+        kf / (sc.pi) * (sc.integrate.quad(integrand, kmin, kmax, args=(rs, theta,
                                          eta, zeta, kf, lmax)))[0]
     )
 
