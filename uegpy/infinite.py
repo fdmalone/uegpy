@@ -422,7 +422,7 @@ U_xc : float
     )
 
 
-def rpa_v_tanaka(rs, theta, zeta, nmax):
+def rpa_v_tanaka(rs, theta, zeta, nmax=10000, qmax=5):
     '''Evaluate RPA electron-electron (potential) energy.
 
     Taken from Tanaka & Ichimaru JPSJ 55, 2278 (1986) and benchmarked against this.
@@ -437,12 +437,13 @@ zeta : int
     Spin polarisation.
 lmax : int
     Maximum Matsubara frequency to include.
+qmax : float
+    Maximum qvector to integrate up to before using asymptotic form.
 
 Returns
 -------
 V : float
     Potential energy.
-
 '''
 
     ef = ut.ef(rs, zeta)
@@ -453,15 +454,17 @@ V : float
 
     def integrand(x, rs, theta, eta, zeta, nmax, kf):
 
-        if x > 4:
-            return st.rpa_tanaka_high_k(x, kf) - 1.0
-        else:
             return (
                 1.5 * theta * sum([di.im_chi_tanaka(x, rs, theta, eta, zeta, l)
                                   for l in range(-nmax, nmax+1)]) - 1.0
             )
 
-    integral = sc.integrate.quad(integrand, 0, np.inf, args=(rs, theta,
+    I1 = sc.integrate.quad(integrand, 0, qmax, args=(rs, theta,
                                    eta, zeta, nmax, kf))[0]
+    # Evaulated analytically using asymptotic form for S(k) from TI.
+    I2 = -8.0 / (9.0*sc.pi*kf*qmax**3.0)
 
-    return  ut.gamma(rs, theta, zeta) * integral / (sc.pi * ut.alpha(zeta))
+    return  (
+        ut.gamma(rs, theta, zeta) * (integral+I2) /
+        (sc.pi * ut.alpha(zeta) * beta)
+    )
