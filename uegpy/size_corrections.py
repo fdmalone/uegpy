@@ -158,7 +158,7 @@ delta_V : float
     def integrand(q, rs, theta, eta, zeta, kf, lmax):
 
         return (
-            st.rpa_matsubara(q/kf, rs, theta, eta, zeta, lmax)-1.0
+            st.rpa_matsubara(q, rs, theta, eta, zeta, lmax) - 1.0
         )
 
     return (
