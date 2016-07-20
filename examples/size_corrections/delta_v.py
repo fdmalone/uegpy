@@ -33,7 +33,7 @@ mu = inf.chem_pot(rs, beta, system.ef, zeta)
 # magnitude of kvectors for finite system.
 qvals = [system.kfac*(np.dot(k, k))**0.5 for k in system.kval[1:]]
 # Minimum kvector
-kmin = qvals[0]
+kmin = qvals[0] / system.kf
 # Correction from ommission of k = 0 term
 delta_zero = szc.v_integral(rs, theta, beta*mu, system.zeta, system.kf, 0, kmin,
                             nmax)
@@ -49,8 +49,9 @@ mad_int = szc.mad_integral(theta, beta*mu, system.zeta, system.kf, 0, qvals[-1],
 mad_sum = szc.mad_summation(theta, beta*mu, system.zeta, system.kf, nmax,
                         qvals, system.L)
 # Integral up to maximum kvector considered
-v_int = szc.v_integral(rs, theta, beta*mu, system.zeta, system.kf, 0, qvals[-1],
+v_int = szc.v_integral(rs, theta, beta*mu, system.zeta, system.kf, 0, qvals[-1]/system.kf,
                        nmax)
+
 # S(k_max)-1
 s_kmax = st.rpa_matsubara(qvals[-1], rs, theta, beta*mu, zeta, nmax)
 

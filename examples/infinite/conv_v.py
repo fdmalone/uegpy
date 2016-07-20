@@ -12,16 +12,17 @@ import dielectric as di
 import utils as ut
 import pandas as pd
 
-rs = 0.01
-theta = 8
+rs = 1
+theta = 1
 zeta = 0
-lvals = np.linspace(100, 50000, 5)
-qmax = [1, 2, 3, 4.01, 5, 8.01]
+#lvals = np.linspace(100, 50000, 5)
+#qmax = [1, 2, 3, 4.01, 5, 8.01]
 
-for q in qmax[-2:]:
-    tan = [inf.rpa_v_tanaka(rs, theta, zeta, l, q) for l in lvals.astype(int)]
-    pl.plot(lvals, tan, label='qmax=%s'%q)
+#for q in qmax[-2:]:
+    #tan = [inf.rpa_v_tanaka(rs, theta, zeta, l, q) for l in lvals.astype(int)]
+    #pl.plot(lvals, tan, label='qmax=%s'%q)
 
+print inf.rpa_v_tanaka(rs, theta, zeta, 100, 2.831717)
 
 pl.legend()
 pl.show()

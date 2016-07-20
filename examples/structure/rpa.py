@@ -14,7 +14,7 @@ import infinite as inf
 qvals = np.linspace(0.1, 4, 10)
 
 zeta = 0
-rs = 1
+rs = 0.01
 theta = 1.0
 
 ef = ut.ef(rs, zeta)
