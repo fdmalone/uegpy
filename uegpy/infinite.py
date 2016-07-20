@@ -465,6 +465,6 @@ V : float
     I2 = -8.0 / (9.0*sc.pi*kf*qmax**3.0)
 
     return  (
-        ut.gamma(rs, theta, zeta) * (integral+I2) /
+        ut.gamma(rs, theta, zeta) * (I1+I2) /
         (sc.pi * ut.alpha(zeta) * beta)
     )
