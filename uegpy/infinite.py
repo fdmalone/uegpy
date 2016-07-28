@@ -319,7 +319,7 @@ u_x : float
 
 '''
 
-    u_x = 1.5 * mu_x(rs, beta, mu, zeta) - hfx_integral(rs, beta, mu, zeta)
+    u_x = 1.5 * mu_x(rs, beta, mu, zeta) - f_x(rs, beta, mu, zeta)
 
     return u_x
 
