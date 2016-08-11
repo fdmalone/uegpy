@@ -184,7 +184,7 @@ def write_table(table, row, column, name, variables, calc_type):
 
 def read_table(name):
 
-    f = pd.read_csv(name, index_col=0)
+    f = pd.read_csv(name, index_col=0, comment='#')
 
     a = np.zeros(np.shape(f))
 
