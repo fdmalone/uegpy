@@ -8,14 +8,22 @@ import ueg_sys as ue
 import finite as fp
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as pl
 
-system = ue.System(1.0, 7, 10, 0)
+system = ue.System(1.0, 7, 10, 1)
 theta = 1.0
 
 b = 1.0 / (theta*system.ef)
-lmax = 10
+lmax = 20
+emax = [2.0, 4.0, 8.0, 10, 12, 14]
 
-mu = fp.chem_pot_sum(system, system.deg_e, b)
-f_c  = fp.rpa_correlation_free_energy(system, mu, b, lmax)
+f_c = []
+for e in emax:
+    system = ue.System(1.0, 7, e, 1)
+    mu = fp.chem_pot_sum(system, system.deg_e, b)
+    f_c.append(fp.rpa_correlation_free_energy(system, mu, b, lmax))
 
-print f_c
+pl.errorbar(emax, f_c, fmt='o')
+
+pl.legend()
+pl.show()
