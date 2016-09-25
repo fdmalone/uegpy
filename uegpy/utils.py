@@ -489,6 +489,24 @@ gamma : float
     return 2.0 * alpha(zeta)**2.0 * rs / gamma
 
 
-def e_x0(rs, zeta):
+def calcT(rs, theta, zeta):
+    ''' Calculate temperature in Hartrees from Theta.
 
-    return -3.0/(2.0*sc.pi*2*rs)*(9.0*sc.pi/4.0)**(1.0/3.0)
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarization.
+
+Returns
+-------
+T : float
+    Temperature in Hartree atomic units.
+'''
+
+    T = ef(rs, zeta) * theta
+
+    return T
