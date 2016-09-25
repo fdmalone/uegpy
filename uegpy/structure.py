@@ -179,7 +179,7 @@ s_q : float
     )
 
 
-def rpa_matsubara(q, rs, theta, eta, zeta, lmax):
+def rpa_matsubara(q, rs, theta, eta, zeta, lmax, qmax=5):
     '''RPA static structure factor evaluated using matsubara frequencies.
 
     .. math::
@@ -207,10 +207,13 @@ s_q : float
    Static structure factor.
 '''
 
-    sum_chi = sum([di.im_chi_tanaka(q, rs, theta, eta, zeta, l) for l in
-                   range(-lmax, lmax+1)])
-
-    return 1.5 * (zeta+1) * theta * sum_chi
+    if (q > qmax):
+        kf = 1.0 / (rs*ut.alpha(zeta))
+        return 1.0 - 8.0/(3*sc.pi*kf*q**4.0)
+    else:
+        sum_chi = sum([di.im_chi_tanaka(q, rs, theta, eta, zeta, l) for l in
+                       range(-lmax, lmax+1)])
+        return 1.5 * theta * sum_chi
 
 
 def q0_plasmon(q, rs):
