@@ -443,8 +443,6 @@ def pdwfxc00(rs, theta, zeta):
         This does not seem to match with Table. IV from the reference. Something
         is completely off for unpolarized case.
 
-    Credit: Ethan W. Brown for code.
-
 Paremeters
 ----------
 rs : float
@@ -488,3 +486,45 @@ f_xc : float
     return fxc*(1. + (2.**(B) - 1.)*Phi)
 
 
+def pz81(rs, zeta):
+    ''' Perdew-Zunger parametrization of the ground state correlation energy of the UEG.
+
+    Ref: PRB, 23, 5048 (1981).
+
+Parameters
+----------
+rs : float
+    Wigner-Seitz radius
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+E_c : float
+    Correlation energy of 3D UEG parametrised to CA QMC data.
+'''
+
+    if rs > 1:
+        if zeta == 1:
+          B1 = 1.3981
+          B2 = 0.2611
+          G = -0.0843
+        else:
+          B1 = 1.0529
+          B2 = 0.3334
+          G = -0.1423
+
+        return 2.*(G/(1+B1*np.sqrt(rs)+B2*rs))
+    else:
+        if zeta == 1:
+          A = 0.01555
+          B = -0.0269
+          C = 0.0007
+          D = -0.0048
+        else:
+          A = 0.0311
+          B = -0.048
+          C = 0.0020
+          D = -0.0116
+
+    return A*np.log(rs) + B + C*rs*np.log(rs) + D*rs
