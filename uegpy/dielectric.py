@@ -351,8 +351,16 @@ Im(chi) : float
 
 def lindhard_matsubara_finite(sys, q, mu, beta, l):
 
-    chi_l = sum([ut.fermi_factor(ek, mu, beta)/(-2*sc.pi*l/beta+ek-0.5*np.dot(k+q, k+q)) +
-                ut.fermi_factor(ek, mu, beta)/(2*sc.pi*l/beta+ek-0.5*np.dot(k+q, k+q))
-                for (k, ek) in zip(sys.kval, sys.spval)])
+    chi_l = 0.0
 
-    return chi_l / sys.L**3.0
+    for (k, ek) in zip(sys.kval, sys.spval):
+
+        kq = ek - 0.5*sys.kfac**2.0*np.dot(k+q, k+q)
+        zl = 2.0*sc.pi*l/beta
+        # print "THIS: ", ut.fermi_factor(ek, mu, beta), zl+kq, l, -zl+kq, q, k
+        if l == 0 and abs(kq) < 1e-10:
+            chi_l = chi_l
+        else:
+            chi_l = chi_l + ut.fermi_factor(ek, mu, beta) * (1.0/(zl+kq) + 1.0/(-zl+kq))
+
+    return (2-sys.zeta) * chi_l / sys.L**3.0
