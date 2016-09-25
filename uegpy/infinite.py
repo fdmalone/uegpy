@@ -36,7 +36,7 @@ rho : float
     )
 
 
-def chem_pot(rs, beta, ef, zeta, method=nav, it=1):
+def chem_pot(rs, beta, ef, zeta):
     '''Find the chemical potential for infinite system.
 
 Parameters
@@ -58,7 +58,7 @@ mu : float
 '''
 
     return (
-        sc.optimize.fsolve(nav_diff, ef, args=(beta, rs, zeta, method, it))[0]
+        sc.optimize.fsolve(nav_diff, ef, args=(beta, rs, zeta, nav, 1))[0]
     )
 
 
@@ -109,7 +109,7 @@ eta : float
 
 
 def fermi_integrand_deriv(x, nu, eta):
-    ''' Derivative of integrand of standard Fermi integral :math:`I(eta, nu)`
+    '''Derivative of integrand of standard Fermi integral :math:`I(eta, nu)`
     wrt beta.
 
     TODO : check this.
@@ -129,7 +129,7 @@ eta : float
 
 
 def fermi_integral(nu, eta):
-    ''' Standard Fermi integral :math:`I(\\eta, \\nu)`, where:
+    '''Standard Fermi integral :math:`I(\\eta, \\nu)`, where:
 
     .. math::
         I(\\eta, \\nu) = \\int_0^{\\infty} \\frac{x^{\\nu}}{(e^{x-\\eta}+1)} dx
@@ -178,13 +178,11 @@ I(eta, nu) : float
 
 
 def gc_free_energy(beta, mu, rs):
-    ''' Free energy:
+    '''Free energy:
 
     .. math::
 
         U = (2-\\zeta) \\frac{8\\sqrt{2}}{9\\pi}r_s^3\\beta^{-5/2} I(5/2, \\eta)
-
-        [todo] : check expression here.
 
 Parameters
 ----------
