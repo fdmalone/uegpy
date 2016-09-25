@@ -52,7 +52,7 @@ s_q = s_q[s_q.q < qmax]
 
 # Integral up to maximum kvector considered
 integrand = np.array([(sq-1.0) for (q, sq) in zip(s_q.q, s_q.S_q)])
-v_int = (1.0/sc.pi) * np.trapz(integrand, s_q.q)
+v_int = (system.kf/sc.pi) * np.trapz(integrand, s_q.q)
 
 # Madelung constant.
 mad = ut.madelung_approx(rs, ne)
