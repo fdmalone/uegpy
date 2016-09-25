@@ -111,6 +111,14 @@ S(q) : float
                     sc.integrate.quad(integrand, 0, 2*kf, args=(q, kf))[0])
 
 
+def hartree_fock_matsubara(q, rs, theta, eta, zeta, lmax):
+
+    sum_chi = sum([di.lindhard_matsubara(q, rs, theta, eta, zeta, l) for l in
+                   range(-lmax, lmax+1)])
+
+    return 1.5 * theta * sum_chi
+
+
 def rpa(q, beta, mu, rs):
     '''Finite temperature RPA static structure factor evulated as:
 
