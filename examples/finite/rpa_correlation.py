@@ -10,20 +10,26 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as pl
 
-system = ue.System(1.0, 7, 10, 1)
-theta = 1.0
+system = ue.System(1.0, 14, 10, 0)
+theta = 0.625
 
 b = 1.0 / (theta*system.ef)
-lmax = 20
-emax = [2.0, 4.0, 8.0, 10, 12, 14]
+lmax = [10, 20, 50, 80]
+emax = [2.0, 4.0, 8.0, 10, 12]
 
 f_c = []
+M = []
+e = 4
 for e in emax:
-    system = ue.System(1.0, 7, e, 1)
+    sys.stderr.write('%s\n'%e)
+    system = ue.System(1.0, 14, e, 0)
     mu = fp.chem_pot_sum(system, system.deg_e, b)
-    f_c.append(fp.rpa_correlation_free_energy(system, mu, b, lmax))
+    M.append(len(system.kval))
+    f_c.append(fp.rpa_correlation_free_energy(system, mu, b, 20))
 
-pl.errorbar(emax, f_c, fmt='o')
+frame = pd.DataFrame({'M': M, 'f_c': f_c}, columns=['M', 'f_c'])
 
-pl.legend()
+print (frame.to_string(index=False, justify='right'))
+pl.errorbar(1.0/np.array(M), f_c, fmt='o')
+
 pl.show()
