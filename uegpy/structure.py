@@ -265,3 +265,15 @@ S(q) : float
                                  kf, zeta))[0]
 
     return q**2.0 / (2*omega_q)
+
+
+def hartree_fock_finite(q, sys, mu, beta, lmax):
+
+    s_q = 0.0
+    for l in range(-lmax, lmax+1):
+
+        s_q += di.lindhard_matsubara_finite(sys, q, mu, beta, l)
+
+    return -(1.0/(beta*sys.rho)) * s_q
+
+

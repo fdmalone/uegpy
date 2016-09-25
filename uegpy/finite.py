@@ -486,3 +486,12 @@ def rpa_correlation_free_energy(sys, mu, beta, lmax):
                sys.kfac*sys.kval[1:])
 
     return 0.5 / (sys.ne*beta) * f_c
+
+
+def hfx_matsubara(sys, mu, beta, lmax):
+
+
+    v_x = sum(ut.vq_vec(sys.kfac*q)*(sq_finite(q, sys, mu, beta, lmax)-1) for q
+              in sys.kval[1:])
+
+    return sys.ne / (2.0*sys.L**3.0) * v_x
