@@ -17,6 +17,8 @@ for a finite number of electrons in the canonical and grand canonical ensemble.
 
 This is a work in progress and probably full of bugs.
 
+Parts of the code were stolen from Ethan Brown.
+
 Documentation
 -------------
 Documentation is mostly in the form of function docstrings and is on `readthedocs
