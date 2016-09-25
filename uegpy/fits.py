@@ -1,6 +1,8 @@
 ''' Various approximate fits to the UEG or OCP '''
 
 import numpy as np
+import utils as ut
+import scipy as sc
 
 def classical_ocp(system, beta):
     ''' Evaluate the classical excess energy using the parametrised fit given by
@@ -39,7 +41,7 @@ U_xc : float
     return U_xc
 
 
-def ksdt(rs, zeta, t):
+def ksdt(rs, t, zeta):
     '''
     Fit to RPIMC data of Brown et al (Phys. Rev. Lett. 110, 146405 (2013)) from
     Karasiev, Sjostrom, Dufty and Trickey, PRL 112, 076403. Please cite these
@@ -240,3 +242,148 @@ f_c : float
     return (
         (vwn_rpa(rs, zeta)*((1.0  + c1(rs)*t + c2(rs)*t**0.25)*np.exp(-c3(rs)*t))+fh(rs, t)*np.exp(-c4(rs)/t))
     )
+
+
+def ti_STLS_params(t, zeta):
+    '''Fitting parameters for :math:`T>0` STLS properties.
+
+    Taken from Tanaka & Ichimaru J. Phys. Soc. Jpn. 55, 2278 (1986).
+
+Parameters
+----------
+t : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+(a, b, c, d, e) : floats
+    Fitting parameters.
+'''
+
+    def a(t, zeta):
+        if zeta == 1:
+            l = (2./(9.*sc.pi))**(1./3.)
+        else:
+            l = (4./(9.*sc.pi))**(1./3.)
+
+        return (1./(sc.pi*l)) * (0.75 + 3.04363*t**2 - 0.092270*t**3 +
+                1.70350*t**4) * np.tanh(1./t) / (1. + 8.31051*t**2 + 5.1105*t**4)
+
+    def b(t):
+      return (t**(1./2.)*(0.323119 + 0.005348*t**(1./2.) +
+              3.490430*t**(3./2.))/(1. + 0.000836*t + 4.03040*t**(2.)))
+
+    def c(t):
+      return (t*(0.514517 + 0.436502*t + 0.711644*t**(2.))/(1. + 1.86096*t**(2.)
+              + 0.538374*t**(3.)))
+
+    def d(t):
+      return (t**(1./2.)*(0.549860 + 0.565967*t**(1./2.) - 1.15890*t +
+              1.35663*t**(3./2.))/(1. - 0.651931*t + t**(2.)))
+
+    def e(t):
+      return (t*(0.636274 + 0.487840*t + 1.61592*t**(2.))/(1. + 2.36797*t**(2.) +
+              1.09010*t**(3.)))
+
+    return (a(t, zeta), b(t), c(t), d(t), e(t))
+
+
+def ti_fxc(rs, t, pol):
+    '''Excess free energy (over kT) from STLS.
+
+    Taken from Tanaka & Ichimaru J. Phys. Soc. Jpn. 55, 2278 (1986).
+
+Parameters
+----------
+t : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+(a, b, c, d, e) : floats
+    Fitting parameters.
+'''
+
+    G = ut.gamma(rs, t, pol)
+
+    (a, b, c, d, e) = ti_STLS_params(t, pol)
+
+    return (-1.0*((c/e)*G + (2./e)*(b-(c*d/e))*(G**(0.5)) +
+            (1./e)*((a-(c/e))-(d/e)*(b-(c*d/e)))*np.log(abs(e*G+d*(G**(0.5))+1.)) -
+            (2./(e*np.sqrt(4.*e-d*d)))*(d*(a-(c/e))+(2.-(d*d/e))*(b-(c*d/e))) *
+            (np.arctan((2.*e*np.sqrt(G)+d)/np.sqrt(4.*e-d*d))-np.arctan(d/np.sqrt(4.*e-d*d)))))
+
+
+def ti_txc(rs, t, pol):
+    '''Excess kinetic energy (over kT) from STLS.
+
+    Taken from Tanaka & Ichimaru J. Phys. Soc. Jpn. 55, 2278 (1986).
+
+Parameters
+----------
+t : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+(a, b, c, d, e) : floats
+    Fitting parameters.
+
+'''
+    h = 0.00001 # Step size for numerical derivative.
+    G = ut.gamma(rs, t, pol)
+
+    return -t * (ti_fxc(ut.rs_gamma(G, t+h, pol), t+h, pol)-ti_fxc(rs, t, pol))/h
+
+
+def ti_v(rs, t, pol):
+    '''Potential energy from STLS.
+
+    Taken from Tanaka & Ichimaru J. Phys. Soc. Jpn. 55, 2278 (1986).
+
+Parameters
+----------
+t : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+(a, b, c, d, e) : floats
+    Fitting parameters.
+'''
+
+    (a, b, c, d, e) = ti_STLS_params(t, pol)
+    G = ut.gamma(rs, t, pol)
+    kT = ut.ef(rs, pol) * t
+
+    return -kT * G * (a + b*G**(1./2.) + c*G)/(1. + d*G**(1./2.) + e*G)
+
+
+def ti_uxc(rs, t, pol):
+    '''Excess internal energy from STLS
+    Taken from Tanaka & Ichimaru J. Phys. Soc. Jpn. 55, 2278 (1986).
+
+Parameters
+----------
+t : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+(a, b, c, d, e) : floats
+    Fitting parameters.
+'''
+
+    kT = ut.ef(rs, pol) * t
+
+    return kT*ti_txc(rs, t, pol) + ti_v(rs, t, pol)
