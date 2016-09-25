@@ -387,3 +387,104 @@ Returns
     kT = ut.ef(rs, pol) * t
 
     return kT*ti_txc(rs, t, pol) + ti_v(rs, t, pol)
+
+
+def PDWParams():
+    a1,a2,b1,b2,c1,c2,v,r,p,q,s,u,w = {},{},{},{},{},{},{},{},{},{},{},{},{}
+    a1[1] = 5.6304
+    a1[2] = 5.2901
+    a1[3] = 3.6854
+    b1[1] = -2.2308
+    b1[2] = -2.0512
+    b1[3] = -1.5385
+    c1[1] = 1.7624
+    c1[2] = 1.6185
+    c1[3] = 1.2629
+    a2[1] = 2.6083
+    a2[2] = -15.076
+    a2[3] = 2.4071
+    b2[1] = 1.2782
+    b2[2] = 24.929
+    b2[3] = 0.78293
+    c2[1] = 0.16625
+    c2[2] = 2.0261
+    c2[3] = 0.095869
+    v[1] = 1.5
+    v[2] = 3.0
+    v[3] = 3.0
+    r[1] = 4.4467
+    r[2] = 4.5581
+    r[3] = 4.3909
+    p[1] = 0.653676
+    p[2] = -0.157510
+    p[3] = 0.190535
+    q[1] = 0.166896
+    q[2] = -0.308756
+    q[3] = 0.691258
+    s[1] = -0.373864
+    s[2] = -0.144853
+    s[3] = -0.890943
+    u[1] = 0.472245
+    u[2] = 2.495400
+    u[3] = 5.656750
+    w[1] = 1.0
+    w[2] = 2.236068
+    w[3] = 3.162278
+
+    return a1,a2,b1,b2,c1,c2,v,r,p,q,s,u,w
+
+
+def pdwfxc00(rs, theta, zeta):
+    ''' Parametrisation of f_xc from CHNC data for the UEG.
+
+    Ref: Perrot, Dharma-wardana, 62, 16536 (2000).
+
+    .. Warning::
+        This does not seem to match with Table. IV from the reference. Something
+        is completely off for unpolarized case.
+
+    Credit: Ethan W. Brown for code.
+
+Paremeters
+----------
+rs : float
+    Wigner-Seitz Radius.
+theta : float
+    Degeneracy temperature.
+zeta : int
+    Spin polarisation
+
+Returns
+-------
+f_xc : float
+    Exchange-correlation free energy.
+'''
+
+    a1,a2,b1,b2,c1,c2,v,r,p,q,s,u,w = PDWParams()
+
+    g = lambda k: np.exp(5.*(rs-r[k]))
+    z = lambda k: rs*(a2[k]+b2[k]*rs)/(1.+c2[k]*rs*rs)
+    y = lambda k: v[k]*np.log(rs) + (a1[k] + b1[k]*rs + c1[k]*rs*rs)/(1. + rs*rs/5.)
+    A = lambda k: np.exp((y(k) + g(k)*z(k))/(1.+g(k)))
+    n = 3./(4.*sc.pi*(rs**3.))
+    u1 = sc.pi*n/2.
+    u2 = (2./3.)*np.sqrt(sc.pi*n)
+    T = ut.calcT(rs, theta, zeta)
+    P1 = (A(2)*u1 + A(3)*u2)*T*T + A(2)*u2*(T**(5./2.))
+    P2 = 1. + A(1)*T*T + A(3)*(T**(5./2.)) + A(2)*(T**3.)
+    exc0 = (inf.ex0(rs, zeta)+pz81(rs, zeta))
+    fxc = (exc0 - P1)/P2
+
+    h = (0.644291 + 0.0639443*rs)/(1. + 0.249611*rs)
+    lam = 1.089 + 0.70*theta*np.sqrt(rs)
+    F = lambda k: (p[k]+q[k]*(theta**(1./3.)))/(1. + s[k]*(theta**(1./3.)) + u[k]*(theta**(2./3.)))
+    iB = 0.
+    for [i,j,k] in [[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]:
+        iB += (np.sqrt(rs)-w[i])*(np.sqrt(rs)-w[j])/F(k)
+    B = 1./iB
+    alpha = 2 - h*np.exp(-theta*lam)
+    Phi = ((1+zeta)**(alpha) + (1-zeta)**(alpha) - 2.)/(2.**(alpha) - 2.)
+
+    return fxc*(1. + (2.**(B) - 1.)*Phi)
+
+
