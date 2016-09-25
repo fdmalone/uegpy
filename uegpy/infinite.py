@@ -319,7 +319,7 @@ u_x : float
 
 '''
 
-    u_x = 1.5 * mu_x(rs, beta, mu, zeta) - hfx_integral(rs, beta, mu, zeta)
+    u_x = 1.5 * mu_x(rs, beta, mu, zeta) - f_x(rs, beta, mu, zeta)
 
     return u_x
 
@@ -368,7 +368,7 @@ f_c : float
         i = 0
         for l in range(-lmax, lmax+1):
 
-            eps_0 = factor * di.tanaka(x, rs, theta, eta, zeta, l)
+            eps_0 = factor * di.lindhard_matsubara(x, rs, theta, eta, zeta, l)
             i += x*x*(np.log(1+eps_0) - eps_0)
 
         return i
@@ -411,7 +411,7 @@ U_xc : float
 
         return (
             x*x*(sum([np.log(1.0+2*gamma*theta/(sc.pi*lamb*x**2.0)
-                           * di.tanaka(x, rs, theta, eta, zeta, l))
+                           * di.lindhard_matsubara(x, rs, theta, eta, zeta, l))
                            for l in range(-lmax, lmax+1)])
                            - 4*gamma/(3*sc.pi*lamb*x**2.))
         )
@@ -422,7 +422,7 @@ U_xc : float
     )
 
 
-def rpa_v_tanaka(rs, theta, zeta, nmax):
+def rpa_v_tanaka(rs, theta, zeta, nmax, qmax=5):
     '''Evaluate RPA electron-electron (potential) energy.
 
     Taken from Tanaka & Ichimaru JPSJ 55, 2278 (1986) and benchmarked against this.
@@ -453,15 +453,12 @@ V : float
 
     def integrand(x, rs, theta, eta, zeta, nmax, kf):
 
-        if x > 4:
-            return st.rpa_tanaka_high_k(x, kf) - 1.0
-        else:
-            return (
-                1.5 * theta * sum([di.im_chi_tanaka(x, rs, theta, eta, zeta, l)
-                                  for l in range(-nmax, nmax+1)]) - 1.0
-            )
+        return (
+            1.5 * theta * sum([di.im_chi_tanaka(x, rs, theta, eta, zeta, l)
+                              for l in range(-nmax, nmax+1)]) - 1.0
+        )
 
-    integral = sc.integrate.quad(integrand, 0, np.inf, args=(rs, theta,
+    integral = sc.integrate.quad(integrand, 0, qmax, args=(rs, theta,
                                    eta, zeta, nmax, kf))[0]
 
     return  ut.gamma(rs, theta, zeta) * integral / (sc.pi * ut.alpha(zeta))
