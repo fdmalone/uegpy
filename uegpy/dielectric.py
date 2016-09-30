@@ -479,3 +479,55 @@ def kramers_kronig_int(omega, q, beta, mu, omax):
     # I2 = -ut.vq(q)*conv*np.log((omax-omega)/omega)
 
     return 1.0 + 2/(sc.pi) * (I1+I2)
+
+
+def lindhard_cplx_k(omega, ekq, ek, beta, mu, eta=0.01):
+
+    n_k = ut.fermi_factor(ek, mu, beta)
+    delta =  ek - ekq
+    om = omega + complex(0, eta)
+
+    return (n_k * (1.0/(om+delta) + 1.0/(-om+delta)))
+
+
+def lindhard_cplx_finite(omega, iq, system, beta, mu, eta):
+
+    chi0 = sum([lindhard_cplx_k(omega,
+            0.5*system.kfac**2.0*np.dot(system.kval[iq]+system.kval[ik],
+            system.kval[ik]+system.kval[iq]), system.spval[ik], beta, mu, eta)
+            for ik in range(0, len(system.spval))])
+
+    return (2-system.zeta)/(system.L**3.0) * chi0
+
+def integrand3(k, omega, q, beta, mu, eta):
+
+    om = omega + complex(0, eta)
+    eq = 0.5*q*q
+    dpl = eq - k*q
+    dmi = eq + k*q
+
+    return k * ut.fermi_factor(0.5*k*k, mu, beta) * (np.log((om+dpl)/(om+dmi)) + np.log((-om+dpl)/(-om+dmi)))
+
+def lindhard_cplx(omega, q, beta, mu, zeta, eta=0.01):
+
+    def integrand(k, omega, q, beta, mu, eta):
+
+        om = omega + complex(0, eta)
+        eq = 0.5*q*q
+        dpl = eq - k*q
+        dmi = eq + k*q
+
+        return k * ut.fermi_factor(0.5*k*k, mu, beta) * (np.log((om+dpl)/(om+dmi)) + np.log((-om+dpl)/(-om+dmi)))
+
+    def re_int(k, omega, q, beta, mu, eta):
+
+        return sc.real(integrand(k, omega, q, beta, mu, eta))
+
+    def im_int(k, omega, q, beta, mu, eta):
+
+        return sc.imag(integrand(k, omega, q, beta, mu, eta))
+
+    IR = sc.integrate.quad(re_int, 0, 10, args=(omega, q, beta, mu, eta))[0] 
+    II = sc.integrate.quad(im_int, 0, 10, args=(omega, q, beta, mu, eta))[0] 
+
+    return (2-zeta) / (8*sc.pi**2.0*q) * (IR + 1j * II) 
