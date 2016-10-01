@@ -492,12 +492,16 @@ def lindhard_cplx_k(omega, ekq, ek, beta, mu, eta=0.01):
 
 def lindhard_cplx_finite(omega, iq, system, beta, mu, eta):
 
-    chi0 = sum([lindhard_cplx_k(omega,
-            0.5*system.kfac**2.0*np.dot(system.kval[iq]+system.kval[ik],
-            system.kval[ik]+system.kval[iq]), system.spval[ik], beta, mu, eta)
-            for ik in range(0, len(system.spval))])
+    #chi0 = sum([lindhard_cplx_k(omega,
+            #0.5*system.kfac**2.0*np.dot(system.kval[iq]+system.kval[ik],
+            #system.kval[ik]+system.kval[iq]), system.spval[ik], beta, mu, eta)
+            #for ik in range(0, len(system.spval))])
 
+    chi0 = 0
+    for (ik, k) in enumerate(system.kval):
+        chi0 += lindhard_cplx_k(omega, 0.5*system.kfac**2.0*np.dot(system.kval[iq]+system.kval[ik], system.kval[iq]+system.kval[ik]), system.spval[ik], beta, mu, eta)
     return (2-system.zeta)/(system.L**3.0) * chi0
+
 
 def integrand3(k, omega, q, beta, mu, eta):
 
@@ -507,6 +511,7 @@ def integrand3(k, omega, q, beta, mu, eta):
     dmi = eq + k*q
 
     return k * ut.fermi_factor(0.5*k*k, mu, beta) * (np.log((om+dpl)/(om+dmi)) + np.log((-om+dpl)/(-om+dmi)))
+
 
 def lindhard_cplx(omega, q, beta, mu, zeta, eta=0.01):
 
@@ -527,7 +532,7 @@ def lindhard_cplx(omega, q, beta, mu, zeta, eta=0.01):
 
         return sc.imag(integrand(k, omega, q, beta, mu, eta))
 
-    IR = sc.integrate.quad(re_int, 0, 10, args=(omega, q, beta, mu, eta))[0] 
-    II = sc.integrate.quad(im_int, 0, 10, args=(omega, q, beta, mu, eta))[0] 
+    IR = sc.integrate.quad(re_int, 0, 10, args=(omega, q, beta, mu, eta))[0]
+    II = sc.integrate.quad(im_int, 0, 10, args=(omega, q, beta, mu, eta))[0]
 
-    return (2-zeta) / (8*sc.pi**2.0*q) * (IR + 1j * II) 
+    return (2-zeta) / (8*sc.pi**2.0*q) * (IR + 1j * II)
