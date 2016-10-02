@@ -432,11 +432,11 @@ def integrand(k, omega, q, beta, mu, delta):
                         #ut.step(k, np.abs(om_mi/q)) - ut.step(k, np.abs(om_pl/q))
     )
 
-def im_lind_smeared(omega, q, beta, mu, delta=0.01, qmax=10):
+def im_lind_smeared(omega, q, beta, mu, zeta, delta=0.01, qmax=10):
 
     I = sc.integrate.quad(integrand, 0, qmax, args=(omega, q, beta, mu, delta))[0]
 
-    return - 1.0/(4.0*sc.pi*q) * I
+    return - (2-zeta)/(8.0*sc.pi*q) * I
 
 
 def kramers_kronig(im_eps, omega, o, idx, do=0.01):
@@ -513,7 +513,7 @@ def integrand3(k, omega, q, beta, mu, eta):
     return k * ut.fermi_factor(0.5*k*k, mu, beta) * (np.log((om+dpl)/(om+dmi)) + np.log((-om+dpl)/(-om+dmi)))
 
 
-def lindhard_cplx(omega, q, beta, mu, zeta, eta=0.01):
+def lindhard_cplx(omega, q, beta, mu, zeta, eta=0.01, kmax=10):
 
     def integrand(k, omega, q, beta, mu, eta):
 
@@ -522,7 +522,10 @@ def lindhard_cplx(omega, q, beta, mu, zeta, eta=0.01):
         dpl = eq - k*q
         dmi = eq + k*q
 
-        return k * ut.fermi_factor(0.5*k*k, mu, beta) * (np.log((om+dpl)/(om+dmi)) + np.log((-om+dpl)/(-om+dmi)))
+        return (
+                k * ut.fermi_factor(0.5*k*k, mu, beta) *
+                (np.log((om+dpl)/(om+dmi)) + np.log((-om+dpl)/(-om+dmi)))
+              )
 
     def re_int(k, omega, q, beta, mu, eta):
 
@@ -532,7 +535,27 @@ def lindhard_cplx(omega, q, beta, mu, zeta, eta=0.01):
 
         return sc.imag(integrand(k, omega, q, beta, mu, eta))
 
-    IR = sc.integrate.quad(re_int, 0, 10, args=(omega, q, beta, mu, eta))[0]
-    II = sc.integrate.quad(im_int, 0, 10, args=(omega, q, beta, mu, eta))[0]
+    IR = sc.integrate.quad(re_int, 0, kmax, args=(omega, q, beta, mu, eta))[0]
+    II = sc.integrate.quad(im_int, 0, kmax, args=(omega, q, beta, mu, eta))[0]
 
-    return (2-zeta) / (8*sc.pi**2.0*q) * (IR + 1j * II)
+    return (2-zeta) / (4*sc.pi**2.0*q) * (IR + 1j * II)
+
+
+def static_dielectric(q, beta, mu, system):
+
+    def integrand(k, q, beta, mu, factor):
+
+        ekq = 0.5*factor**2.0*(np.dot(k+q, k+q))
+        ek = 0.5*factor**2.0*np.dot(k,k)
+
+        if (abs(ek-ekq) > 1e-16):
+            return ((ut.fermi_factor(ek, mu, beta) - ut.fermi_factor(ekq, mu, beta)) /
+                    (ek- ekq))
+        else:
+            # print ek-ekq, ut.fermi_factor(ek, mu, beta)-ut.fermi_factor(ekq, mu,
+                    # beta), q, k, np.dot(k, q), ekq, ek
+            return 0
+
+    I = sum(integrand(k, q, beta, mu, system.kfac) for k in system.kval)
+
+    return I/system.L**3.0
