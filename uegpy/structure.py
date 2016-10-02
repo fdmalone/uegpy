@@ -256,4 +256,4 @@ S(q) : float
     omega_q = sc.optimize.fsolve(di.re_rpa_dielectric0, 0.5*kf**2.0, args=(q,
                                  kf, zeta))[0]
 
-    return q**2.0 / (2*omega_q)
+    return (q**2.0 / (2*omega_q), omega_q)
