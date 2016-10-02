@@ -40,3 +40,4 @@ build/
 *.pyx
 setup.py
 *.c
+*.csv
