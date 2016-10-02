@@ -23,21 +23,25 @@ kf = (2*ef)**0.5
 
 start = time.time()
 
-
 nkpoints = int(sys.argv[3])
 nomega = int(sys.argv[4])
+kmin = float(sys.argv[5])
+
 omega = np.linspace(-10*ef, 10*ef, nomega)
-qvals = np.linspace(0, 10*kf, nkpoints)
+qvals = np.linspace(kmin, 10*kf, nkpoints)
 
 variables = ({'rs': rs, 'theta': theta, 'zeta': zeta, 'nkpoints': nkpoints,
               'nomega': nomega})
 
-(re_eps_inv, im_eps_inv) = se.tabulate_dielectric(beta, mu, 10*ef, 10*kf,
-                                            nomega, nkpoints, zeta, delta=0.001)
+(re_eps_inv, im_eps_inv) = se.tabulate_dielectric_cplx(beta, mu, 10*ef, 10*kf,
+                                                       nomega, nkpoints, zeta,
+                                                       kmin=kmin, eta=0.001)
 
 se.write_table(im_eps_inv, omega, qvals, 'im_eps.csv', variables,
                calc_type='Dielectric function')
 
+se.write_table(re_eps_inv, omega, qvals, 're_eps.csv', variables,
+               calc_type='Real part of Dielectric function')
 print ("Dielectic completed.")
 
 ksel = np.linspace(0, 2*kf, 40)
@@ -47,6 +51,7 @@ A = np.zeros((len(omega), len(ksel)))
 nk = []
 
 for (ik, k) in enumerate(ksel):
+    print ik, k
     im_sigma[:, ik] = [se.im_g0w0_self_energy(o, k, beta, mu, im_eps_inv,
                        nomega, nkpoints, 10*kf, omega) for o in omega]
     re_sigma[:, ik] = [se.hartree_fock(k, beta, mu, 10*ef) +
@@ -56,11 +61,11 @@ for (ik, k) in enumerate(ksel):
     nk.append(se.momentum_distribution(A[:,ik], beta, mu, k, omega))
 
 se.write_table(im_sigma, omega, ksel, 'im_sigma.csv', variables,
-               calc_type='Imaginary part of G0W0 self energy')
+               calc_type='Imaginary part of G0W0 self energy.')
 se.write_table(re_sigma, omega, ksel, 're_sigma.csv', variables,
-               calc_type='Imaginary part of G0W0 self energy')
+               calc_type='Real part of G0W0 self energy.')
 se.write_table(A, omega, ksel, 'spectral_function.csv', variables,
-               calc_type='G0W0 Spectral function')
+               calc_type='G0W0 Spectral function.')
 
 frame = pd.DataFrame({'k': ksel/kf, 'n_k': nk})
 
