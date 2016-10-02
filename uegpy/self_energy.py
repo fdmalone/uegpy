@@ -62,10 +62,10 @@ g0 : float
     # omega = np.
 
 
-def tabulate_dielectric(beta, mu, omax, kmax, nomega, nkpoints, zeta, delta=0.001):
+def tabulate_dielectric(beta, mu, omax, kmax, nomega, nkpoints, zeta, kmin=0.01, delta=0.001):
 
     omega = np.linspace(-omax, omax, nomega)
-    qvals = np.linspace(0, kmax, nkpoints)
+    qvals = np.linspace(kmin, kmax, nkpoints)
 
     im_eps = np.zeros((len(omega), len(qvals)))
     re_eps = np.zeros((len(omega), len(qvals)))
@@ -76,14 +76,34 @@ def tabulate_dielectric(beta, mu, omax, kmax, nomega, nkpoints, zeta, delta=0.00
         if iq == 0:
             im_eps[:, iq] = np.zeros(len(omega))
         else:
-            im_eps[:, iq] = np.array([-(2-zeta)*ut.vq(q)*di.im_lind_smeared(o, q, beta, mu, delta=delta, qmax=kmax)
+            im_eps[:, iq] = np.array([-ut.vq(q)*di.im_lind_smeared(o, q, beta, mu, zeta, delta=delta)
                                                                     for o in omega])
         re_eps[:, iq] = [1.0+di.kramers_kronig_eta(im_eps[:, iq], omega, o, do=omega[1]-omega[0]) for (io, o) in enumerate(omega)]
         denom = re_eps[:, iq]**2.0 + im_eps[:, iq]**2.0 + delta**2.0
         im_eps_inv[:, iq] = -im_eps[:, iq] / denom
         re_eps_inv[:, iq] = re_eps[:, iq] / denom
 
+    return (im_eps, re_eps, re_eps_inv, im_eps_inv)
+
+
+def tabulate_dielectric_cplx(beta, mu, omax, kmax, nomega, nkpoints, zeta,
+                             kmin=0.01, eta=0.01):
+
+    omega = np.linspace(-omax, omax, nomega)
+    qvals = np.linspace(kmin, kmax, nkpoints)
+
+    eps = np.zeros((len(omega), len(qvals)), dtype=np.complex_)
+    im_eps_inv = np.zeros((len(omega), len(qvals)))
+    re_eps_inv = np.zeros((len(omega), len(qvals)))
+
+    for (iq, q) in enumerate(qvals):
+        eps[:, iq] = [1.0 - ut.vq(q)*di.lindhard_cplx(o, q, beta, mu, zeta, eta) for o in omega]
+        # print iq, q, eps[:10,iq]
+        re_eps_inv[:, iq] = [(1.0/e).real for e in eps[:,iq]]
+        im_eps_inv[:, iq] = [(1.0/e).imag for e in eps[:,iq]]
+
     return (re_eps_inv, im_eps_inv)
+
 
 def angular_integral(q, im_eps_inv, xi, k, beta, mu, u_grid, omega_grid):
 
