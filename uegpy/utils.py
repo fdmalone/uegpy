@@ -155,7 +155,8 @@ frame : :class:`pandas.DataFrame`
             'Beta' not in x and 'M' not in x and 'rs' not in x]
 
     for name in mads:
-        frame[name] = frame[name]/system.ne + 0.5*madelung_approx(system)
+        frame[name] = frame[name]/system.ne + 0.5*madelung_approx(system.rs,
+                system.ne)
     for name in rest:
         frame[name] = frame[name] / system.ne
 
