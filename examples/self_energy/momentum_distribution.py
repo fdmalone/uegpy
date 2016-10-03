@@ -35,7 +35,7 @@ variables = ({'rs': rs, 'theta': theta, 'zeta': zeta, 'nkpoints': nkpoints,
 
 (re_eps_inv, im_eps_inv) = se.tabulate_dielectric_cplx(beta, mu, 10*ef, 10*kf,
                                                        nomega, nkpoints, zeta,
-                                                       kmin=kmin, eta=0.001)
+                                                       kmin=kmin, eta=abs(omega[1]-omega[0]))
 
 se.write_table(im_eps_inv, omega, qvals, 'im_eps.csv', variables,
                calc_type='Dielectric function')
