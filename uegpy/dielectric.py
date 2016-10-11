@@ -198,7 +198,7 @@ im_chi : float
 
 
 def re_rpa_dielectric0(omega, q, kf, zeta):
-    ''' Real part of the :math:`T=0` RPA dielectric function.
+    '''Real part of the :math:`T=0` RPA dielectric function.
 
 Parameters
 ----------
@@ -224,7 +224,7 @@ re_eps : float
 
 
 def im_rpa_dielectric0(omega, q, kf, zeta):
-    ''' Imaginary part of the :math:`T=0` RPA dielectric function.
+    '''Imaginary part of the :math:`T=0` RPA dielectric function.
 
 Parameters
 ----------
@@ -317,7 +317,7 @@ chi(x, l) : float
 
 
 def im_chi_tanaka(x, rs, theta, eta, zeta, l):
-    ''' Imaginary part of RPA dielectric function in dimensionless form.
+    '''Imaginary part of RPA dielectric function in dimensionless form.
 
     Taken from Tanaka and Ichimary, Phys. Soc. Jap, 55, 2278 (1986).
 

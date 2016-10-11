@@ -270,7 +270,7 @@ ex : float
 
 
 def canonical_partition_function(system, beta):
-    ''' Calculate canonical partition function from single particle eigenvalues.
+    '''Calculate canonical partition function from single particle eigenvalues.
 
     Warning: This gets very expensive very fast.
 

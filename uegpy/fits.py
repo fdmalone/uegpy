@@ -5,7 +5,7 @@ import utils as ut
 import scipy as sc
 
 def classical_ocp(system, beta):
-    ''' Evaluate the classical excess energy using the parametrised fit given by
+    '''Evaluate the classical excess energy using the parametrised fit given by
     J. P. Hansen PRA 8, 6 1973.
 
 
@@ -42,8 +42,7 @@ U_xc : float
 
 
 def ksdt(rs, t, zeta):
-    '''
-    Fit to RPIMC data of Brown et al (Phys. Rev. Lett. 110, 146405 (2013)) from
+    '''Fit to RPIMC data of Brown et al (Phys. Rev. Lett. 110, 146405 (2013)) from
     Karasiev, Sjostrom, Dufty and Trickey, PRL 112, 076403. Please cite these
     guys.
 
@@ -156,7 +155,7 @@ f_xc : float
 
 
 def vwn_rpa(rs, zeta):
-    ''' Vosko Wilk Nusair fit to RPA correlation energy of UEG. Can. J. Phys.
+    '''Vosko Wilk Nusair fit to RPA correlation energy of UEG. Can. J. Phys.
     58, 1200 (1980).
 
     Currently unpolarised only.
@@ -195,7 +194,7 @@ ec : float
 
 
 def pdw(rs, t, zeta):
-    ''' Perrot, Dharma-wardana (Phys. Rev. A 30, 2619 (1984).)fit to RPA
+    '''Perrot, Dharma-wardana (Phys. Rev. A 30, 2619 (1984).)fit to RPA
     correlation free energy of unpolarised UEG.
 
 Parameters

@@ -8,7 +8,7 @@ import sys
 
 
 def fermi_factor(ek, mu, beta):
-    ''' Usual fermi factor:
+    '''Usual fermi factor:
     .. math::
         f_k = \\frac{1}{e^{\\beta(\\varepsilon_k-\\mu)}+1}
 
@@ -32,7 +32,7 @@ f_k : float
 
 
 def fermi_block(ek, mu, beta):
-    ''' Usual fermi factor blocking factor, i.e., :math:`\\bar{f}_k = 1-f_k`.
+    '''Usual fermi factor blocking factor, i.e., :math:`\\bar{f}_k = 1-f_k`.
 
 Parameters
 ----------
@@ -54,7 +54,7 @@ fb_k : float
 
 
 def fermi_angle(u, k, q, mu, beta):
-    ''' Fermi factor for :math:`k + q`. Used for integration.
+    '''Fermi factor for :math:`k + q`. Used for integration.
 
 Parameters
 ----------
@@ -80,7 +80,7 @@ f_kq : float
 
 
 def madelung_approx(rs, ne):
-    ''' Use expression in Schoof et al. (PhysRevLett.115.130402) for the
+    '''Use expression in Schoof et al. (PhysRevLett.115.130402) for the
     Madelung contribution to the total energy. Please cite these guys and
     L.M. Fraser et al. Phys. Rev. B 53, 1814 whose functional form they fitted
     to.
@@ -103,7 +103,7 @@ v_M: float
 
 
 def add_mad(system, frame):
-    ''' Add Madelung constant to data.
+    '''Add Madelung constant to data.
 
 Parameters
 ----------
@@ -134,7 +134,7 @@ frame : :class:`pandas.DataFrame`
 
 
 def magic_numbers(system):
-    ''' Work out possible magic electron numbers (i.e. those that will fit in
+    '''Work out possible magic electron numbers (i.e. those that will fit in
     a closed shell) below nmax
 
 Parameters
@@ -286,7 +286,7 @@ f : :class:`pandas.DataFrame`
 
 
 def vq(q):
-    ''' Coulomb interaction.
+    '''Coulomb interaction.
 
 Parameters
 ----------
@@ -304,7 +304,7 @@ vq : float
 
 
 def vq_vec(q):
-    ''' Coulomb interaction.
+    '''Coulomb interaction.
 
 Parameters
 ----------
@@ -322,7 +322,7 @@ vq : float
 
 
 def ef(rs, zeta):
-    ''' Fermi Energy for 3D UEG.
+    '''Fermi Energy for 3D UEG.
 
 Parameters
 ----------
@@ -342,7 +342,7 @@ ef : float
 
 
 def step_angle(u, k, q, kf):
-    ''' Heaviside steb function for k+q.
+    '''Heaviside steb function for k+q.
 
 Parameters
 ----------
@@ -368,7 +368,7 @@ theta(kf - |a-b|): float
 
 
 def step(a, b):
-    ''' Heaviside steb function i.e., :math:`\theta(a-b)`
+    '''Heaviside steb function i.e., :math:`\theta(a-b)`
 
 Parameters
 ----------
@@ -391,7 +391,7 @@ theta(a-b): float
 
 
 def plasma_freq(rs):
-    ''' Plasma frequency for 3D UEG.
+    '''Plasma frequency for 3D UEG.
 
 Parameters
 ----------
@@ -409,7 +409,7 @@ omega_p : float
 
 
 def alpha(zeta):
-    ''' Alpha Parameter for ueg.
+    '''Alpha Parameter for ueg.
 
 Parameters
 ----------
@@ -425,7 +425,7 @@ alpha : float
 
 
 def gamma(rs, theta, zeta):
-    ''' Classical plasma coupling parameter for 3D UEG
+    '''Classical plasma coupling parameter for 3D UEG
 
 Parameters
 ----------
@@ -447,7 +447,7 @@ gamma : float
 
 
 def rs_gamma(gamma, theta, zeta):
-    ''' Find rs give a gamma and theta.
+    '''Find rs give a gamma and theta.
 
 Parameters
 ----------
@@ -468,7 +468,7 @@ gamma : float
     return gamma * theta / (2.0 * alpha(zeta)**2.0)
 
 def theta_gamma(gamma, rs, zeta):
-    ''' Find theta give a gamma and ts.
+    '''Find theta give a gamma and ts.
 
 Parameters
 ----------

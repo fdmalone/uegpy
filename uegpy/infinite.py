@@ -109,7 +109,7 @@ eta : float
 
 
 def fermi_integrand_deriv(x, nu, eta):
-    ''' Derivative of integrand of standard Fermi integral :math:`I(eta, nu)`
+    '''Derivative of integrand of standard Fermi integral :math:`I(eta, nu)`
     wrt beta.
 
     TODO : check this.
@@ -129,7 +129,7 @@ eta : float
 
 
 def fermi_integral(nu, eta):
-    ''' Standard Fermi integral :math:`I(\\eta, \\nu)`, where:
+    '''Standard Fermi integral :math:`I(\\eta, \\nu)`, where:
 
     .. math::
         I(\\eta, \\nu) = \\int_0^{\\infty} \\frac{x^{\\nu}}{(e^{x-\\eta}+1)} dx
@@ -178,7 +178,7 @@ I(eta, nu) : float
 
 
 def gc_free_energy(beta, mu, rs):
-    ''' Free energy:
+    '''Free energy:
 
     .. math::
 

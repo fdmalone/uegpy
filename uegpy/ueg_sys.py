@@ -82,7 +82,7 @@ M : int
 
 
     def sp_energies(self, kfac, ecut):
-        ''' Calculate the allowed kvectors and resulting single particle eigenvalues
+        '''Calculate the allowed kvectors and resulting single particle eigenvalues
         which can fit in the sphere in kspace determined by ecut.
 
     Parameters
@@ -127,7 +127,7 @@ M : int
 
 
     def compress_spval(self, spval):
-        ''' Compress the single particle eigenvalues so that we only consider unique
+        '''Compress the single particle eigenvalues so that we only consider unique
         values which vastly speeds up the k-space summations required.
 
     Parameters

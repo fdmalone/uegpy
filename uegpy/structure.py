@@ -222,7 +222,7 @@ s_q : float
 
 
 def q0_plasmon(q, rs):
-    ''' Plasmon structure factor.
+    '''Plasmon structure factor.
 
     .. math::
 
@@ -245,7 +245,7 @@ S(q) : float
 
 
 def bijl_feynman(q, kf, zeta):
-    ''' Bijl-Feynman structure factor.
+    '''Bijl-Feynman structure factor.
 
 Parameters
 ----------
@@ -275,5 +275,3 @@ def hartree_fock_finite(q, sys, mu, beta, lmax):
         s_q += di.lindhard_matsubara_finite(sys, q, mu, beta, l)
 
     return -(1.0/(beta*sys.rho)) * s_q
-
-

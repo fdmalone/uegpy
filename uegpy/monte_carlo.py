@@ -8,7 +8,7 @@ import time
 
 
 def sample_canonical_energy(system, beta, nmeasure):
-    ''' Sample canonical energy of a non-interacting system.
+    '''Sample canonical energy of a non-interacting system.
 
     Properties of the non-interacting canonical system can be evaluated by
     simply discarding configurations generated in grand canonical ensemble whose
