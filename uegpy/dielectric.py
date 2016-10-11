@@ -350,17 +350,32 @@ Im(chi) : float
 
 
 def lindhard_matsubara_finite(sys, q, mu, beta, l):
+    '''Evaluate Lindhard function at finite temperature in finite box at imaginary frequencies.
+
+Parameters
+----------
+sys : :class:`ueg_sys` object
+    System object.
+q : numpy array
+    magnitude of wavefector to evaluate at.
+mu : float
+    chemical potential.
+beta : float
+    inverse temperature.
+l : int
+    Matsubara frequency index.
+
+Returns
+-------
+chi_0 : float
+    Lindhard function.
+'''
 
     chi_l = 0.0
 
     for (k, ek) in zip(sys.kval, sys.spval):
-
-        kq = ek - 0.5*sys.kfac**2.0*np.dot(k+q, k+q)
+        delta_kq = ek - 0.5*sys.kfac**2.0*np.dot(k+q, k+q)
         zl = 2.0*sc.pi*l/beta
-        # print "THIS: ", ut.fermi_factor(ek, mu, beta), zl+kq, l, -zl+kq, q, k
-        if l == 0 and abs(kq) < 1e-10:
-            chi_l = chi_l
-        else:
-            chi_l = chi_l + ut.fermi_factor(ek, mu, beta) * (1.0/(zl+kq) + 1.0/(-zl+kq))
+        chi_l = chi_l + ut.fermi_factor(ek, mu, beta) * (delta_kq / (zl**2.0 + delta_kq**2.0))
 
     return (2-sys.zeta) * chi_l / sys.L**3.0
