@@ -559,3 +559,127 @@ def static_dielectric(q, beta, mu, system):
     I = sum(integrand(k, q, beta, mu, system.kfac) for k in system.kval)
 
     return I/system.L**3.0
+
+
+def chi0(q, omega, ef, zeta):
+    '''RPA Lindhard function at :math:`T=0`.
+
+    From Giuliani & Vignali QTEL.
+
+Parameters
+----------
+q : float
+    wavevector (modulus).
+omega : complex float
+    frequency.
+kf : float
+    Fermi wavevector.
+zeta : int
+    Spin polarisation.
+
+Parameters
+----------
+chi0 : float
+    Dielectric function.
+'''
+
+    def psi3(z):
+
+        return 0.5*z + 0.25*(1-z*z) * np.log((z+1)/(z-1))
+
+    kf = (2*ef)**0.5
+    x1 = omega/(q*kf) - q/(2*kf)
+    x2 = omega/(q*kf) + q/(2*kf)
+
+    chi0 = (2-zeta) * kf**2.0/(2*sc.pi**2.0*q) * (psi3(x1) - psi3(x2))
+
+    return chi0
+
+
+def eps_rpa0(q, omega, ef, zeta):
+    '''RPA Lindhard function at :math:`T=0`.
+
+    From Giuliani & Vignali QTEL.
+
+Parameters
+----------
+q : float
+    wavevector (modulus).
+omega : complex float
+    frequency.
+kf : float
+    Fermi wavevector.
+zeta : int
+    Spin polarisation.
+
+Parameters
+----------
+chi0 : float
+    Dielectric function.
+'''
+
+    return 1.0 - ut.vq(q) * chi0(q, omega, ef, zeta)
+
+
+def chi0T(q, omega, beta, mu, zeta):
+    '''RPA Lindhard function at :math:`T>0`.
+
+    From Giuliani & Vignali QTEL.
+
+Parameters
+----------
+q : float
+    wavevector (modulus).
+omega : complex float
+    frequency.
+kf : float
+    Fermi wavevector.
+zeta : int
+    Spin polarisation.
+
+Parameters
+----------
+chi0 : float
+    Dielectric function.
+'''
+
+    def imag_integrand(E, q, omega, beta, mu, zeta):
+
+        return sc.imag(beta*chi0(q, omega, E, zeta) /
+                (4.0*np.cosh(0.5*beta*(E-mu))**2.0))
+
+    def real_integrand(E, q, omega, beta, mu, zeta):
+
+        return sc.real(beta*chi0(q, omega, E, zeta) /
+                (4.0*np.cosh(0.5*beta*(E-mu))**2.0))
+
+    IR = sc.integrate.quad(real_integrand, 0, np.inf, args=(q, omega, beta, mu, zeta))[0]
+    II = sc.integrate.quad(imag_integrand, 0, np.inf, args=(q, omega, beta, mu, zeta))[0]
+
+    return (IR + 1j * II)
+
+
+def eps_rpaT(q, omega, beta, mu, zeta):
+    '''RPA dielectric function at :math:`T>0`.
+
+    From Giuliani & Vignali QTEL.
+
+Parameters
+----------
+q : float
+    wavevector (modulus).
+omega : complex float
+    frequency.
+beta : float
+    Inverse temperature.
+mu : float
+    Chemical potential.
+zeta : int
+    Spin polarisation.
+
+Parameters
+----------
+eps : float
+    RPA Dielectric function.
+'''
+    return 1.0 - ut.vq(q) * chi0T(q, omega, beta, mu, zeta)
