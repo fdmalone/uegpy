@@ -3,6 +3,7 @@
 import numpy as np
 import scipy as sc
 from scipy import integrate
+import scipy.constants as scc
 import subprocess
 import sys
 
@@ -510,3 +511,29 @@ T : float
     T = ef(rs, zeta) * theta
 
     return T
+
+
+def calc_density_parameters(Z, rho_m, A):
+    '''Cacluate the density parameters of a real free electron system.
+
+Parameters
+----------
+Z : int
+    Valence (number of free electrons) in atom
+rho_m : float
+    Mass density of element.
+A : float
+    Atomic mass of element.
+
+Returns
+-------
+rs : float
+    Density parameter (in bohr).
+n : float
+    Electronic density (in g/cm^3).
+'''
+
+    n = sc.N_A * Z * rho_m / A
+
+    a0 = scc.physical_constants['Bohr radius'][0]
+    rs = (3.0/(4.0*sc.pi*n))**(1.0/3.0) / a0
