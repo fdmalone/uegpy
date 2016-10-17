@@ -533,7 +533,11 @@ n : float
     Electronic density (in g/cm^3).
 '''
 
-    n = sc.N_A * Z * rho_m / A
+    N_A = scc.N_A
+    n = N_A * Z * rho_m / A
 
-    a0 = scc.physical_constants['Bohr radius'][0]
+    # convert to cm.
+    a0 = 100 * scc.physical_constants['Bohr radius'][0]
     rs = (3.0/(4.0*sc.pi*n))**(1.0/3.0) / a0
+
+    return (rs, n)
