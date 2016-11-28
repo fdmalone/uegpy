@@ -2,12 +2,21 @@
 #include <math.h>
 #include <iostream>
 #include <vector>
+#include <complex>
 
 using namespace std;
 
 static double const PI = 3.141592653589793;
 
 double trapezoid(vector<double> &f, double dx) {
+
+    // Trapezoidal rule.
+    //
+    // In:
+    //     f: vector
+    //        function to be integrated.
+    //     dx: double
+    //         spacing between data points in f.
 
     double res;
 
@@ -94,13 +103,15 @@ double im_eps_inv(double omega, double q, double beta, double mu, double kmax=10
     im_eps = -vq * im_lind(omega, q, beta, mu);
     denom = re_eps*re_eps + im_eps*im_eps + eta*eta;
 
-    return -im_eps / denom;
+    complex<double> eps(re_eps, im_eps+omega/abs(omega) * eta);
+    //return -im_eps / denom;
+    return (1.0 / eps).imag();
 }
 
-double angular_integral(double k, double omega, double q, double beta, double mu) {
+double angular_integral(double k, double omega, double q, double beta, double mu, double kmax=10, double eta=0.001) {
 
     vector<double> I;
-    double du = 0.01, u, ekq;
+    double du = 0.005, u, ekq;
     int imax;
 
     imax = (int)(2/du) + 1;
@@ -108,7 +119,8 @@ double angular_integral(double k, double omega, double q, double beta, double mu
     u = -1.0;
     for (int i = 0; i < imax; i++) {
         ekq = 0.5*k*k + 0.5*q*q + k*q*u - mu;
-        I.push_back(im_eps_inv(ekq-omega, q, beta, mu) * (bose_factor(ekq-omega, beta)+fermi_factor(ekq, mu, beta)));
+        I.push_back(im_eps_inv(ekq-omega, q, beta, mu, kmax, eta) * (bose_factor(ekq-omega, beta)+fermi_factor(ekq, 0, beta)));
+        //cout << "uint: " << u << "    " << I[i] << endl;
         u = u + du;
     }
 
@@ -119,14 +131,15 @@ double angular_integral(double k, double omega, double q, double beta, double mu
 double im_sigma_rpa(double omega, double q, double beta, double mu, double qmax=10) {
 
     double result, error;
-    double dq = 0.1, k;
+    double dq, k;
     vector<double> I;
 
-    int imax = (int)qmax/dq + 1;
+    int imax = 1000;
 
+    dq = qmax/imax;
     k = 0.001;
     for (int i = 0; i < imax; i++) {
-        I.push_back(angular_integral(k, omega, q, beta, mu));
+        I.push_back(angular_integral(k, omega, q, beta, mu, qmax, dq));
         k += dq;
     }
 
@@ -137,19 +150,25 @@ double im_sigma_rpa(double omega, double q, double beta, double mu, double qmax=
 int main() {
 
     double mu = 1.84158;
-    double beta = 100;
-    double k, omega, kf, im, re, inv;
+    double beta = 10/mu;
+    double k, omega, kf, im, re, inv, im_eps_inv, domega;
     vector<double> I;
+    int omax;
 
-    omega = -2.0;
+    omega = -5.0*mu;
     kf = sqrt((2*mu));
-    for (int o = 0; o < 400; o++) {
-        omega += 0.01;
-        k = 0.2;
-        //im = im_lind(omega, k, beta, mu);
-        //re = re_lind(omega, k, beta, mu, kf);
-        im = im_sigma_rpa(omega, k, beta, mu);
+    omax = 2*abs(omega) / domega + 1;
+    domega = 0.1;
+    for (int o = 0; o < omax; o++) {
+        k = 0.4;
+        //im = 4*PI/(k*k)*im_lind(omega, k, beta, mu);
+        //re = 1-4*PI/(k*k)*re_lind(omega, k, beta, mu, kf);
+        im = im_sigma_rpa(omega, k, beta, mu, 10*kf);
+        //im_eps_inv = im_eps_inv(omega, k, beta, mu);
+        //std::cout << omega << "   " << im << "    " << re << "   " << im/(im*im+re*re+0.02) <<  endl;
         std::cout << omega << "   " << im << endl;
+        std::cerr << omega << "   " << im << endl;
+        omega += domega;
     }
     k = 0.0;
 
