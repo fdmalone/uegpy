@@ -474,22 +474,22 @@ def rpa_correlation_free_energy(sys, mu, beta, lmax):
     def integrand(q, sys, mu, beta, l):
 
         I = 0.0
-        for l in range(-lmax, lmax):
+        for l in range(-lmax, lmax+1):
 
-            eps_0 = ut.vq_vec(q) * di.lindhard_matsubara_finite(sys, q, mu, beta, l)
+            eps_0 = ut.vq_vec(sys.kfac*q) * di.lindhard_matsubara_finite(sys, q, mu, beta, l)
+            print l, q, eps_0, I
             I += np.log(1-eps_0) + eps_0
 
         return I
 
 
-    f_c = sum(integrand(q, sys, mu, beta, lmax) for q in
-               sys.kfac*sys.kval[1:])
+    f_c = sum(integrand(q, sys, mu, beta, lmax) for q in sys.kval[1:])
 
-    return 0.5 / (sys.ne*beta) * f_c
+    print beta, f_c
+    return (0.5/(sys.ne*beta)) * f_c
 
 
 def hfx_matsubara(sys, mu, beta, lmax):
-
 
     v_x = sum(ut.vq_vec(sys.kfac*q)*(sq_finite(q, sys, mu, beta, lmax)-1) for q
               in sys.kval[1:])

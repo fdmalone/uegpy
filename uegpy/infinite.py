@@ -376,6 +376,7 @@ f_c : float
     integral = sc.integrate.quad(integrand, 0.0, 100, args=(rs, theta, eta,
                                 zeta, lmax, gamma, alpha))[0]
 
+    print beta, integral
     return  (0.75/beta) * integral
 
 

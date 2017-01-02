@@ -374,8 +374,14 @@ chi_0 : float
     chi_l = 0.0
 
     for (k, ek) in zip(sys.kval, sys.spval):
-        delta_kq = ek - 0.5*sys.kfac**2.0*np.dot(k+q, k+q)
-        zl = 2.0*sc.pi*l/beta
-        chi_l = chi_l + ut.fermi_factor(ek, mu, beta) * (delta_kq / (zl**2.0 + delta_kq**2.0))
+        ekq = 0.5*sys.kfac**2.0*np.dot(k+q, k+q)
+        delta_kq = ek - ekq
+        if delta_kq < 1e-12 and l == 0:
+            chi_l = chi_l + 1.0
+        else:
+            zl = 2.0*sc.pi*l/beta
+            chi_l = chi_l + ut.fermi_factor(ek, mu, beta) * (2.0*delta_kq / (zl**2.0 + delta_kq**2.0))
+        # chi_l = chi_l + ut.fermi_factor(ek, mu, beta)*(1.0-ut.fermi_factor(ekq, mu, beta)) * (2.0*delta_kq / (zl**2.0 + delta_kq**2.0))
+        print l, q, chi_l, delta_kq, zl, ekq, ek, k
 
     return (2-sys.zeta) * chi_l / sys.L**3.0
