@@ -8,28 +8,23 @@ import ueg_sys as ue
 import finite as fp
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as pl
 
-system = ue.System(1.0, 14, 10, 0)
-theta = 0.625
+rs = float(sys.argv[1])
+nel = int(sys.argv[2])
+zeta = int(sys.argv[3])
+theta = float(sys.argv[4])
+ecut = float(sys.argv[5])
+lmax = int(sys.argv[6])
 
+system = ue.System(rs, nel, ecut, zeta)
 b = 1.0 / (theta*system.ef)
-lmax = [10, 20, 50, 80]
-emax = [2.0, 4.0, 8.0]
-
-f_c = []
-M = []
-e = 4
-for e in emax:
-    sys.stderr.write('%s\n'%e)
-    system = ue.System(1.0, 14, e, 0)
-    mu = fp.chem_pot_sum(system, system.deg_e, b)
-    M.append(len(system.kval))
-    f_c.append(fp.rpa_correlation_free_energy(system, mu, b, 20))
-
-frame = pd.DataFrame({'M': M, 'f_c': f_c}, columns=['M', 'f_c'])
+mu = fp.chem_pot_sum(system, system.deg_e, b)
+f_c = fp.rpa_correlation_free_energy(system, mu, b, lmax)
+f_xm = fp.exchange_energy_chi0(system, mu, b, lmax)
+f_x = fp.hfx_sum(system, b, mu)
+frame = pd.DataFrame({'M': [len(system.kval)], 'lmax': [lmax],
+                      'f_c': [f_c], 'f_xm': [f_xm], 'f_x': [f_x],
+                      'r_s': [rs], 'zeta': [zeta], 'Theta': [theta], 'nel': [nel]},
+                      columns=['r_s', 'M', 'nel', 'Theta', 'lmax', 'zeta', 'f_x', 'f_xm', 'f_c'])
 
 print (frame.to_string(index=False, justify='right'))
-pl.errorbar(1.0/np.array(M), f_c, fmt='o')
-
-pl.show()
