@@ -274,4 +274,4 @@ def hartree_fock_finite(q, sys, mu, beta, lmax):
 
         s_q += di.lindhard_matsubara_finite(sys, q, mu, beta, l)
 
-    return -(1.0/(beta*sys.rho)) * s_q
+    return -(system.ne/(beta*system.L**3.0)) * s_q

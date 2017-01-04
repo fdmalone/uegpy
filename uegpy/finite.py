@@ -7,6 +7,7 @@ from utils import fermi_factor
 import itertools
 import utils as ut
 import dielectric as di
+import matplotlib.pyplot as pl
 
 
 def centre_of_mass_obsv(system, beta):
@@ -205,7 +206,7 @@ hfx : float
                                         fermi_factor(system.spval[q], mu, beta)
                 )
 
-    return -hfx / (system.L*sc.pi)
+    return -(2-system.zeta) * hfx / (system.L*sc.pi)
 
 
 def hf_potential(occ, kvecs, L):
@@ -477,16 +478,29 @@ def rpa_correlation_free_energy(sys, mu, beta, lmax):
         for l in range(-lmax, lmax+1):
 
             eps_0 = ut.vq_vec(sys.kfac*q) * di.lindhard_matsubara_finite(sys, q, mu, beta, l)
-            print l, q, eps_0, I
             I += np.log(1-eps_0) + eps_0
 
         return I
 
-
     f_c = sum(integrand(q, sys, mu, beta, lmax) for q in sys.kval[1:])
 
-    print beta, f_c
     return (0.5/(sys.ne*beta)) * f_c
+
+
+def exchange_energy_chi0(sys, mu, beta, lmax):
+
+    def integrand(q, sys, mu, beta, l):
+
+        I = sum(di.lindhard_matsubara_finite(sys, q, mu, beta, l) for l in range(-lmax, lmax+1))
+
+        return -sys.L**3.0 / (sys.ne*beta) * I
+
+    sq = [integrand(q, sys, mu, beta, lmax) for q in sys.kval[1:]]
+    # for k, s in zip(sys.kval[1:], sq):
+        # print sys.kfac*np.dot(k, k)**0.5/sys.kf, s
+    f_x = sum(ut.vq_vec(sys.kfac*q)*(integrand(q, sys, mu, beta, lmax) - 1.0) for q in sys.kval[1:])
+
+    return (sys.ne/(2.0*sys.L**3.0)) * f_x
 
 
 def hfx_matsubara(sys, mu, beta, lmax):
@@ -495,3 +509,19 @@ def hfx_matsubara(sys, mu, beta, lmax):
               in sys.kval[1:])
 
     return sys.ne / (2.0*sys.L**3.0) * v_x
+
+
+def hfx_structure(system, mu, beta):
+
+    fx = 0.0
+    for q in system.kval[1:]:
+        for (ik, k) in enumerate(system.kval):
+            ekq = 0.5*system.kfac**2.0*np.dot(k+q, k+q)
+            fx += ut.vq_vec(system.kfac*q)*ut.fermi_factor(ekq, mu, beta)*ut.fermi_factor(system.spval[ik], mu, beta)
+
+    return -(2-system.zeta)/(2.0*system.L**3.0) * fx
+
+
+def greens_function(omega_n, xi):
+
+    return 1.0 / (complex(0, omega_n)-xi)
