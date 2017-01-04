@@ -7,6 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
 import ueg_sys as ue
 import finite as fp
 import numpy as np
+import utils as ut
 import pandas as pd
 
 rs = float(sys.argv[1])
@@ -27,4 +28,5 @@ frame = pd.DataFrame({'M': [len(system.kval)], 'lmax': [lmax],
                       'r_s': [rs], 'zeta': [zeta], 'Theta': [theta], 'nel': [nel]},
                       columns=['r_s', 'M', 'nel', 'Theta', 'lmax', 'zeta', 'f_x', 'f_xm', 'f_c'])
 
+print ("# Running uegpy version: %s"%(ut.get_git_revision_hash()))
 print (frame.to_string(index=False, justify='right'))
