@@ -321,7 +321,7 @@ chi(x, l) : float
 
         chi_n = sc.integrate.quad(integrand, 0, np.inf, args=(x, theta, eta, l))[0]
 
-        return 0.5 * (2-zeta) * prefactor * chi_n
+        return prefactor * chi_n
 
 
 def im_chi_tanaka(x, rs, theta, eta, zeta, l):
@@ -352,6 +352,6 @@ Im(chi) : float
 
     phi = lindhard_matsubara(x, rs, theta, eta, zeta, l)
 
-    pre = 2.0*ut.gamma(rs, theta, zeta)*theta / (sc.pi*ut.alpha(zeta)*x**2.0)
+    pre = (2.0-zeta)*ut.gamma(rs, theta, zeta)*theta / (sc.pi*ut.alpha(zeta)*x**2.0)
 
     return phi / (1.0 + pre*phi)

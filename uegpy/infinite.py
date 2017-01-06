@@ -361,7 +361,7 @@ f_c : float
 
     def integrand(x, rs, theta, eta, zeta, lmax, gamma, alpha):
 
-        factor = 2*gamma*theta/(sc.pi*alpha*x*x)
+        factor = (2-zeta)*gamma*theta/(sc.pi*alpha*x*x)
 
         i = 0
         for l in range(-lmax, lmax+1):
@@ -374,7 +374,7 @@ f_c : float
     integral = sc.integrate.quad(integrand, 0.0, 100, args=(rs, theta, eta,
                                 zeta, lmax, gamma, alpha))[0]
 
-    return  (0.75/beta) * integral
+    return  (1.5/((2.0-zeta)*beta) * integral
 
 
 def rpa_xc_free_energy(rs, theta, zeta, lmax):
@@ -408,19 +408,19 @@ U_xc : float
     def integrand(x, rs, zeta, theta, eta, gamma, lamb, lmax):
 
         return (
-            x*x*(sum([np.log(1.0+2*gamma*theta/(sc.pi*lamb*x**2.0)
+            x*x*(sum([np.log(1.0+(2-zeta)*gamma*theta/(sc.pi*lamb*x**2.0)
                            * di.lindhard_matsubara(x, rs, theta, eta, zeta, l))
                            for l in range(-lmax, lmax+1)])
-                           - 4*gamma/(3*sc.pi*lamb*x**2.))
+                           - 2*(2-zeta)*gamma/(3*sc.pi*lamb*x**2.))
         )
 
     return (
-        0.75 * theta * ef * sc.integrate.quad(integrand, 0, 100,
+        1.5/((2.0-zeta)*beta) * sc.integrate.quad(integrand, 0, 100,
          args=(rs, zeta, theta, eta, gamma, alpha, lmax))[0] / (zeta+1)
     )
 
 
-def rpa_v_tanaka(rs, theta, zeta, nmax=10000, qmax=5):
+def rpa_v_tanaka(rs, theta, zeta, nmax=10000, qmax=5, correction=True):
     '''Evaluate RPA electron-electron (potential) energy.
 
     Taken from Tanaka & Ichimaru JPSJ 55, 2278 (1986) and benchmarked against this.
