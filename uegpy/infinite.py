@@ -457,12 +457,12 @@ V : float
                                   for l in range(-nmax, nmax+1)]) - 1.0
             )
 
-    I1 = sc.integrate.quad(integrand, 0, qmax, args=(rs, theta,
+    I = sc.integrate.quad(integrand, 0, qmax, args=(rs, theta,
                                    eta, zeta, nmax, kf))[0]
-    # Evaulated analytically using asymptotic form for S(k) from TI.
-    I2 = -8.0 / (9.0*sc.pi*kf*qmax**3.0)
+    if correction:
+        # Evaulated analytically using asymptotic form for S(k) from TI.
+        I += -8.0 / (9.0*sc.pi*kf*qmax**3.0)
 
     return  (
-        ut.gamma(rs, theta, zeta) * (I1+I2) /
-        (sc.pi * ut.alpha(zeta) * beta)
+        ut.gamma(rs, theta, zeta)*I / (sc.pi*ut.alpha(zeta)*beta)
     )
