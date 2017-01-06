@@ -218,7 +218,7 @@ s_q : float
     sum_chi = sum([di.im_chi_tanaka(q, rs, theta, eta, zeta, l) for l in
                    range(-lmax, lmax+1)])
 
-    return 1.5 * (zeta+1) * theta * sum_chi
+    return 1.5 * theta * sum_chi
 
 
 def q0_plasmon(q, rs):
@@ -267,11 +267,21 @@ S(q) : float
     return q**2.0 / (2*omega_q)
 
 
-def hartree_fock_finite(q, sys, mu, beta, lmax):
+def hartree_fock_finite(q, sys, beta, mu, lmax):
 
     s_q = 0.0
     for l in range(-lmax, lmax+1):
 
         s_q += di.lindhard_matsubara_finite(sys, q, mu, beta, l)
 
-    return -(system.ne/(beta*system.L**3.0)) * s_q
+    return -(sys.L**3.0/(beta*sys.ne)) * s_q
+
+
+def rpa_finite(q, system, beta, mu, lmax):
+
+    s_q = 0.0
+    for l in range(-lmax, lmax+1):
+        chi0 = di.lindhard_matsubara_finite(system, q, mu, beta, l)
+        s_q += chi0 / (1.0 - ut.vq_vec(system.kfac*q)*chi0)
+
+    return -(system.L**3.0/(beta*system.ne)) * s_q
