@@ -166,9 +166,13 @@ re_chi : float
     )
 
 
-def re_eps(q, omega, beta, mu):
+def re_eps(omega, q, beta, mu, zeta):
 
-    return 1.0 - ut.vq(q) * re_lind(omega, q, beta, mu) 
+    return 1.0 - (2-zeta) * ut.vq(q) * re_lind(omega, q, beta, mu)
+
+def im_eps(omega, q, beta, mu, zeta):
+
+    return - (2-zeta) * ut.vq(q) * im_lind(omega, q, beta, mu)
 
 def im_lind(omega, q, beta, mu):
     '''Imaginary part of free-electron Lindhard density-density response function.
