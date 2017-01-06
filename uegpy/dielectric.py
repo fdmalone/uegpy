@@ -321,7 +321,7 @@ chi(x, l) : float
 
         chi_n = sc.integrate.quad(integrand, 0, np.inf, args=(x, theta, eta, l))[0]
 
-        return prefactor * chi_n / (zeta + 1)
+        return 0.5 * (2-zeta) * prefactor * chi_n
 
 
 def im_chi_tanaka(x, rs, theta, eta, zeta, l):
