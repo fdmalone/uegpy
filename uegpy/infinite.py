@@ -374,7 +374,7 @@ f_c : float
     integral = sc.integrate.quad(integrand, 0.0, 100, args=(rs, theta, eta,
                                 zeta, lmax, gamma, alpha))[0]
 
-    return  (1.5/((2.0-zeta)*beta) * integral
+    return  1.5/((2.0-zeta)*beta) * integral
 
 
 def rpa_xc_free_energy(rs, theta, zeta, lmax):
