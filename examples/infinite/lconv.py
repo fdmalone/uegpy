@@ -11,16 +11,17 @@ import infinite as inf
 import dielectric as di
 import utils as ut
 import pandas as pd
+import fits as ft
 
 rs = 1
-theta = 0.11
+theta = float(sys.argv[1])
 zeta = 0
-lvals = np.linspace(0, 50, 5)
+lvals = np.linspace(0, 100, 2)
 
-tan = [inf.rpa_correlation_free_energy_dl(rs, theta, zeta, l) for l in lvals.astype(int)]
+tan = [inf.rpa_correlation_free_energy(rs, theta, zeta, l)/(-0.6109) for l in lvals.astype(int)]
 
-pl.axhline(-0.1662*0.61089)
-
+print tan
 pl.plot(lvals, tan)
+pl.axhline(ft.pdw(rs, theta, 0)/-0.6109)
 
 pl.show()
