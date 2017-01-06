@@ -24,7 +24,7 @@ f_c = [inf.rpa_correlation_free_energy(rs, t, zeta, lmax) for t in tvals]
 f_x = [inf.f_x(rs, b, m, zeta) for (b, m) in zip(bvals, mvals)]
 f_c_pdw = [ft.pdw(rs, t, zeta) for t in tvals]
 f_xc_ksdt = [ft.ksdt(rs, t, zeta) for t in tvals]
-v_rpa = [inf.rpa_v_tanaka(rs, t, zeta, lmax) for t in tvals]
+v_rpa = [inf.rpa_v_tanaka(rs, t, zeta, 50000, 10) for t in tvals]
 
 frame = pd.DataFrame({'Theta': tvals, 'f_x': f_x, 'f_c': f_c, 'pdw': f_c_pdw,
                     'f_xc_ksdt': f_xc_ksdt, 'v_rpa': v_rpa},
