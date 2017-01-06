@@ -342,6 +342,26 @@ ef : float
     return 0.5 * (9.0*(zeta+1)*sc.pi*0.25)**(2.0/3.0) * rs**(-2.0)
 
 
+def kf(rs, zeta):
+    '''Fermi wavevector for 3D UEG.
+
+Parameters
+----------
+rs : float
+    Density parameter.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+kf : float
+    Fermi wavevector.
+
+'''
+
+    return (9.0*(zeta+1)*sc.pi*0.25)**(1.0/3.0) * rs**(-1.0)
+
+
 def step_angle(u, k, q, kf):
     ''' Heaviside steb function for k+q.
 
