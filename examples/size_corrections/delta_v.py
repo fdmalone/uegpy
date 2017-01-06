@@ -46,8 +46,7 @@ v_sum = szc.v_summation(rs, theta, beta*mu, system.zeta, system.kf, nmax,
 mad_int = szc.mad_integral(theta, beta*mu, system.zeta, system.kf, 0, qvals[-1],
                             nmax)
 # Sum over potential
-mad_sum = szc.mad_summation(theta, beta*mu, system.zeta, system.kf, nmax,
-                        qvals, system.L)
+mad_sum = szc.mad_summation(qvals, system.L)
 # Integral up to maximum kvector considered
 v_int = szc.v_integral(rs, theta, beta*mu, system.zeta, system.kf, 0, qvals[-1]/system.kf,
                        nmax)
