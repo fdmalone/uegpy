@@ -12,12 +12,16 @@ import structure as st
 import infinite as inf
 import utils as ut
 import dielectric as di
+import scipy as sc
 
 rs = float(sys.argv[1])
 nel = int(sys.argv[2])
 zeta = int(sys.argv[3])
 theta = float(sys.argv[4])
-ecut = float(sys.argv[5])
+# In terms of kf
+qcf = float(sys.argv[5])
+qc = qcf * (4.0*sc.pi*nel/3.0)**(1.0/3.0) / (2.0*sc.pi*ut.alpha(zeta))
+ecut = 0.5 * qc**2.0
 lmax = int(sys.argv[6])
 
 system = ue.System(rs, nel, ecut, zeta)
