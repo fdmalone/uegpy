@@ -260,3 +260,30 @@ S(q) : float
                                  kf, zeta))[0]
 
     return q**2.0 / (2*omega_q)
+
+def bcdc(q, rs, theta, zeta):
+    '''Structure factor using leading order RPA form.
+
+    From Brown, Clark, Du Bois, Ceperley PRL 2013.
+
+Parameters
+----------
+q : float
+    Wavevector
+rs : float
+    Density parameter.
+theta : float
+    Temperature.
+zeta : int
+    Spin polarisation.
+
+Returns
+-------
+S(q) : float
+    BCDC structure factor.
+'''
+
+    op = ut.plasma_freq(rs)
+    beta = 1.0 / ut.calcT(rs, theta, zeta)
+
+    return q**2 / (2.0*op) * 1.0 / (np.tanh(0.5*beta*op))
