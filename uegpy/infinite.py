@@ -366,7 +366,7 @@ f_c : float
         i = 0
         for l in range(-lmax, lmax+1):
 
-            eps_0 = factor * di.tanaka(x, rs, theta, eta, zeta, l)
+            eps_0 = factor * di.lindhard_matsubara(x, rs, theta, eta, zeta, l)
             i += x*x*(np.log(1+eps_0) - eps_0)
 
         return i
@@ -409,13 +409,13 @@ U_xc : float
 
         return (
             x*x*(sum([np.log(1.0+2*gamma*theta/(sc.pi*lamb*x**2.0)
-                           * di.tanaka(x, rs, theta, eta, zeta, l))
+                           * di.lindhard_matsubara(x, rs, theta, eta, zeta, l))
                            for l in range(-lmax, lmax+1)])
                            - 4*gamma/(3*sc.pi*lamb*x**2.))
         )
 
     return (
-        0.75 * theta * ef * sc.integrate.quad(integrand, 0.001, 5,
+        0.75 * theta * ef * sc.integrate.quad(integrand, 0, 100,
          args=(rs, zeta, theta, eta, gamma, alpha, lmax))[0] / (zeta+1)
     )
 
