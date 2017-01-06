@@ -29,11 +29,13 @@ for n in nvals:
     qvals = np.array([system.kfac * np.dot(k, k)**0.5 for k in system.kval[1:]])
     chi0 = [di.lindhard_matsubara_finite(system, q, mu, beta, 10) for q
             in system.kval[1:]]
-    for (q, c) in zip(qvals, chi0):
-        print q/system.kf, c
+    # for (q, c) in zip(qvals, chi0):
+        # print q/system.kf, c
     pl.plot(np.array(qvals)/system.kf, chi0,
             label=r'Real: $N=%s$'%n, linewidth=0, marker='o')
 
+qvals = np.linspace(0, 4*kf, 100)
+chi = inf.
 pl.legend(numpoints=1)
 pl.show()
 pl.cla()

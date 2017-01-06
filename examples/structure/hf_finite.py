@@ -16,10 +16,10 @@ import dielectric as di
 
 rs = 1.0
 zeta = 0
-theta = 0.0625
+theta = 0.125
 
 ne = 14
-lmax = 10
+lmax = 10000
 
 system = ue.System(rs, ne, 4, zeta)
 beta = 1.0 / (system.ef*theta)

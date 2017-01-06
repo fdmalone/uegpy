@@ -13,7 +13,7 @@ import matplotlib.pyplot as pl
 # theta = np.logspace(-1, 1, 10)
 theta = [0.0625]
 # lmax = np.array([10, 50, 100, 400, 1000])
-lmax = np.array([100])
+lmax = np.array([10])
 
 f_x = []
 f_x2 = []
@@ -27,6 +27,7 @@ M.append(len(system.kval))
 pl.axhline(fp.hfx_structure(system, mu, b), label='HF')
 for l in lmax:
     sys.stderr.write('%s\n'%l)
+    print mu, b, l
     f_x3.append(fp.exchange_energy_chi0(system, mu, b, l))
 
 # frame = pd.DataFrame({'M': M, 'Theta': theta, 'f_x': f_x}, columns=['M',
