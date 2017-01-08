@@ -322,7 +322,7 @@ u_x : float
     return u_x
 
 
-def rpa_correlation_free_energy(rs, theta, zeta, lmax):
+def rpa_correlation_free_energy(rs, theta, zeta, lmax, qmax):
     '''RPA correlation free energy.
 
     Calculated as given in Tanaka and Ichimaru, Phys. Soc.  Jap, 55, 2278 (1986)
@@ -371,7 +371,7 @@ f_c : float
 
         return i
 
-    integral = sc.integrate.quad(integrand, 0.0, 100, args=(rs, theta, eta,
+    integral = sc.integrate.quad(integrand, 0.0, qmax, args=(rs, theta, eta,
                                 zeta, lmax, gamma, alpha))[0]
 
     return  1.5/((2.0-zeta)*beta) * integral
