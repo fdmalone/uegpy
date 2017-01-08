@@ -377,7 +377,7 @@ f_c : float
     return  1.5/((2.0-zeta)*beta) * integral
 
 
-def rpa_xc_free_energy(rs, theta, zeta, lmax):
+def rpa_xc_free_energy(rs, theta, zeta, lmax, qmax=6.0):
     '''RPA XC free energy as given in Phys. Soc. Jap, 55, 2278 (1986).
 
 Parameters
@@ -415,8 +415,8 @@ U_xc : float
         )
 
     return (
-        1.5/((2.0-zeta)*beta) * sc.integrate.quad(integrand, 0, 100,
-         args=(rs, zeta, theta, eta, gamma, alpha, lmax))[0] / (zeta+1)
+        1.5/((2.0-zeta)*beta) * sc.integrate.quad(integrand, 0, qmax,
+         args=(rs, zeta, theta, eta, gamma, alpha, lmax))[0]
     )
 
 
