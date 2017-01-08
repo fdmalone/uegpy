@@ -155,6 +155,64 @@ f_xc : float
                       (1+d(t, zeta)*rs**(1.0/2.0)+e(t, zeta)*rs))
 
 
+def ksdt_uxc(rs, t, zeta, dt=0.0001):
+    '''Evaluate u_xc from KSDT fit using finite differences.
+
+    .. math::
+        u_{\mathrm{xc}} = f_{\mathrm{xc}} - \Theta \left(\frac{\partial
+                        f_{\mathrm{xc}}}{\partial \Theta}\right)_{r_s}
+
+Parameters
+----------
+rs : float
+    Density desired.
+t : float
+    Reduced temperature (:math:`T/T_F`)
+zeta : int
+    Spin polarisation.
+dt : float (optional)
+    Temperature difference to carry out derivative. Default: 0.0001.
+
+Returns
+-------
+u_xc : float
+    Exchange-correlation internal energy per-particle.
+'''
+
+    f_xc = ksdt(rs, t, zeta)
+    s_xc = t * (ksdt(rs, t+dt, zeta)-ksdt(rs, t, zeta))/dt
+
+    return f_xc - s_xc
+
+
+def ksdt_v(rs, t, zeta, dr=0.0001):
+    '''Evaluate u_xc from KSDT fit using finite differences.
+
+    .. math::
+        v = 2*f_{\mathrm{xc}} + r_s \left(\frac{\partial
+                        f_{\mathrm{xc}}}{\partial r_s}\right)_{\Theta}
+
+Parameters
+----------
+rs : float
+    Density desired.
+t : float
+    Reduced temperature (:math:`T/T_F`)
+zeta : int
+    Spin polarisation.
+dt : float (optional)
+    Temperature difference to carry out derivative. Default: 0.0001.
+
+Returns
+-------
+v : float
+    Potential energy per-particle.
+'''
+    df_xc = rs * (ksdt(rs+dr, t, zeta)-ksdt(rs, t, zeta))/dr
+
+    return 2.0*ksdt(rs, t, zeta) + df_xc
+
+
 def vwn_rpa(rs, zeta):
     ''' Vosko Wilk Nusair fit to RPA correlation energy of UEG. Can. J. Phys.
     58, 1200 (1980).
