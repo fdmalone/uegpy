@@ -21,11 +21,11 @@ system = ue.System(rs, nel, ecut, zeta)
 b = 1.0 / (theta*system.ef)
 mu = fp.chem_pot_sum(system, system.deg_e, b)
 f_c = fp.rpa_correlation_free_energy(system, mu, b, lmax)
-f_x = fp.hfx_sum(system, b, mu)
+f_x = fp.hfx_sum(system, b, mu)/system.ne + 0.5*ut.madelung_approx(rs, system.ne)
 frame = pd.DataFrame({'M': [len(system.kval)], 'lmax': [lmax],
-                      'f_c': [f_c], 'f_x': [f_x],
+                      'f_c': [f_c], 'f_x': [f_x], 'f_xc': [f_x+f_c]
                       'rs': [rs], 'zeta': [zeta], 'Theta': [theta], 'nel': [nel]},
-                      columns=['rs', 'M', 'nel', 'Theta', 'lmax', 'zeta', 'f_x', 'f_c'])
+                      columns=['rs', 'M', 'nel', 'Theta', 'lmax', 'zeta', 'f_x', 'f_c', 'f_xc'])
 
 print ("# Running uegpy version: %s"%(ut.get_git_revision_hash()))
 print (frame.to_string(index=False, justify='right'))
