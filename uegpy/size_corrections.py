@@ -238,14 +238,40 @@ def f_c_summation(system, theta, eta, lmax, qvals):
 
     def integrand(q, system, theta, eta, lmax):
         pref = - 1.5 * system.rho / system.ef
-        chi0 = pref*vq*di.lindhard_matsubara(q/system.kf, system.rs, theta,
-                 eta, system.zeta, l)
         vq = ut.vq(q)
-        sl = sum(np.log(1.0-vq*chi0)+vq*chi0 for l in range(-lmax, lmax+1))
+        sl = 0.0
+        for l in range(-lmax, lmax+1):
+            chi0 = pref*di.lindhard_matsubara(q/system.kf, system.rs, theta,
+                     eta, system.zeta, l)
+            sl += np.log(1.0-vq*chi0) + vq*chi0
+
+        return sl
 
     f_c = sum(integrand(q, system, theta, eta, lmax) for q in qvals)
 
-    return -theta*system.ef/system.nel * f_c
+    return theta*system.ef/(2.0*system.ne) * f_c
+
+
+def f_x_summation(rs, beta, mu, zeta, qvals, L):
+
+    def integrand(q, rs, beta, mu, zeta):
+
+        return  ut.vq(q)*(st.hartree_fock(q, rs, beta, mu, zeta) - 1.0)
+
+    f_x = sum(integrand(q, rs, beta, mu, zeta) for q in qvals)
+
+    return f_x / (2.0*L**3.0)
+
+
+def f_x_integral(rs, beta, mu, zeta, qmax):
+
+    def integrand(q, rs, beta, mu, zeta):
+
+        return (st.hartree_fock(q, rs, beta, mu, zeta) - 1.0)
+
+    I = sc.integrate.quad(integrand, 0, qmax, args=(rs, beta, mu, zeta))[0]
+
+    return I / sc.pi
 
 
 def v_summation(rs, theta, eta, zeta, kf, lmax, qvals, L):
