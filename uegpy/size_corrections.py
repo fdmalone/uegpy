@@ -5,6 +5,7 @@ import structure as st
 import utils as ut
 import infinite as inf
 import ueg_sys as ue
+import dielectric as di
 
 
 def conv_fac(nmax, alpha):
@@ -180,6 +181,7 @@ V : float
     )
 
 
+
 def mad_integral(theta, eta, zeta, kf, kmin, kmax, nmax):
     '''Evaluate integral of uniform distribution of point charges.
 
@@ -215,6 +217,35 @@ v_s: float
         1.0/(sc.pi) * (sc.integrate.quad(integrand, kmin, kmax, args=(theta,
                                          eta, zeta, kf, nmax)))[0]
     )
+
+
+def f_xc_summation(system, theta, eta, lmax, qvals):
+
+    beta = 1.0 / (system.ef * theta)
+    def integrand(q, system, theta, beta, eta, lmax):
+        pref = - 1.5 * system.rho / system.ef
+        vq = ut.vq(q)
+        sl = sum(np.log(1.0-pref*vq*di.lindhard_matsubara(q/system.kf, system.rs, theta,
+                 eta, system.zeta, l)) for l in range(-lmax, lmax+1))
+        return sl - system.rho*beta*vq
+
+    f_xc = sum(integrand(q, system, theta, beta, eta, lmax) for q in qvals)
+
+    return f_xc / (2.0*system.ne*beta)
+
+
+def f_c_summation(system, theta, eta, lmax, qvals):
+
+    def integrand(q, system, theta, eta, lmax):
+        pref = - 1.5 * system.rho / system.ef
+        chi0 = pref*vq*di.lindhard_matsubara(q/system.kf, system.rs, theta,
+                 eta, system.zeta, l)
+        vq = ut.vq(q)
+        sl = sum(np.log(1.0-vq*chi0)+vq*chi0 for l in range(-lmax, lmax+1))
+
+    f_c = sum(integrand(q, system, theta, eta, lmax) for q in qvals)
+
+    return -theta*system.ef/system.nel * f_c
 
 
 def v_summation(rs, theta, eta, zeta, kf, lmax, qvals, L):
