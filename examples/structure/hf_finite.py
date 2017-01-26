@@ -9,29 +9,25 @@ import matplotlib.pyplot as pl
 import numpy as np
 import pandas as pd
 import infinite as inf
+import finite
 import structure as st
 import utils as ut
 
-tvals = np.logspace(-1, 1, 4)
-system = ue.System(1, 33, 10, 1)
-qvals = np.linspace(0.0,2,100)
-qvals = np.append(qvals, np.linspace(2, 4, 10))
-
 rs = 1.0
-zeta = 1
+zeta = 0
 
-ne = [7, 19, 33, 81, 203]
+system = ue.System(rs, 14, 10, zeta)
+print system.rs, system.ne, system.zeta
+beta = 1.0/(0.0625*system.ef)
+mu = finite.chem_pot_sum(system, system.deg_e, beta)
 
-for n in ne:
-    system = ue.System(rs, n, 3, zeta)
-    s = ([1.0 - (1.0/n) * sum(ut.fermi_factor(0.5*system.kfac**2.0*np.dot(k+q, k+q),
-        system.ef, 32*system.ef)*ut.fermi_factor(0.5*system.kfac**2.0*np.dot(k,
-            k), system.ef, 32*system.ef) for k in system.kval) for q in system.kval[1:]])
-    print s
+sq = [st.hartree_fock_finite(system.kfac*q, system, mu, beta) for q in system.kval[1:]]
 
-    pl.errorbar(np.array([system.kfac*np.dot(q, q)**0.5 for q in system.kval[1:]])/system.kf, s, label=r'$N=%s$'%n, fmt='o')
+pl.plot(system.kfac*np.array([np.dot(q, q)**0.5 for q in system.kval[1:]]), sq,
+        'ro')
 
+vsq = system.ne/(2.0*system.L**3.0) * sum(ut.vq_vec(system.kfac*q)*(s-1.0) for
+        (q, s) in zip(system.kval[1:], sq))
 
-pl.plot(qvals, [st.hartree_fock_ground_state(q*system.kf, system.kf) for q in qvals])
-pl.legend()
+print(finite.hfx_sum(system, beta, mu), vsq)
 pl.show()
