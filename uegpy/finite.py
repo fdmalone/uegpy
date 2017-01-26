@@ -203,7 +203,7 @@ hfx : float
                                         fermi_factor(system.spval[q], mu, beta)
                 )
 
-    return -(2.0-system.zeta) * hfx / (2.0*system.L*sc.pi)
+    return -(2.0-system.zeta) * hfx / (system.L*sc.pi)
 
 
 def hf_potential(occ, kvecs, L):
