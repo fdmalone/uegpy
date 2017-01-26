@@ -293,7 +293,7 @@ def hartree_fock_finite(q, system, mu, beta):
     sq = 0.0
 
     for (k, ek) in zip(system.kval, system.spval):
-        ekq = np.dot(system.kfac*k+q, system.kfac*k+q)
+        ekq = 0.5*np.dot(system.kfac*k+q, system.kfac*k+q)
         sq += ut.fermi_factor(ekq, mu, beta)*ut.fermi_factor(ek, mu, beta)
 
     return 1.0 - (2.0-system.zeta)/system.ne * sq
