@@ -1,10 +1,9 @@
 ''' Structure factors at various levels of theory. '''
 import numpy as np
 import scipy as sc
-import utils as ut
 from scipy import optimize
-import dielectric as di
-import infinite as inf
+import uegpy.utils as ut
+import uegpy.dielectric as di
 
 
 def hartree_fock(q, rs, beta, mu, zeta):

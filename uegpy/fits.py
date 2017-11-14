@@ -1,8 +1,8 @@
 ''' Various approximate fits to the UEG or OCP '''
 
 import numpy as np
-import utils as ut
 import scipy as sc
+import uegpy.utils as ut
 
 def classical_ocp(system, beta):
     ''' Evaluate the classical excess energy using the parametrised fit given by
@@ -156,11 +156,11 @@ f_xc : float
 
 
 def ksdt_uxc(rs, t, zeta, dt=0.0001):
-    '''Evaluate u_xc from KSDT fit using finite differences.
+    r'''Evaluate u_xc from KSDT fit using finite differences.
 
     .. math::
         u_{\mathrm{xc}} = f_{\mathrm{xc}} - \Theta \left(\frac{\partial
-                        f_{\mathrm{xc}}}{\partial \Theta}\right)_{r_s}
+        f_{\mathrm{xc}}}{\partial \Theta}\right)_{r_s}
 
 Parameters
 ----------
@@ -186,28 +186,28 @@ u_xc : float
 
 
 def ksdt_v(rs, t, zeta, dr=0.0001):
-    '''Evaluate u_xc from KSDT fit using finite differences.
+    r"""Evaluate u_xc from KSDT fit using finite differences.
 
     .. math::
-        v = 2*f_{\mathrm{xc}} + r_s \left(\frac{\partial
+        v = f_{\mathrm{xc}} + r_s \left(\frac{\partial
                         f_{\mathrm{xc}}}{\partial r_s}\right)_{\Theta}
 
-Parameters
-----------
-rs : float
-    Density desired.
-t : float
-    Reduced temperature (:math:`T/T_F`)
-zeta : int
-    Spin polarisation.
-dt : float (optional)
-    Temperature difference to carry out derivative. Default: 0.0001.
+    Parameters
+    ----------
+    rs : float
+        Density desired.
+    t : float
+        Reduced temperature (:math:`T/T_F`)
+    zeta : int
+        Spin polarisation.
+    dt : float (optional)
+        Temperature difference to carry out derivative. Default: 0.0001.
 
-Returns
--------
-v : float
-    Potential energy per-particle.
-'''
+    Returns
+    -------
+    v : float
+        Potential energy per-particle.
+"""
     df_xc = rs * (ksdt(rs+dr, t, zeta)-ksdt(rs, t, zeta))/dr
 
     return 2.0*ksdt(rs, t, zeta) + df_xc
@@ -493,28 +493,28 @@ def PDWParams():
 
 
 def pdwfxc00(rs, theta, zeta):
-    ''' Parametrisation of f_xc from CHNC data for the UEG.
+    """ Parametrisation of f_xc from CHNC data for the UEG.
 
-    Ref: Perrot, Dharma-wardana, 62, 16536 (2000).
+    From Perrot, Dharma-wardana, 62, 16536 (2000).
 
     .. Warning::
         This does not seem to match with Table. IV from the reference. Something
         is completely off for unpolarized case.
 
-Paremeters
-----------
-rs : float
-    Wigner-Seitz Radius.
-theta : float
-    Degeneracy temperature.
-zeta : int
-    Spin polarisation
+    Parameters
+    ----------
+    rs : float
+        Wigner-Seitz Radius.
+    theta : float
+        Degeneracy temperature.
+    zeta : int
+        Spin polarisation
 
-Returns
--------
-f_xc : float
-    Exchange-correlation free energy.
-'''
+    Returns
+    -------
+    f_xc : float
+        Exchange-correlation free energy.
+"""
 
     a1,a2,b1,b2,c1,c2,v,r,p,q,s,u,w = PDWParams()
 

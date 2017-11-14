@@ -6,9 +6,9 @@ import scipy as sc
 from scipy import integrate
 import random as rand
 from scipy import optimize
-import utils as ut
-import dielectric as di
-import structure as st
+import uegpy.utils as ut
+import uegpy.dielectric as di
+import uegpy.structure as st
 
 
 def nav(beta, mu, zeta):

@@ -1,9 +1,8 @@
 ''' Dielectric / Density response functions. '''
 import numpy as np
 import scipy as sc
-import utils as ut
 from scipy import optimize
-import infinite as inf
+import uegpy.utils as ut
 
 
 def re_lind0(omega, q, kf):

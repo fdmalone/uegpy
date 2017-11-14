@@ -1,10 +1,10 @@
 '''Simple Monte Carlo routines for evaluating in the canonical ensemble.'''
-import utils as ut
 import numpy as np
 import random as rand
-import finite as fn
 import pandas as pd
 import time
+import uegpy.utils as ut
+import uegpy.finite as fn
 
 
 def sample_canonical_energy(system, beta, nmeasure):

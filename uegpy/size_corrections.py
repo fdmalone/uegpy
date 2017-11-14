@@ -1,11 +1,11 @@
 ''' Utilities for finite size corrections. '''
 import numpy as np
 import scipy as sc
-import structure as st
-import utils as ut
-import infinite as inf
-import ueg_sys as ue
-import dielectric as di
+import uegpy.structure as st
+import uegpy.utils as ut
+import uegpy.infinite as inf
+import uegpy.ueg_sys as ue
+import uegpy.dielectric as di
 
 
 def conv_fac(nmax, alpha):

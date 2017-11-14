@@ -3,8 +3,8 @@
 import numpy as np
 import scipy as sc
 from scipy import optimize
-from utils import fermi_factor
 import itertools
+from uegpy.utils import fermi_factor
 
 
 def centre_of_mass_obsv(system, beta):
