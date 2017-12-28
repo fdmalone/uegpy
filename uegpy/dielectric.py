@@ -110,7 +110,7 @@ q : float
 beta : float
     Inverse temperature.
 mu : float
-    Fermi wavevector.
+    Chemical potential.
 
 Returns
 -------
@@ -121,8 +121,10 @@ chi_rpa : float
 
     vq = 4.0*sc.pi / q**2.0
     num = im_lind(omega, q, beta, mu)
-    denom = ((1.0-vq*re_lind(omega, q, beta, mu))**2.0 +
-                                          (vq*im_lind(omega, q, beta, mu))**2.0)
+    denom = (
+        (1.0-vq*re_lind(omega, q, beta, mu))**2.0 +
+        (vq*im_lind(omega, q, beta, mu))**2.0
+    )
 
     return num / denom
 
@@ -257,14 +259,14 @@ re_eps : float
 
 
 def lindhard_matsubara(x, rs, theta, eta, zeta, l):
-    '''Dimensionless Lindhard function function factor.
+    r"""Dimensionless Lindhard function function factor.
 
     Taken from Tanaka and Ichimaru J.  Phys. Soc. Jap, 55, 2278 (1986).
 
     For large l or x we use the asyptotic form of
 
     .. math::
-        phi(x, l) = \\frac{4 x^2}{3(2*\pi l \Theta)^2 + x^4} +
+        \phi(x, l) = \frac{4 x^2}{3(2\pi l \Theta)^2 + x^4} +
                      \mathcal{O}(x^{-4}, l^{-4})
 
 Parameters
@@ -276,7 +278,7 @@ rs : float
 theta : float
     Degeneracy temperature.
 eta : float
-    :math:\beta*\mu
+    :math:`\beta*\mu`
 zeta : int
     Spin polarisation.
 l : int
@@ -286,7 +288,7 @@ Returns
 -------
 chi(x, l) : float
     Lindhard function evaluated at frequency l (for imaginary frequencies).
-'''
+"""
 
     if np.abs(l) > 100 or x > 100:
 
