@@ -8,7 +8,7 @@ import uegpy.utils as ut
 def re_lind0(omega, q, kf):
     '''Real part of Lindhard Dielectric function at :math:`T = 0`.
 
-    Note this is :math:`\mathrm{Re}\left[chi_{0\sigma}(\q, \omega)\\right]`
+    Note this is :math:`\mathrm{Re}\left[\chi_{0\sigma}(\mathbf{q}, \omega)\\right]`
 
 Parameters
 ----------
@@ -40,7 +40,7 @@ re_chi_0 : float
 def im_lind0(omega, q, kf):
     '''Imaginary part of Lindhard Dielectric function at :math:`T = 0`.
 
-    Note this is :math:`\mathrm{Im}\left[chi_{0\sigma}(\q, \omega)\\right]`
+    Note this is :math:`\mathrm{Im}\left[\chi_{0\sigma}(\mathbf{q}, \omega)\\right]`
 
 
 Parameters
