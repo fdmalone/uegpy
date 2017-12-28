@@ -278,7 +278,7 @@ rs : float
 theta : float
     Degeneracy temperature.
 eta : float
-    :math:`\beta*\mu`
+    :math:`\beta\mu`
 zeta : int
     Spin polarisation.
 l : int
