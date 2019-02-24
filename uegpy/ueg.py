@@ -6,7 +6,7 @@ import numpy as np
 import math
 import json
 
-class System:
+class UEG3D:
     '''System Properties - Everything is measured in Hartree atomic units.
 
 Attributes
