@@ -102,6 +102,11 @@ v_M: float
 
     return (-2.837297*(3.0/(4.0*sc.pi))**(1.0/3.0)*ne**(-1.0/3.0)*rs**(-1.0))
 
+def get_box_length(rs, N):
+    return rs*(4*N*sc.pi/3.)**(1/3.)
+
+def get_rs(L, N):
+    return ((L**3.0/N)*(3.0/(4.0*sc.pi)))**(1.0/3.0)
 
 def add_mad(system, frame):
     ''' Add Madelung constant to data.
