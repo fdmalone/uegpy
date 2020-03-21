@@ -65,6 +65,7 @@ M : int
         self.pol = zeta + 1
         # Box Length.
         self.L = self.rs*(4*self.ne*sc.pi/3.)**(1/3.)
+        self.vol = self.L**3
         # Density.
         self.rho = (4/3.*sc.pi*self.rs**3.0)**(-1.0)
         # k-space grid spacing.
