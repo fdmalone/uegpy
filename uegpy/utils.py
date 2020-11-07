@@ -255,9 +255,9 @@ sha1 : string
     suffix = subprocess.check_output(['git', 'status', '--porcelain'],
                                      cwd=src).strip()
     if suffix:
-        return sha1 + '-dirty'
+        return sha1.decode('utf-8') + '-dirty'
     else:
-        return sha1
+        return sha1.decode('utf-8')
 
 
 def add_frame(f1, f2, val1, op='+', val2=None, label=None, err=False):

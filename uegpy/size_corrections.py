@@ -4,7 +4,6 @@ import scipy as sc
 import uegpy.structure as st
 import uegpy.utils as ut
 import uegpy.infinite as inf
-import uegpy.ueg_sys as ue
 import uegpy.dielectric as di
 
 

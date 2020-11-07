@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                              '../../uegpy')))
-import ueg_sys as ue
+import ueg as ue
 import numpy as np
 import pandas as pd
 import infinite as inf
@@ -25,7 +25,7 @@ nmax = int(sys.argv[5])
 ecut = float(sys.argv[6])
 
 # Base system.
-system = ue.System(rs, ne, ecut, zeta)
+system = ue.UEG3D(rs, ne, ecut, zeta)
 
 beta = 1.0 / (theta*system.ef)
 
@@ -90,4 +90,4 @@ frame = pd.DataFrame(data={'Theta': theta, 'rs': rs, 'N': ne, 'zeta': zeta,
                            'S_kmax': s_kmax}, columns=names)
 
 print ("# Running uegpy version: %s"%(ut.get_git_revision_hash()))
-print frame.to_string(index=False)
+print (frame.to_string(index=False))
