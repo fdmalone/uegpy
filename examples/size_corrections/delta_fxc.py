@@ -90,4 +90,7 @@ frame = pd.DataFrame(data={'Theta': theta, 'rs': rs, 'N': ne, 'zeta': zeta,
                            'S_kmax': s_kmax}, columns=names)
 
 print ("# Running uegpy version: %s"%(ut.get_git_revision_hash()))
+import time
+start = time.time()
 print (frame.to_string(index=False))
+print("# Time taken: {:f}".format(time.time()-start))
